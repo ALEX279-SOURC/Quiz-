@@ -1,2 +1,2 @@
 # Quiz-
-#https://alex279-sourc.github.io/Quiz-/index.html
+#https://alex279-sourc.github.io/Quiz-/csh.html
