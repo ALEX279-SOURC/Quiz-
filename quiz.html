@@ -1,392 +1,307 @@
 <!DOCTYPE html>
-<html lang="gu">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ઝવેરચંદ મેઘાણી અને 'માણસાઈના દીવા' - ક્વિઝ</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus Study Hub | College Notes</title>
   <style>
     :root {
-      --primary: #1e3a8a;
+      --primary: #2563eb;
       --primary-hover: #1d4ed8;
       --bg: #f8fafc;
       --card-bg: #ffffff;
-      --text-main: #0f172a;
+      --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
-      --correct: #16a34a;
-      --correct-bg: #dcfce7;
-      --wrong: #dc2626;
-      --wrong-bg: #fee2e2;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Noto Sans Gujarati', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
       background-color: var(--bg);
-      color: var(--text-main);
-      padding: 24px 16px;
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 760px;
-      background: var(--card-bg);
-      padding: 32px;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-      border: 1px solid var(--border);
+      flex-direction: column;
     }
 
     header {
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 20px;
-      margin-bottom: 28px;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 1rem;
       text-align: center;
     }
 
     header h1 {
-      font-size: 1.6rem;
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
       color: var(--primary);
-      margin-bottom: 6px;
     }
 
     header p {
-      font-size: 0.95rem;
       color: var(--text-muted);
+      margin-top: 0.25rem;
+      font-size: 0.95rem;
     }
 
-    .question-card {
-      margin-bottom: 28px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #f1f5f9;
+    main {
+      flex: 1;
+      max-width: 650px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
 
-    .question-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      margin-bottom: 14px;
-      line-height: 1.5;
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
     }
 
-    .options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .option-label {
+    .step-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: #f8fafc;
+      gap: 0.5rem;
+    }
+
+    .breadcrumb {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .btn-select {
+      background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.95rem;
-    }
-
-    .option-label:hover {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-    }
-
-    .option-label input[type="radio"] {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--primary);
-      cursor: pointer;
-    }
-
-    /* Results styling after submit */
-    .option-label.correct {
-      background: var(--correct-bg);
-      border-color: var(--correct);
-      color: #14532d;
-      font-weight: 600;
-    }
-
-    .option-label.wrong {
-      background: var(--wrong-bg);
-      border-color: var(--wrong);
-      color: #7f1d1d;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    button {
-      flex: 1;
-      padding: 14px 20px;
+      padding: 1rem;
+      border-radius: 8px;
       font-size: 1rem;
       font-weight: 600;
-      border: none;
-      border-radius: 10px;
+      color: var(--text);
+      text-align: left;
       cursor: pointer;
-      transition: background 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
     }
 
-    .btn-submit {
-      background: var(--primary);
-      color: #ffffff;
-    }
-
-    .btn-submit:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-reset {
-      background: #e2e8f0;
-      color: #334155;
-      display: none;
-    }
-
-    .btn-reset:hover {
-      background: #cbd5e1;
-    }
-
-    #score-box {
-      display: none;
-      margin-top: 24px;
-      padding: 18px;
-      border-radius: 12px;
+    .btn-select:hover {
+      border-color: var(--primary);
       background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
+      transform: translateY(-1px);
+    }
+
+    .resource-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .resource-card:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-order {
+      background: #f59e0b;
+      color: #fff !important;
+      border-color: #d97706;
+    }
+
+    .btn-order:hover {
+      background: #d97706 !important;
+    }
+
+    .back-btn {
+      background: transparent;
+      border: none;
       color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <header>
-      <h1>ઝવેરચંદ મેઘાણી : પ્રશ્નોત્તરી ક્વિઝ</h1>
-      <p>આપેલા પ્રશ્નોના સાચા વિકલ્પ પસંદ કરો અને તમારો સ્કોર ચકાસો.</p>
-    </header>
+  <header>
+    <h1>CAMPUS STUDY HUB</h1>
+    <p>📚 Your College. Your Notes. One Place.</p>
+  </header>
 
-    <form id="quiz-form">
-      <div id="quiz-container"></div>
+  <main>
+    <div class="card">
+      <div id="breadcrumb" class="breadcrumb hidden">Home</div>
+      <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
 
-      <div class="btn-group">
-        <button type="button" class="btn-submit" id="submit-btn" onclick="checkAnswers()">સબમિટ કરો (Submit)</button>
-        <button type="button" class="btn-reset" id="reset-btn" onclick="resetQuiz()">ફરી પ્રયાસ કરો (Restart)</button>
-      </div>
-    </form>
+      <!-- STEP 1: SELECT COURSE -->
+      <section id="step-course">
+        <h2 class="step-title">Select your course</h2>
+        <div class="grid">
+          <button class="btn-select" onclick="selectCourse('FYBA')">FYBA <span>→</span></button>
+          <button class="btn-select" onclick="selectCourse('SYBA')">SYBA <span>→</span></button>
+          <button class="btn-select" onclick="selectCourse('TYBA')">TYBA <span>→</span></button>
+          <button class="btn-select" onclick="selectCourse('Other courses')">Other courses <span>→</span></button>
+        </div>
+      </section>
 
-    <div id="score-box"></div>
-  </div>
+      <!-- STEP 2: SELECT SEMESTER -->
+      <section id="step-semester" class="hidden">
+        <h2 class="step-title">Select Semester</h2>
+        <div class="grid">
+          <button class="btn-select" onclick="selectSemester('Semester 1')">Semester 1 <span>→</span></button>
+          <button class="btn-select" onclick="selectSemester('Semester 2')">Semester 2 <span>→</span></button>
+        </div>
+      </section>
+
+      <!-- STEP 3: SELECT SUBJECT -->
+      <section id="step-subject" class="hidden">
+        <h2 class="step-title">Select Subject</h2>
+        <div class="grid">
+          <button class="btn-select" onclick="selectSubject('Sanskrit')">Sanskrit <span>→</span></button>
+          <button class="btn-select" onclick="selectSubject('History')">History <span>→</span></button>
+          <button class="btn-select" onclick="selectSubject('English')">English <span>→</span></button>
+          <button class="btn-select" onclick="selectSubject('Political Science')">Political Science <span>→</span></button>
+        </div>
+      </section>
+
+      <!-- STEP 4: RESOURCE HUB -->
+      <section id="step-resources" class="hidden">
+        <h2 class="step-title" id="subject-title">Sanskrit Resources</h2>
+        <div class="grid">
+          <!-- Replace '#' with your Google Drive / PDF links -->
+          <a href="#" class="resource-card" target="_blank">
+            <span>📖 Notes</span> <span>Download ↗</span>
+          </a>
+          <a href="#" class="resource-card" target="_blank">
+            <span>📝 Important Questions</span> <span>View ↗</span>
+          </a>
+          <a href="#" class="resource-card" target="_blank">
+            <span>📄 Previous Papers</span> <span>Download ↗</span>
+          </a>
+          <a href="#" class="resource-card" target="_blank">
+            <span>🎯 Exam Preparation</span> <span>View ↗</span>
+          </a>
+          <!-- Direct WhatsApp order link -->
+          <a href="https://wa.me/?text=Hi,%20I%20want%20to%20order%20printed%20notes%20for%20Sanskrit" class="resource-card btn-order" target="_blank">
+            <span>🖨️ Order Printed Notes</span> <span>Order ↗</span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    &copy; Campus Study Hub. Built for college students.
+  </footer>
 
   <script>
-    const questions = [
-      {
-        q: "ઝવેરચંદ મેઘાણીના પિતા અને માતાનું નામ શું હતું?",
-        options: [
-          "કાળીદાસ મેઘાણી અને ધોળીબાઈ",
-          "રવિશંકર મેઘાણી અને કસ્તૂરબા",
-          "કાળીદાસ મેઘાણી અને જમનાબાઈ",
-          "મોહનલાલ મેઘાણી અને નિર્મળાબાઈ"
-        ],
-        answer: 0
-      },
-      {
-        q: "ઝવેરચંદ મેઘાણીને 'રાષ્ટ્રીય શાયર'નું બિરુદ કોણે આપ્યું હતું?",
-        options: [
-          "રવિશંકર મહારાજ",
-          "મહાત્મા ગાંધીજી",
-          "કવિ નર્મદ",
-          "સરદાર વલ્લભભાઈ પટેલ"
-        ],
-        answer: 1
-      },
-      {
-        q: "નીચેનામાંથી કઈ નવલકથા ઝવેરચંદ મેઘાણી દ્વારા લખાયેલી છે?",
-        options: [
-          "સરસ્વતીચંદ્ર",
-          "માનવીની ભવાઈ",
-          "સોરઠ, તારા વહેતાં પાણી",
-          "સત્યના પ્રયોગો"
-        ],
-        answer: 2
-      },
-      {
-        q: "'માણસાઈના દીવા' પુસ્તકમાં નીચેનામાંથી કયું પ્રકરણ સામેલ છે?",
-        options: [
-          "ચોર બોરિયો",
-          "ધરતીનો ધબકાર",
-          "સૌરાષ્ટ્રની રસધાર",
-          "હિમાલયનો પ્રવાસ"
-        ],
-        answer: 0
-      },
-      {
-        q: "'માણસાઈના દીવા' પુસ્તકને વર્ષ ૧૯૪૬માં કયું પારિતોષિક એનાયત થયું હતું?",
-        options: [
-          "રણજિતરામ સુવર્ણચંદ્રક",
-          "મહિડા પારિતોષિક",
-          "જ્ઞાનપીઠ પુરસ્કાર",
-          "નર્મદ સુવર્ણચંદ્રક"
-        ],
-        answer: 1
-      },
-      {
-        q: "અસલ નવાણા પાસેથી શાની ચોરી થઈ હતી?",
-        options: [
-          "સોનાના દાગીનાની",
-          "બે ડબ્બા ઘીની",
-          "પાંચ બોરી અનાજની",
-          "રોકડ રકમની"
-        ],
-        answer: 1
-      },
-      {
-        q: "'વગર હથિયારે લડાયેલી લડાઈ' કૃતિમાં મોતીને કયા કારણસર જેલ ભોગવવી પડી હતી?",
-        options: [
-          "લૂંટફાટ અને હિંસા",
-          "જમીન વિવાદ",
-          "ચોરીના આરોપસર / હાજરી ધારાના ભંગ બદલ",
-          "ટેક્સ ન ભરવા બદલ"
-        ],
-        answer: 2
-      },
-      {
-        q: "ઝવેરચંદ મેઘાણીનો જન્મ ક્યારે અને ક્યાં થયો હતો?",
-        options: [
-          "૨૮ ઑગસ્ટ, ૧૮૯૬ - ચોટીલા",
-          "૨ ઓક્ટોબર, ૧૮૬૯ - પોરબંદર",
-          "૧૫ ઑગસ્ટ, ૧૯૦૦ - રાજકોટ",
-          "૨૮ ઑગસ્ટ, ૧૮૯૦ - ભાવનગર"
-        ],
-        answer: 0
-      },
-      {
-        q: "'માણસાઈના દીવા' પુસ્તક કોના જીવન-અનુભવો પર આધારિત રચાયેલું છે?",
-        options: [
-          "ઠક્કરબાપા",
-          "પૂજ્ય મૂકસેવક રવિશંકર મહારાજ",
-          "બાબાસાહેબ આંબેડકર",
-          "મોતીભાઈ અમીન"
-        ],
-        answer: 1
-      },
-      {
-        q: "'હાજરી' પ્રકરણ/વાર્તામાં બ્રિટિશ હકૂમત દ્વારા કઈ કોમને ગુનેગાર કોમ તરીકે ઓળખવામાં આવી હતી?",
-        options: [
-          "પાટણવાડિયા (તથા ધારાળા / બારૈયા)",
-          "ચારણ અને રબારી",
-          "વાઘેર અને કાઠી",
-          "ભીલ અને ગરાસિયા"
-        ],
-        answer: 0
+    const state = {
+      course: null,
+      semester: null,
+      subject: null,
+      step: 1
+    };
+
+    function updateView() {
+      // Hide all steps
+      document.getElementById('step-course').classList.add('hidden');
+      document.getElementById('step-semester').classList.add('hidden');
+      document.getElementById('step-subject').classList.add('hidden');
+      document.getElementById('step-resources').classList.add('hidden');
+
+      const backBtn = document.getElementById('backBtn');
+      const breadcrumb = document.getElementById('breadcrumb');
+
+      if (state.step === 1) {
+        document.getElementById('step-course').classList.remove('hidden');
+        backBtn.classList.add('hidden');
+        breadcrumb.classList.add('hidden');
+      } else if (state.step === 2) {
+        document.getElementById('step-semester').classList.remove('hidden');
+        backBtn.classList.remove('hidden');
+        breadcrumb.classList.remove('hidden');
+        breadcrumb.innerText = `${state.course}`;
+      } else if (state.step === 3) {
+        document.getElementById('step-subject').classList.remove('hidden');
+        backBtn.classList.remove('hidden');
+        breadcrumb.classList.remove('hidden');
+        breadcrumb.innerText = `${state.course} >${state.semester}`;
+      } else if (state.step === 4) {
+        document.getElementById('step-resources').classList.remove('hidden');
+        document.getElementById('subject-title').innerText = `${state.subject}`;
+        backBtn.classList.remove('hidden');
+        breadcrumb.classList.remove('hidden');
+        breadcrumb.innerText = `${state.course} > ${state.semester} >${state.subject}`;
       }
-    ];
-
-    const quizContainer = document.getElementById("quiz-container");
-
-    function renderQuiz() {
-      quizContainer.innerHTML = "";
-      questions.forEach((item, index) => {
-        const qCard = document.createElement("div");
-        qCard.className = "question-card";
-
-        const title = document.createElement("div");
-        title.className = "question-title";
-        title.textContent = `પ્રશ્ન ${index + 1}: ${item.q}`;
-        qCard.appendChild(title);
-
-        const optionsDiv = document.createElement("div");
-        optionsDiv.className = "options";
-
-        item.options.forEach((opt, optIndex) => {
-          const label = document.createElement("label");
-          label.className = "option-label";
-          label.id = `q${index}-opt${optIndex}`;
-
-          const input = document.createElement("input");
-          input.type = "radio";
-          input.name = `question-${index}`;
-          input.value = optIndex;
-
-          label.appendChild(input);
-          label.appendChild(document.createTextNode(opt));
-          optionsDiv.appendChild(label);
-        });
-
-        qCard.appendChild(optionsDiv);
-        quizContainer.appendChild(qCard);
-      });
     }
 
-    function checkAnswers() {
-      let score = 0;
-      let unanswered = 0;
-
-      questions.forEach((item, index) => {
-        const selected = document.querySelector(`input[name="question-${index}"]:checked`);
-        
-        if (!selected) {
-          unanswered++;
-        }
-
-        // Highlight correct and wrong options
-        item.options.forEach((_, optIndex) => {
-          const label = document.getElementById(`q${index}-opt${optIndex}`);
-          const input = label.querySelector("input");
-          input.disabled = true; // Disable edits after submit
-
-          if (optIndex === item.answer) {
-            label.classList.add("correct");
-          }
-          if (selected && parseInt(selected.value) === optIndex && optIndex !== item.answer) {
-            label.classList.add("wrong");
-          }
-        });
-
-        if (selected && parseInt(selected.value) === item.answer) {
-          score++;
-        }
-      });
-
-      // Display score
-      const scoreBox = document.getElementById("score-box");
-      scoreBox.style.display = "block";
-      scoreBox.textContent = `તમારો કુલ સ્કોર: ${score} / ${questions.length}`;
-
-      // Update buttons
-      document.getElementById("submit-btn").style.display = "none";
-      document.getElementById("reset-btn").style.display = "inline-block";
-
-      // Scroll to score
-      scoreBox.scrollIntoView({ behavior: 'smooth' });
+    function selectCourse(course) {
+      state.course = course;
+      state.step = 2;
+      updateView();
     }
 
-    function resetQuiz() {
-      document.getElementById("score-box").style.display = "none";
-      document.getElementById("submit-btn").style.display = "inline-block";
-      document.getElementById("reset-btn").style.display = "none";
-      renderQuiz();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    function selectSemester(sem) {
+      state.semester = sem;
+      state.step = 3;
+      updateView();
     }
 
-    // Initialize Quiz on load
-    renderQuiz();
+    function selectSubject(sub) {
+      state.subject = sub;
+      state.step = 4;
+      updateView();
+    }
+
+    function goBack() {
+      if (state.step > 1) {
+        state.step--;
+        updateView();
+      }
+    }
   </script>
 </body>
-</html>
+  </html>
+  
