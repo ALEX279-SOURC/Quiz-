@@ -178,7 +178,7 @@
       <!-- STEP 1: SELECT COURSE -->
       <section id="step-course">
         <h2 class="step-title">Select your course</h2>
-        <div class="grid">
+        <div class="grid" id="course-list">
           <button class="btn-select" onclick="selectCourse('FYBA')">FYBA <span>→</span></button>
           <button class="btn-select" onclick="selectCourse('SYBA')">SYBA <span>→</span></button>
           <button class="btn-select" onclick="selectCourse('TYBA')">TYBA <span>→</span></button>
@@ -189,59 +189,99 @@
       <!-- STEP 2: SELECT SEMESTER -->
       <section id="step-semester" class="hidden">
         <h2 class="step-title">Select Semester</h2>
-        <div class="grid">
-          <button class="btn-select" onclick="selectSemester('Semester 1')">Semester 1 <span>→</span></button>
-          <button class="btn-select" onclick="selectSemester('Semester 2')">Semester 2 <span>→</span></button>
-        </div>
+        <div class="grid" id="semester-list"></div>
       </section>
 
       <!-- STEP 3: SELECT SUBJECT -->
       <section id="step-subject" class="hidden">
         <h2 class="step-title">Select Subject</h2>
-        <div class="grid">
-          <button class="btn-select" onclick="selectSubject('Sanskrit M1')">Sanskrit M1 <span>→</span></button>
-          <button class="btn-select" onclick="selectSubject('Sanskrit M2')">Sanskrit M2<span>→</span></button>
-          <button class="btn-select" onclick="selectSubject('Gujrati minor')">Gujrati minor<span>→</span></button>
-          <button class="btn-select" onclick="selectSubject('MDC gujrati')">MDC gujrati<span>→</span></button>
-          <button class="btn-select" onclick="selectSubject('AEC gujrati')">AEC gujrati <span>→</span></button>
-          <button class="btn-select" onclick="selectSubject('SEC gujrati')">SEC gujrati<span>→</span></button>
-          <button class="btn-select" onclick="selectSubject('VAC')">VAC <span>→</span></button>
-        </div>
+        <div class="grid" id="subject-list"></div>
       </section>
 
-            <!-- STEP 4: RESOURCE HUB -->
+      <!-- STEP 4: RESOURCE HUB -->
       <section id="step-resources" class="hidden">
-        <h2 class="step-title" id="subject-title">Sanskrit Resources</h2>
+        <h2 class="step-title" id="subject-title">Resources</h2>
         <div class="grid">
-          <!-- Replace '#' with your Google Drive / PDF links -->
-          <a href="#" class="resource-card" target="_blank">
+          <a id="link-notes" href="#" class="resource-card" target="_blank">
             <span>📖 Notes</span> <span>Download ↗</span>
           </a>
-          <a href="#" class="resource-card" target="_blank">
+          <a id="link-questions" href="#" class="resource-card" target="_blank">
             <span>📝 Important Questions</span> <span>View ↗</span>
           </a>
-          <a href="https://drive.google.com/drive/folders/1dzsTueQ29szEzigely0evoGySmlFC4hq" class="resource-card" target="_blank">
+          <a id="link-papers" href="#" class="resource-card" target="_blank">
             <span>📄 Previous Papers</span> <span>Download ↗</span>
           </a>
-          <a href="#" class="resource-card" target="_blank">
+          <a id="link-exam" href="#" class="resource-card" target="_blank">
             <span>🎯 Exam Preparation</span> <span>View ↗</span>
           </a>
-          <!-- Direct WhatsApp order link -->
-          <a href="https://wa.me/916359217206?text=Hi,%20I%20want%20to%20order%20printed%20notes%20for%20Sanskrit" class="resource-card btn-order" target="_blank">
-            <span>🖨️ Order Assignments </span> <span>Order ↗</span>
+          <a id="link-assignments" href="#" class="resource-card btn-order" target="_blank">
+            <span>📝 Order Assignments</span> <span>Order ↗</span>
           </a>
         </div>
       </section>
-
     </div>
   </main>
 
   <footer>
     &copy; Campus Study Hub. Built for college students.
-    created by Arc
   </footer>
 
   <script>
+    // --- YAHAN AAP APNE HAR SEMESTER AUR SUBJECT KI LINKS DAAL SAKTE HAIN ---
+    const studyData = {
+      "FYBA": {
+        "Semester 1": {
+          "Sanskrit": {
+            notes: "https://drive.google.com/FYBA_SEM1_SANSKRIT_NOTES",
+            questions: "https://drive.google.com/FYBA_SEM1_SANSKRIT_QUESTIONS",
+            papers: "https://drive.google.com/FYBA_SEM1_SANSKRIT_PAPERS",
+            exam: "https://drive.google.com/FYBA_SEM1_SANSKRIT_EXAM"
+          },
+          "History": {
+            notes: "https://drive.google.com/FYBA_SEM1_HISTORY_NOTES",
+            questions: "https://drive.google.com/FYBA_SEM1_HISTORY_QUESTIONS",
+            papers: "https://drive.google.com/FYBA_SEM1_HISTORY_PAPERS",
+            exam: "https://drive.google.com/FYBA_SEM1_HISTORY_EXAM"
+          },
+          "English": {
+            notes: "https://drive.google.com/FYBA_SEM1_ENGLISH_NOTES",
+            questions: "https://drive.google.com/FYBA_SEM1_ENGLISH_QUESTIONS",
+            papers: "https://drive.google.com/FYBA_SEM1_ENGLISH_PAPERS",
+            exam: "https://drive.google.com/FYBA_SEM1_ENGLISH_EXAM"
+          }
+        },
+        "Semester 2": {
+          "Sanskrit": {
+            notes: "https://drive.google.com/FYBA_SEM2_SANSKRIT_NOTES",
+            questions: "https://drive.google.com/FYBA_SEM2_SANSKRIT_QUESTIONS",
+            papers: "https://drive.google.com/FYBA_SEM2_SANSKRIT_PAPERS",
+            exam: "https://drive.google.com/FYBA_SEM2_SANSKRIT_EXAM"
+          },
+          "History": {
+            notes: "https://drive.google.com/FYBA_SEM2_HISTORY_NOTES",
+            questions: "https://drive.google.com/FYBA_SEM2_HISTORY_QUESTIONS",
+            papers: "https://drive.google.com/FYBA_SEM2_HISTORY_PAPERS",
+            exam: "https://drive.google.com/FYBA_SEM2_HISTORY_EXAM"
+          }
+        }
+      },
+      "SYBA": {
+        "Semester 3": {
+          "Sanskrit": {
+            notes: "https://drive.google.com/SYBA_SEM3_SANSKRIT_NOTES",
+            questions: "https://drive.google.com/SYBA_SEM3_SANSKRIT_QUESTIONS",
+            papers: "https://drive.google.com/SYBA_SEM3_SANSKRIT_PAPERS",
+            exam: "https://drive.google.com/SYBA_SEM3_SANSKRIT_EXAM"
+          }
+        },
+        "Semester 4": {}
+      },
+      "TYBA": {
+        "Semester 5": {},
+        "Semester 6": {}
+      }
+    };
+
     const state = {
       course: null,
       semester: null,
@@ -250,7 +290,6 @@
     };
 
     function updateView() {
-      // Hide all steps
       document.getElementById('step-course').classList.add('hidden');
       document.getElementById('step-semester').classList.add('hidden');
       document.getElementById('step-subject').classList.add('hidden');
@@ -268,18 +307,75 @@
         backBtn.classList.remove('hidden');
         breadcrumb.classList.remove('hidden');
         breadcrumb.innerText = `${state.course}`;
+        renderSemesters();
       } else if (state.step === 3) {
         document.getElementById('step-subject').classList.remove('hidden');
         backBtn.classList.remove('hidden');
         breadcrumb.classList.remove('hidden');
-        breadcrumb.innerText = `${state.course} >${state.semester}`;
+        breadcrumb.innerText = `${state.course} > ${state.semester}`;
+        renderSubjects();
       } else if (state.step === 4) {
         document.getElementById('step-resources').classList.remove('hidden');
-        document.getElementById('subject-title').innerText = `${state.subject}`;
+        document.getElementById('subject-title').innerText = `${state.subject} Resources`;
         backBtn.classList.remove('hidden');
         breadcrumb.classList.remove('hidden');
-        breadcrumb.innerText = `${state.course} > ${state.semester} >${state.subject}`;
+        breadcrumb.innerText = `${state.course} > ${state.semester} > ${state.subject}`;
+
+        // Get specific links for Course -> Semester -> Subject
+        const courseData = studyData[state.course] || {};
+        const semData = courseData[state.semester] || {};
+        const links = semData[state.subject] || {};
+
+        document.getElementById('link-notes').href = links.notes || '#';
+        document.getElementById('link-questions').href = links.questions || '#';
+        document.getElementById('link-papers').href = links.papers || '#';
+        document.getElementById('link-exam').href = links.exam || '#';
+
+        // Custom WhatsApp order message with full course, sem & subject details
+        const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subject})`);
+        document.getElementById('link-assignments').href = `https://wa.me/?text=${waText}`;
       }
+    }
+
+    function renderSemesters() {
+      const container = document.getElementById('semester-list');
+      container.innerHTML = '';
+      const courseObj = studyData[state.course] || {};
+      const semesters = Object.keys(courseObj);
+
+      if (semesters.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">Coming soon...</p>';
+        return;
+      }
+
+      semesters.forEach(sem => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-select';
+        btn.innerHTML = `${sem} <span>→</span>`;
+        btn.onclick = () => selectSemester(sem);
+        container.appendChild(btn);
+      });
+    }
+
+    function renderSubjects() {
+      const container = document.getElementById('subject-list');
+      container.innerHTML = '';
+      const courseObj = studyData[state.course] || {};
+      const semObj = courseObj[state.semester] || {};
+      const subjects = Object.keys(semObj);
+
+      if (subjects.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">Coming soon...</p>';
+        return;
+      }
+
+      subjects.forEach(sub => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-select';
+        btn.innerHTML = `${sub} <span>→</span>`;
+        btn.onclick = () => selectSubject(sub);
+        container.appendChild(btn);
+      });
     }
 
     function selectCourse(course) {
@@ -308,5 +404,4 @@
     }
   </script>
 </body>
-  </html>
-  
+</html>
