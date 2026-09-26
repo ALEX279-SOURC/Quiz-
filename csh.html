@@ -227,53 +227,55 @@
   </footer>
 
   <script>
-    // --- YAHAN AAP APNE HAR SEMESTER AUR SUBJECT KI LINKS DAAL SAKTE HAIN ---
+    // AAPKA WHATSAPP NUMBER
+    const WHATSAPP_NUMBER = "916359217206";
+
+    // GOOGLE DRIVE LINKS KA DATA
     const studyData = {
       "FYBA": {
         "Semester 1": {
           "Sanskrit": {
-            notes: "https://drive.google.com/FYBA_SEM1_SANSKRIT_NOTES",
-            questions: "https://drive.google.com/FYBA_SEM1_SANSKRIT_QUESTIONS",
+            notes: "#",
+            questions: "#",
             papers: "https://drive.google.com/drive/folders/1dzsTueQ29szEzigely0evoGySmlFC4hq",
-            exam: "https://drive.google.com/FYBA_SEM1_SANSKRIT_EXAM"
+            exam: "#"
           },
           "History": {
-            notes: "https://drive.google.com/FYBA_SEM1_HISTORY_NOTES",
-            questions: "https://drive.google.com/FYBA_SEM1_HISTORY_QUESTIONS",
-            papers: "https://drive.google.com/FYBA_SEM1_HISTORY_PAPERS",
-            exam: "https://drive.google.com/FYBA_SEM1_HISTORY_EXAM"
+            notes: "#",
+            questions: "#",
+            papers: "#",
+            exam: "#"
           },
           "English": {
-            notes: "https://drive.google.com/FYBA_SEM1_ENGLISH_NOTES",
-            questions: "https://drive.google.com/FYBA_SEM1_ENGLISH_QUESTIONS",
-            papers: "https://drive.google.com/FYBA_SEM1_ENGLISH_PAPERS",
-            exam: "https://drive.google.com/FYBA_SEM1_ENGLISH_EXAM"
+            notes: "#",
+            questions: "#",
+            papers: "#",
+            exam: "#"
+          },
+          "Political Science": {
+            notes: "#",
+            questions: "#",
+            papers: "#",
+            exam: "#"
           }
         },
         "Semester 2": {
           "Sanskrit": {
-            notes: "https://drive.google.com/FYBA_SEM2_SANSKRIT_NOTES",
-            questions: "https://drive.google.com/FYBA_SEM2_SANSKRIT_QUESTIONS",
-            papers: "https://drive.google.com/FYBA_SEM2_SANSKRIT_PAPERS",
-            exam: "https://drive.google.com/FYBA_SEM2_SANSKRIT_EXAM"
+            notes: "#",
+            questions: "#",
+            papers: "#",
+            exam: "#"
           },
           "History": {
-            notes: "https://drive.google.com/FYBA_SEM2_HISTORY_NOTES",
-            questions: "https://drive.google.com/FYBA_SEM2_HISTORY_QUESTIONS",
-            papers: "https://drive.google.com/FYBA_SEM2_HISTORY_PAPERS",
-            exam: "https://drive.google.com/FYBA_SEM2_HISTORY_EXAM"
+            notes: "#",
+            questions: "#",
+            papers: "#",
+            exam: "#"
           }
         }
       },
       "SYBA": {
-        "Semester 3": {
-          "Sanskrit": {
-            notes: "https://drive.google.com/SYBA_SEM3_SANSKRIT_NOTES",
-            questions: "https://drive.google.com/SYBA_SEM3_SANSKRIT_QUESTIONS",
-            papers: "https://drive.google.com/SYBA_SEM3_SANSKRIT_PAPERS",
-            exam: "https://drive.google.com/SYBA_SEM3_SANSKRIT_EXAM"
-          }
-        },
+        "Semester 3": {},
         "Semester 4": {}
       },
       "TYBA": {
@@ -288,6 +290,43 @@
       subject: null,
       step: 1
     };
+
+    // Refresh hone par current tab par hi rakhega
+    function parseHash() {
+      const hash = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''));
+      if (!hash) {
+        state.course = null;
+        state.semester = null;
+        state.subject = null;
+        state.step = 1;
+        updateView();
+        return;
+      }
+
+      const parts = hash.split('/');
+      if (parts[0]) {
+        state.course = parts[0];
+        state.step = 2;
+      }
+      if (parts[1]) {
+        state.semester = parts[1];
+        state.step = 3;
+      }
+      if (parts[2]) {
+        state.subject = parts[2];
+        state.step = 4;
+      }
+      updateView();
+    }
+
+    function setHash() {
+      let path = '';
+      if (state.step === 2) path = `${state.course}`;
+      else if (state.step === 3) path = `${state.course}/${state.semester}`;
+      else if (state.step === 4) path = `${state.course}/${state.semester}/${state.subject}`;
+      
+      window.location.hash = path ? `#/${path}` : '';
+    }
 
     function updateView() {
       document.getElementById('step-course').classList.add('hidden');
@@ -321,7 +360,6 @@
         breadcrumb.classList.remove('hidden');
         breadcrumb.innerText = `${state.course} > ${state.semester} > ${state.subject}`;
 
-        // Get specific links for Course -> Semester -> Subject
         const courseData = studyData[state.course] || {};
         const semData = courseData[state.semester] || {};
         const links = semData[state.subject] || {};
@@ -331,9 +369,8 @@
         document.getElementById('link-papers').href = links.papers || '#';
         document.getElementById('link-exam').href = links.exam || '#';
 
-        // Custom WhatsApp order message with full course, sem & subject details
         const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subject})`);
-        document.getElementById('link-assignments').href = `https://wa.me/916359217206?text=${waText}`;
+        document.getElementById('link-assignments').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
       }
     }
 
@@ -344,7 +381,7 @@
       const semesters = Object.keys(courseObj);
 
       if (semesters.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted);">Coming soon...</p>';
+        container.innerHTML = '<p style="color:var(--text-muted); padding:1rem 0;">Coming soon...</p>';
         return;
       }
 
@@ -365,7 +402,7 @@
       const subjects = Object.keys(semObj);
 
       if (subjects.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted);">Coming soon...</p>';
+        container.innerHTML = '<p style="color:var(--text-muted); padding:1rem 0;">Coming soon...</p>';
         return;
       }
 
@@ -381,27 +418,30 @@
     function selectCourse(course) {
       state.course = course;
       state.step = 2;
+      setHash();
       updateView();
     }
 
     function selectSemester(sem) {
       state.semester = sem;
       state.step = 3;
+      setHash();
       updateView();
     }
 
     function selectSubject(sub) {
       state.subject = sub;
       state.step = 4;
+      setHash();
       updateView();
     }
 
     function goBack() {
-      if (state.step > 1) {
-        state.step--;
-        updateView();
-      }
+      window.history.back();
     }
+
+    window.addEventListener('hashchange', parseHash);
+    window.addEventListener('DOMContentLoaded', parseHash);
   </script>
 </body>
 </html>
