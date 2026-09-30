@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard | Campus Study Hub</title>
+  <title>Control Centre of Campus Study Hub</title>
 
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -11,16 +11,18 @@
 
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #0f172a;
-      --card: #1e293b;
-      --border: #334155;
+      --bg: #0b1329;
+      --card-bg: #131f3f;
+      --card-border: #1e2e5c;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --danger: #ef4444;
+      --danger-hover: #dc2626;
       --success: #10b981;
-      --radius: 10px;
+      --radius: 14px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
     }
 
     * {
@@ -39,304 +41,719 @@
       flex-direction: column;
     }
 
+    /* TOP HEADER */
     header {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 1.5rem;
+      background: #0f172a;
+      border-bottom: 1px solid var(--card-border);
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .brand-subtitle {
+      font-size: 0.78rem;
+      color: #38bdf8;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .menu-trigger-btn {
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.35rem;
+      transition: all 0.2s;
+    }
+
+    .menu-trigger-btn:hover {
+      background: #334155;
+      border-color: var(--primary);
+    }
+
+    /* SLIDE-OUT SIDE DRAWER */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 998;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .drawer-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .side-drawer {
+      position: fixed;
+      top: 0;
+      right: -320px;
+      width: 300px;
+      height: 100%;
+      background: #0f172a;
+      border-left: 1px solid var(--card-border);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .side-drawer.active {
+      right: 0;
+    }
+
+    .drawer-header {
+      padding: 1.25rem 1rem;
+      border-bottom: 1px solid var(--card-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    header h1 {
+    .drawer-close-btn {
+      background: #1e293b;
+      border: none;
+      color: #94a3b8;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .drawer-close-btn:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    /* ADMIN DETAILS CARD INSIDE DRAWER */
+    .admin-info-card {
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 0.9rem;
+      margin: 1rem;
+    }
+
+    .admin-info-header {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      color: #38bdf8;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .admin-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .admin-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .pin-display-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* MENU NAVIGATION ITEMS (SINGLE LINE) */
+    .drawer-menu-list {
+      display: flex;
+      flex-direction: column;
+      padding: 0 0.75rem;
+      gap: 0.5rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .menu-item-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      background: #131f3f;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .menu-item-btn:hover {
+      background: #1e2e5c;
+      border-color: var(--primary);
+      transform: translateX(-2px);
+    }
+
+    .menu-item-btn .item-content {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .counter-pill {
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+    }
+
+    /* MAIN CONTENT VIEW */
+    main {
+      flex: 1;
+      max-width: 760px;
+      width: 100%;
+      margin: 1.5rem auto 2.5rem;
+      padding: 0 1rem;
+    }
+
+    /* WELCOME DASHBOARD SCREEN */
+    .dashboard-home {
+      text-align: center;
+      padding: 2.5rem 1rem;
+    }
+
+    .home-quick-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .quick-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.25rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.25s;
+    }
+
+    .quick-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+    }
+
+    .quick-icon {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .quick-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .quick-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* SECTION DETAIL CARDS WITH TOP-RIGHT ❌ ICON */
+    .tab-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.5rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      animation: tabEnter 0.2s ease-out;
+    }
+
+    @keyframes tabEnter {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .tab-close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+    }
+
+    .tab-close-btn:hover {
+      background: #ef4444;
+      color: #fff;
+      border-color: #ef4444;
+    }
+
+    .section-title {
       font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    /* FORMS & INPUTS */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.02em;
+    }
+
+    .input-box, .select-box {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      background: #0b1329;
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+
+    .input-box:focus, .select-box:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-action-primary {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-action-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    /* DIRECTORY LIST & SUBJECT ITEMS */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    .list-card {
+      background: #0b1329;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 0.9rem 1.15rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .list-card-content {
+      overflow: hidden;
+    }
+
+    .list-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
       color: #fff;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
-    .btn-nav {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 0.35rem 0.75rem;
-      border-radius: 6px;
-      text-decoration: none;
+    .list-card-sub {
       font-size: 0.8rem;
-    }
-    .btn-nav:hover { color: #fff; border-color: #fff; }
-
-    main {
-      flex: 1;
-      max-width: 1000px;
-      width: 100%;
-      margin: 1.5rem auto;
-      padding: 0 1rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
     }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .card-title {
-      font-size: 1.15rem;
+    .btn-delete-item {
+      background: #2d1520;
+      color: #f87171;
+      border: 1px solid #7f1d1d;
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
       font-weight: 700;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    input, select {
-      background: #0f172a;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: #fff;
-      padding: 0.65rem 0.85rem;
-      font-size: 0.9rem;
-      outline: none;
-    }
-    input:focus, select:focus {
-      border-color: var(--primary);
-    }
-
-    .btn {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      padding: 0.65rem 1.25rem;
-      border-radius: 6px;
-      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      white-space: nowrap;
     }
-    .btn:hover { background: var(--primary-hover); }
-    .btn-danger { background: var(--danger); font-size: 0.75rem; padding: 0.3rem 0.6rem; }
-    .btn-danger:hover { background: #dc2626; }
 
-    /* Tables */
-    .table-container {
-      overflow-x: auto;
+    .btn-delete-item:hover {
+      background: #ef4444;
+      color: #fff;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.85rem;
+
+    /* COMMENTS ITEM CARD */
+    .comment-card {
+      background: #0b1329;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
     }
-    th, td {
-      padding: 0.75rem;
-      border-bottom: 1px solid var(--border);
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
     }
-    th {
+
+    .comment-user {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .comment-time {
+      font-size: 0.72rem;
       color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.75rem;
     }
 
-    /* Auth Screen */
-    .pin-gate {
-      max-width: 360px;
-      margin: 4rem auto;
-      text-align: center;
-    }
-    .pin-gate input {
-      text-align: center;
-      font-size: 1.25rem;
-      letter-spacing: 0.2em;
-      margin-bottom: 1rem;
+    .comment-body {
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.4;
+      background: #131f3f;
+      padding: 0.65rem 0.85rem;
+      border-radius: 6px;
+      margin-top: 0.35rem;
     }
 
-    .hidden { display: none !important; }
+    .hidden {
+      display: none !important;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: auto;
+    }
   </style>
 </head>
 <body>
 
-  <!-- ADMIN PASSCODE GATE -->
-  <div id="authGate" class="pin-gate card">
-    <h2 style="margin-bottom: 0.5rem;">🔒 Admin Access</h2>
-    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 1.25rem;">Enter Admin PIN to manage Campus Study Hub</p>
-    <input type="password" id="adminPinInput" placeholder="Enter PIN" maxlength="6" autofocus />
-    <button class="btn" style="width: 100%;" onclick="verifyPin()">Unlock Dashboard</button>
-  </div>
+  <!-- TOP HEADER -->
+  <header>
+    <div class="brand-box">
+      <span class="brand-title">Control Centre</span>
+      <span class="brand-subtitle">of Campus study hub</span>
+    </div>
 
-  <!-- DASHBOARD WRAPPER -->
-  <div id="adminDashboard" class="hidden">
-    <header>
-      <h1>⚡ Campus Study Hub &bull; Control Center</h1>
-      <div style="display:flex; gap:0.5rem; align-items:center;">
-        <a href="index.html" class="btn-nav" target="_blank">View Live Site ↗</a>
-        <button class="btn-nav" onclick="lockAdmin()">Lock</button>
+    <!-- RIGHT MENU TRIGGER ICON -->
+    <button class="menu-trigger-btn" onclick="openDrawer()" title="Open Management Menu">
+      ☰
+    </button>
+  </header>
+
+  <!-- SLIDE-OUT SIDE DRAWER -->
+  <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawer()"></div>
+  <aside id="sideDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span style="font-weight: 800; font-size: 1rem; color: #fff;">Navigation Menu</span>
+      <button class="drawer-close-btn" onclick="closeDrawer()" title="Close Menu">✕</button>
+    </div>
+
+    <!-- ADMIN DETAILS WITH PIN -->
+    <div class="admin-info-card">
+      <div class="admin-info-header">Admin Profile</div>
+      <div class="admin-row">
+        <span style="color: var(--text-muted);">Name:</span>
+        <span style="font-weight: 700; color: #fff;">Admin / Alex</span>
       </div>
-    </header>
-
-    <main>
-      <!-- CARD 1: ADD / UPDATE STUDY MATERIAL -->
-      <div class="card">
-        <h2 class="card-title">📚 Add or Update Subject Materials</h2>
-        <form onsubmit="saveSubjectData(event)">
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Course</label>
-              <select id="courseSelect" onchange="updateSemesterDropdown()" required>
-                <option value="FYBA">FYBA</option>
-                <option value="SYBA">SYBA</option>
-                <option value="TYBA">TYBA</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Semester</label>
-              <select id="semesterSelect" required></select>
-            </div>
-            <div class="form-group">
-              <label>Subject Name</label>
-              <input type="text" id="subjectNameInput" placeholder="e.g. Sanskrit, Gujarati" required />
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Notes Drive Link</label>
-              <input type="url" id="notesLinkInput" placeholder="https://drive.google.com/..." />
-            </div>
-            <div class="form-group">
-              <label>Important Questions Link</label>
-              <input type="url" id="questionsLinkInput" placeholder="https://drive.google.com/..." />
-            </div>
-            <div class="form-group">
-              <label>Previous Year Papers Link</label>
-              <input type="url" id="papersLinkInput" placeholder="https://drive.google.com/..." />
-            </div>
-            <div class="form-group">
-              <label>Exam Prep Link</label>
-              <input type="url" id="examLinkInput" placeholder="https://drive.google.com/..." />
-            </div>
-          </div>
-
-          <button type="submit" id="saveBtn" class="btn">Save & Update Subject ↗</button>
-        </form>
-      </div>
-
-      <!-- CARD 2: SUBJECTS DIRECTORY LIST -->
-      <div class="card">
-        <h2 class="card-title">🗂 Existing Managed Subjects</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Course</th>
-                <th>Semester</th>
-                <th>Subject</th>
-                <th>Drive Papers</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="subjectsTableBody">
-              <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Loading subjects...</td></tr>
-            </tbody>
-          </table>
+      <div class="admin-row">
+        <span style="color: var(--text-muted);">Master PIN:</span>
+        <div class="pin-display-wrap">
+          <span id="adminPinMasked" style="font-family: monospace; font-weight:700;">••••</span>
+          <span onclick="toggleAdminPinDisplay()" style="cursor: pointer; font-size: 0.85rem;">👁️</span>
         </div>
       </div>
+    </div>
 
-      <!-- CARD 3: REGISTERED USERS DIRECTORY -->
-      <div class="card">
-        <div class="card-title">
-          <span>👥 Enrolled Students Directory (<span id="userCount">0</span>)</span>
-          <button class="btn-nav" onclick="loadUsers()">Refresh</button>
+    <!-- MENU LIST (SINGLE LINE TEXT) -->
+    <div class="drawer-menu-list">
+      <button class="menu-item-btn" onclick="navigateToTab('addSubjectTab')">
+        <div class="item-content">
+          <span>📚</span>
+          <span>Add or Update Subject Materials</span>
         </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Phone / WhatsApp</th>
-                <th>Department / Status</th>
-                <th>Joined Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="usersTableBody">
-              <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Loading users...</td></tr>
-            </tbody>
-          </table>
+        <span>→</span>
+      </button>
+
+      <button class="menu-item-btn" onclick="navigateToTab('existingSubjectsTab')">
+        <div class="item-content">
+          <span>🗂</span>
+          <span>Existing Managed Subjects</span>
+        </div>
+        <span>→</span>
+      </button>
+
+      <button class="menu-item-btn" onclick="navigateToTab('studentsDirectoryTab')">
+        <div class="item-content">
+          <span>👥</span>
+          <span>Enrolled Students Directory</span>
+        </div>
+        <span class="counter-pill" id="enrolledCountBadge">0</span>
+      </button>
+
+      <!-- VIEW LIVE SITE: OPENS IN NEW TAB -->
+      <a class="menu-item-btn" href="https://alex279-sourc.github.io/Quiz-/csh.html#" target="_blank" rel="noopener noreferrer">
+        <div class="item-content">
+          <span>🌐</span>
+          <span>View live site</span>
+        </div>
+        <span>↗</span>
+      </a>
+
+      <button class="menu-item-btn" onclick="navigateToTab('commentsTab')">
+        <div class="item-content">
+          <span>✉️</span>
+          <span>Comments</span>
+        </div>
+        <span class="counter-pill" id="commentsCountBadge">0</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN VIEW CONTAINER -->
+  <main>
+    
+    <!-- HOME CLEAN SCREEN (NO TABS BY DEFAULT) -->
+    <section id="homeDashboard" class="dashboard-home">
+      <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">⚡</div>
+      <h2 style="font-size: 1.5rem; font-weight: 800; color: #fff;">Campus Study Hub Control</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 460px; margin: 0.35rem auto 0;">
+        Tap the ☰ menu icon at top right to manage subjects, review scholars, or monitor comments.
+      </p>
+
+      <div class="home-quick-grid">
+        <div class="quick-card" onclick="navigateToTab('addSubjectTab')">
+          <div class="quick-icon">📚</div>
+          <div class="quick-title">Add Subject Material</div>
+          <div class="quick-desc">Upload Google Drive links for notes and previous year papers.</div>
+        </div>
+
+        <div class="quick-card" onclick="navigateToTab('existingSubjectsTab')">
+          <div class="quick-icon">🗂</div>
+          <div class="quick-title">Existing Subjects</div>
+          <div class="quick-desc">Manage, inspect, or delete live semester courses.</div>
+        </div>
+
+        <div class="quick-card" onclick="navigateToTab('studentsDirectoryTab')">
+          <div class="quick-icon">👥</div>
+          <div class="quick-title">Students Directory (<span id="quickUserCount">0</span>)</div>
+          <div class="quick-desc">Inspect registered scholars and manage active student sessions.</div>
+        </div>
+
+        <div class="quick-card" onclick="navigateToTab('commentsTab')">
+          <div class="quick-icon">✉️</div>
+          <div class="quick-title">Student Comments (<span id="quickCommentCount">0</span>)</div>
+          <div class="quick-desc">Read queries, requests, and feedback submitted by users.</div>
         </div>
       </div>
-    </main>
-  </div>
+    </section>
+
+    <!-- TAB 1: ADD OR UPDATE SUBJECT MATERIALS -->
+    <section id="addSubjectTab" class="tab-card hidden">
+      <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+
+      <h2 class="section-title">📚 Add or Update Subject Materials</h2>
+      <p class="section-desc">Changes will instantly sync with the main Campus Study Hub website.</p>
+
+      <form onsubmit="handleSubjectSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">COURSE</label>
+          <select id="courseSelect" class="select-box" onchange="updateSemesterDropdown()" required>
+            <option value="FYBA">FYBA</option>
+            <option value="SYBA">SYBA</option>
+            <option value="TYBA">TYBA</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">SEMESTER</label>
+          <select id="semesterSelect" class="select-box" required></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">SUBJECT NAME</label>
+          <input type="text" id="subjectNameInput" class="input-box" placeholder="e.g. Sanskrit M1, Gujarati, History" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">NOTES DRIVE LINK</label>
+          <input type="url" id="notesLinkInput" class="input-box" placeholder="https://drive.google.com/..." />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">IMPORTANT QUESTIONS LINK</label>
+          <input type="url" id="questionsLinkInput" class="input-box" placeholder="https://drive.google.com/..." />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">PREVIOUS YEAR PAPERS LINK</label>
+          <input type="url" id="papersLinkInput" class="input-box" placeholder="https://drive.google.com/..." />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">EXAM PREPARATION LINK</label>
+          <input type="url" id="examLinkInput" class="input-box" placeholder="https://drive.google.com/..." />
+        </div>
+
+        <button type="submit" id="saveSubjectBtn" class="btn-action-primary">Save & Publish to Live Site →</button>
+      </form>
+    </section>
+
+    <!-- TAB 2: EXISTING MANAGED SUBJECTS -->
+    <section id="existingSubjectsTab" class="tab-card hidden">
+      <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+
+      <h2 class="section-title">🗂 Existing Managed Subjects</h2>
+      <p class="section-desc">Subjects currently live on the main portal. Delete to remove immediately.</p>
+
+      <div class="item-list" id="existingSubjectsContainer">
+        <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading managed subjects...</div>
+      </div>
+    </section>
+
+    <!-- TAB 3: ENROLLED STUDENTS DIRECTORY -->
+    <section id="studentsDirectoryTab" class="tab-card hidden">
+      <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+
+      <h2 class="section-title">👥 Enrolled Students Directory</h2>
+      <p class="section-desc">Total verified scholars on Campus Study Hub. Deleting forces an instant logout on their phone.</p>
+
+      <div class="item-list" id="studentsListContainer">
+        <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading enrolled students...</div>
+      </div>
+    </section>
+
+    <!-- TAB 4: COMMENTS (WITH USER NAME, TIME & DATE) -->
+    <section id="commentsTab" class="tab-card hidden">
+      <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+
+      <h2 class="section-title">✉️ Student Comments & Queries</h2>
+      <p class="section-desc">Feedback and requests submitted from the Campus Study Hub portal.</p>
+
+      <div id="commentsContainer">
+        <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No student comments found yet.</div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    &copy; Control Centre • Campus Study Hub Admin.
+  </footer>
 
   <script>
-    // 1. ADMIN PIN (Aap is PIN ko yahan badal sakte hain)
-    const ADMIN_PIN = "1234";
-
-    // 2. FIREBASE CONFIGURATION
+    // 1. FIREBASE CONFIGURATION
     const firebaseConfig = {
-      apiKey: "AIzaSyBzjHop1OV6agKwLsXxTj7x9xd9GQ9ZKsY",
+      apiKey: "AIzaSyBzjHop10vEagKwLaXxTj7x9xd9GQ92KxE",
       authDomain: "campus-study-hub-6b8ab.firebaseapp.com",
       databaseURL: "https://campus-study-hub-6b8ab-default-rtdb.firebaseio.com",
       projectId: "campus-study-hub-6b8ab",
       storageBucket: "campus-study-hub-6b8ab.firebasestorage.app",
-      messagingSenderId: "655468124613",
-      appId: "1:655468124613:web:6156466ab93f18541e5bac",
-      measurementId: "G-YE7EE087CY"
+      messagingSenderId: "555468124613",
+      appId: "1:555468124613:web:5156466ab53f18541e5bac",
+      measurementId: "G-YE7B0G87CY"
     };
 
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
-    const db = firebase.database();
+    const database = firebase.database();
 
-    // PIN Gate System
-    function verifyPin() {
-      const pin = document.getElementById('adminPinInput').value;
-      if (pin === ADMIN_PIN) {
-        sessionStorage.setItem('csh_admin_auth', 'true');
-        showDashboard();
-      } else {
-        alert("Incorrect PIN!");
-      }
-    }
+    const ADMIN_DEFAULT_PIN = "1234";
+    let isPinVisible = false;
 
-    function lockAdmin() {
-      sessionStorage.removeItem('csh_admin_auth');
-      window.location.reload();
-    }
-
-    function showDashboard() {
-      document.getElementById('authGate').classList.add('hidden');
-      document.getElementById('adminDashboard').classList.remove('hidden');
-      updateSemesterDropdown();
-      loadSubjects();
-      loadUsers();
-    }
-
-    // Dynamic Semesters for Dropdown
-    const courseSemMap = {
+    // 2. SEMESTER OPTIONS MAP
+    const semesterMap = {
       "FYBA": ["Semester 1", "Semester 2"],
       "SYBA": ["Semester 3", "Semester 4"],
       "TYBA": ["Semester 5", "Semester 6"]
@@ -346,19 +763,61 @@
       const course = document.getElementById('courseSelect').value;
       const semSelect = document.getElementById('semesterSelect');
       semSelect.innerHTML = '';
-      (courseSemMap[course] || []).forEach(sem => {
+      const sems = semesterMap[course] || [];
+      sems.forEach(s => {
         const opt = document.createElement('option');
-        opt.value = sem;
-        opt.innerText = sem;
+        opt.value = s;
+        opt.innerText = s;
         semSelect.appendChild(opt);
       });
     }
 
-    // Save or Update Subject Material
-    function saveSubjectData(e) {
+    // 3. DRAWER OPEN / CLOSE
+    function openDrawer() {
+      document.getElementById('sideDrawer').classList.add('active');
+      document.getElementById('drawerOverlay').classList.add('active');
+    }
+
+    function closeDrawer() {
+      document.getElementById('sideDrawer').classList.remove('active');
+      document.getElementById('drawerOverlay').classList.remove('active');
+    }
+
+    function toggleAdminPinDisplay() {
+      const el = document.getElementById('adminPinMasked');
+      isPinVisible = !isPinVisible;
+      el.innerText = isPinVisible ? ADMIN_DEFAULT_PIN : "••••";
+    }
+
+    // 4. TAB NAVIGATION & CLOSE
+    function navigateToTab(tabId) {
+      closeDrawer();
+      document.getElementById('homeDashboard').classList.add('hidden');
+      document.getElementById('addSubjectTab').classList.add('hidden');
+      document.getElementById('existingSubjectsTab').classList.add('hidden');
+      document.getElementById('studentsDirectoryTab').classList.add('hidden');
+      document.getElementById('commentsTab').classList.add('hidden');
+
+      const target = document.getElementById(tabId);
+      if (target) {
+        target.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function closeToHome() {
+      document.getElementById('addSubjectTab').classList.add('hidden');
+      document.getElementById('existingSubjectsTab').classList.add('hidden');
+      document.getElementById('studentsDirectoryTab').classList.add('hidden');
+      document.getElementById('commentsTab').classList.add('hidden');
+      document.getElementById('homeDashboard').classList.remove('hidden');
+    }
+
+    // 5. ADD / UPDATE SUBJECT MATERIALS
+    function handleSubjectSubmit(e) {
       e.preventDefault();
       const course = document.getElementById('courseSelect').value;
-      const sem = document.getElementById('semesterSelect').value;
+      const semester = document.getElementById('semesterSelect').value;
       const subject = document.getElementById('subjectNameInput').value.trim();
 
       const notes = document.getElementById('notesLinkInput').value.trim() || '#';
@@ -366,111 +825,165 @@
       const papers = document.getElementById('papersLinkInput').value.trim() || '#';
       const exam = document.getElementById('examLinkInput').value.trim() || '#';
 
-      const saveBtn = document.getElementById('saveBtn');
-      saveBtn.innerText = "Saving to Firebase...";
-      saveBtn.disabled = true;
+      if (!subject) return;
 
-      const path = `study_data/${course}/${sem}/${subject}`;
-      db.ref(path).set({
-        notes, questions, papers, exam
+      const btn = document.getElementById('saveSubjectBtn');
+      btn.innerText = "Publishing to Website...";
+      btn.disabled = true;
+
+      const path = `study_data/${course}/${semester}/${subject}`;
+      database.ref(path).set({
+        notes: notes,
+        questions: questions,
+        papers: papers,
+        exam: exam,
+        updatedAt: new Date().toISOString()
       }).then(() => {
-        alert(`Subject '${subject}' updated successfully!`);
+        alert(`Subject '${subject}' successfully published to ${course} (${semester})!`);
         document.getElementById('subjectNameInput').value = '';
         document.getElementById('notesLinkInput').value = '';
         document.getElementById('questionsLinkInput').value = '';
         document.getElementById('papersLinkInput').value = '';
         document.getElementById('examLinkInput').value = '';
-        saveBtn.innerText = "Save & Update Subject ↗";
-        saveBtn.disabled = false;
-        loadSubjects();
+        btn.innerText = "Save & Publish to Live Site →";
+        btn.disabled = false;
+        navigateToTab('existingSubjectsTab');
       }).catch(err => {
-        alert("Error saving: " + err.message);
-        saveBtn.disabled = false;
+        alert("Error publishing subject: " + err.message);
+        btn.innerText = "Save & Publish to Live Site →";
+        btn.disabled = false;
       });
     }
 
-    // Load & Render Subjects
-    function loadSubjects() {
-      const tbody = document.getElementById('subjectsTableBody');
-      db.ref('study_data').on('value', (snap) => {
-        tbody.innerHTML = '';
-        const data = snap.val();
+    // 6. RENDER EXISTING MANAGED SUBJECTS
+    function listenToSubjects() {
+      const container = document.getElementById('existingSubjectsContainer');
+      database.ref('study_data').on('value', (snapshot) => {
+        const data = snapshot.val();
         if (!data) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No custom subjects found in database yet.</td></tr>';
+          container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem;">No custom subjects added yet. Add one from the menu!</div>`;
           return;
         }
 
+        container.innerHTML = '';
         Object.keys(data).forEach(course => {
-          Object.keys(data[course]).forEach(sem => {
-            Object.keys(data[course][sem]).forEach(sub => {
-              const item = data[course][sem][sub];
-              const tr = document.createElement('tr');
-              tr.innerHTML = `
-                <td><strong>${course}</strong></td>
-                <td>${sem}</td>
-                <td>${sub}</td>
-                <td>${item.papers !== '#' ? `<a href="${item.papers}" target="_blank" style="color:#60a5fa">Drive Folder ↗</a>` : '<span style="color:var(--text-muted)">Empty</span>'}</td>
-                <td>
-                  <button class="btn btn-danger" onclick="deleteSubject('${course}', '${sem}', '${sub}')">Delete</button>
-                </td>
+          Object.keys(data[course]).forEach(semester => {
+            Object.keys(data[course][semester]).forEach(subName => {
+              const card = document.createElement('div');
+              card.className = 'list-card';
+              card.innerHTML = `
+                <div class="list-card-content">
+                  <div class="list-card-title">📘 ${subName}</div>
+                  <div class="list-card-sub">${course} • ${semester}</div>
+                </div>
+                <button class="btn-delete-item" onclick="deleteSubject('${course}', '${semester}', '${subName}')">Delete Subject</button>
               `;
-              tbody.appendChild(tr);
+              container.appendChild(card);
             });
           });
         });
       });
     }
 
-    function deleteSubject(course, sem, sub) {
-      if (confirm(`Are you sure you want to remove ${sub}?`)) {
-        db.ref(`study_data/${course}/${sem}/${sub}`).remove();
+    function deleteSubject(course, sem, subject) {
+      if (confirm(`Are you sure you want to remove '${subject}' from ${course} (${sem})?`)) {
+        database.ref(`study_data/${course}/${sem}/${subject}`).remove().then(() => {
+          alert(`Subject '${subject}' removed from live site.`);
+        });
       }
     }
 
-    // Load & Manage Registered Users
-    function loadUsers() {
-      const tbody = document.getElementById('usersTableBody');
-      const countEl = document.getElementById('userCount');
-      db.ref('registered_students').on('value', (snap) => {
-        tbody.innerHTML = '';
-        const count = snap.numChildren() || 0;
-        countEl.innerText = count;
+    // 7. RENDER ENROLLED STUDENTS DIRECTORY
+    function listenToStudents() {
+      const container = document.getElementById('studentsListContainer');
+      database.ref('registered_students').on('value', (snapshot) => {
+        const count = snapshot.numChildren() || 0;
+        document.getElementById('enrolledCountBadge').innerText = count;
+        document.getElementById('quickUserCount').innerText = count;
 
-        const data = snap.val();
+        const data = snapshot.val();
         if (!data) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No registered students found.</td></tr>';
+          container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem;">No enrolled students registered yet.</div>`;
           return;
         }
 
+        container.innerHTML = '';
         Object.keys(data).forEach(key => {
-          const user = data[key];
-          const tr = document.createElement('tr');
-          const dateStr = user.joinedAt ? new Date(user.joinedAt).toLocaleDateString() : 'N/A';
-          tr.innerHTML = `
-            <td><strong>${user.name}</strong></td>
-            <td><a href="https://wa.me/91${user.phone}" target="_blank" style="color:#22c55e; text-decoration:none;">${user.phone} ↗</a></td>
-            <td>${user.college || 'Verified Scholar'}</td>
-            <td>${dateStr}</td>
-            <td>
-              <button class="btn btn-danger" onclick="deleteUser('${key}')">Remove</button>
-            </td>
+          const student = data[key];
+          const card = document.createElement('div');
+          card.className = 'list-card';
+          card.innerHTML = `
+            <div class="list-card-content">
+              <div class="list-card-title">👤 ${student.name} <span style="font-size:0.75rem; color:#38bdf8;">(${student.collegeYear || 'FYBA'} - ${student.academicYear || '2026'})</span></div>
+              <div class="list-card-sub">📱 +91 ${student.phone} | PIN: <span style="font-family:monospace; color:#fff;">${student.pin || '••••'}</span></div>
+            </div>
+            <button class="btn-delete-item" onclick="removeStudent('${key}', '${student.name}')">Remove Student</button>
           `;
-          tbody.appendChild(tr);
+          container.appendChild(card);
         });
       });
     }
 
-    function deleteUser(key) {
-      if (confirm("Remove this user from the directory?")) {
-        db.ref('registered_students/' + key).remove();
+    function removeStudent(studentId, name) {
+      if (confirm(`Remove scholar '${name}'? This will automatically log them out of Campus Study Hub.`)) {
+        database.ref(`registered_students/${studentId}`).remove().then(() => {
+          alert(`Scholar '${name}' removed.`);
+        });
       }
     }
 
-    // Auto check session
-    if (sessionStorage.getItem('csh_admin_auth') === 'true') {
-      showDashboard();
+    // 8. RENDER COMMENTS (WITH STUDENT NAME, DATE & TIME)
+    function listenToComments() {
+      const container = document.getElementById('commentsContainer');
+      database.ref('student_comments').on('value', (snapshot) => {
+        const count = snapshot.numChildren() || 0;
+        document.getElementById('commentsCountBadge').innerText = count;
+        document.getElementById('quickCommentCount').innerText = count;
+
+        const data = snapshot.val();
+        if (!data) {
+          container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem;">No comments posted by students yet.</div>`;
+          return;
+        }
+
+        container.innerHTML = '';
+        const commentsArr = Object.entries(data);
+        commentsArr.reverse().forEach(([key, item]) => {
+          const timeFormatted = item.timestamp ? new Date(item.timestamp).toLocaleString('en-IN', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          }) : 'Just now';
+
+          const card = document.createElement('div');
+          card.className = 'comment-card';
+          card.innerHTML = `
+            <div class="comment-header">
+              <span class="comment-user">💬 ${item.userName || 'Anonymous Scholar'} (${item.userPhone ? '+91 ' + item.userPhone : 'Student'})</span>
+              <span class="comment-time">${timeFormatted}</span>
+            </div>
+            <div class="comment-body">${item.message || ''}</div>
+            <div style="display:flex; justify-content:flex-end; margin-top:0.4rem;">
+              <button class="btn-delete-item" style="padding:0.25rem 0.55rem; font-size:0.75rem;" onclick="deleteComment('${key}')">Delete</button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      });
     }
+
+    function deleteComment(commentId) {
+      if (confirm("Delete this comment permanently?")) {
+        database.ref(`student_comments/${commentId}`).remove();
+      }
+    }
+
+    // Initialize listeners & dropdown on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      updateSemesterDropdown();
+      listenToSubjects();
+      listenToStudents();
+      listenToComments();
+    });
   </script>
 </body>
-  </html>
-  
+</html>
