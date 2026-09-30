@@ -121,6 +121,7 @@
       font-size: 0.85rem;
       color: var(--text-muted);
       margin-bottom: 1rem;
+      word-break: break-word;
     }
 
     .grid {
@@ -142,11 +143,18 @@
       justify-content: space-between;
       align-items: center;
       transition: all 0.2s ease;
+      gap: 0.75rem;
     }
 
     .btn-select:hover {
       border-color: var(--primary);
       background: #eff6ff;
+    }
+
+    .btn-select span.btn-label {
+      word-break: break-word;
+      line-height: 1.35;
+      flex: 1;
     }
 
     .resource-card {
@@ -385,7 +393,6 @@
       border-color: #fca5a5;
     }
 
-    /* ACTIVE USERS LIVE BOX */
     .active-users-box {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -415,7 +422,6 @@
       font-weight: 800;
     }
 
-    /* COMMENT SUBMISSION TAB BOX */
     .comment-section-box {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -442,7 +448,6 @@
       line-height: 1.35;
     }
 
-    /* POPUP MODAL FOR EMPTY DATA */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -507,7 +512,6 @@
 </head>
 <body>
 
-  <!-- Top Strip: Profile Icon -->
   <div class="top-bar">
     <div id="authProfileBar" class="hidden">
       <button class="profile-btn" onclick="openAccountTab()" title="Account Settings">
@@ -534,7 +538,6 @@
         <h2 id="authHeading">Student Registration</h2>
         <p id="authSubheading">Register with your details & 4-digit PIN to access study materials.</p>
         
-        <!-- REGISTRATION FORM -->
         <form id="enrollForm" onsubmit="handleRegistration(event)">
           <label class="form-label">
             <span class="label-text-nowrap">FULL NAME</span>
@@ -577,7 +580,6 @@
           <button type="submit" id="regSubmitBtn" class="btn-primary-action">Create Account & Enter →</button>
         </form>
 
-        <!-- RETURNING LOGIN FORM -->
         <form id="returningLoginForm" class="hidden" onsubmit="handleLogin(event)">
           <label class="form-label">
             <span class="label-text-nowrap">REGISTERED MOBILE NUMBER</span>
@@ -604,9 +606,9 @@
         <section id="step-course">
           <h2 class="step-title">Select Course</h2>
           <div class="grid" id="course-list">
-            <button class="btn-select" onclick="selectCourse('FYBA')">FYBA <span>→</span></button>
-            <button class="btn-select" onclick="selectCourse('SYBA')">SYBA <span>→</span></button>
-            <button class="btn-select" onclick="selectCourse('TYBA')">TYBA <span>→</span></button>
+            <button class="btn-select" onclick="selectCourse('FYBA')"><span>FYBA</span> <span>→</span></button>
+            <button class="btn-select" onclick="selectCourse('SYBA')"><span>SYBA</span> <span>→</span></button>
+            <button class="btn-select" onclick="selectCourse('TYBA')"><span>TYBA</span> <span>→</span></button>
           </div>
         </section>
 
@@ -646,7 +648,7 @@
       <section id="accountSection" class="hidden">
         <button class="card-close-btn" onclick="closeAccountTab()" title="Close and return">✕</button>
         
-        <h2 class="step-title">⚙️️ Student Account Details</h2>
+        <h2 class="step-title">⚙ Student Account Details</h2>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
           Your current registered credentials. Tap update below if you wish to change mobile or PIN.
         </p>
@@ -766,7 +768,6 @@
 
   </main>
 
-  <!-- EMPTY DATA / NOT FOUND POPUP MODAL -->
   <div id="emptyDataModal" class="modal-overlay hidden" onclick="closeEmptyModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <button class="modal-close-btn" onclick="closeEmptyModal()" title="Close">❌</button>
@@ -784,7 +785,6 @@
   </footer>
 
   <script>
-    // 1. FIREBASE CONFIGURATION
     const firebaseConfig = {
       apiKey: "AIzaSyBzjHop10vEagKwLaXxTj7x9xd9GQ92KxE",
       authDomain: "campus-study-hub-6b8ab.firebaseapp.com",
@@ -803,6 +803,14 @@
 
     const WHATSAPP_NUMBER = "916359217206";
 
+    function decodeSub(str) {
+      try {
+        return decodeURIComponent(str);
+      } catch(e) {
+        return str;
+      }
+    }
+
     let studyData = {
       "FYBA": { "Semester 1": {}, "Semester 2": {} },
       "SYBA": { "Semester 3": {}, "Semester 4": {} },
@@ -812,7 +820,8 @@
     const state = {
       course: null,
       semester: null,
-      subject: null,
+      subjectKey: null,
+      subjectName: null,
       step: 1,
       inAccountTab: false,
       previousHash: ''
@@ -840,7 +849,7 @@
       el.classList.toggle('hidden');
     }
 
-    // 2. LIVE SYNC: ADMIN DATA
+    // 2. LIVE SYNC WITH PROPER SUBJECT NAME EXTRACTION
     database.ref('study_data').on('value', (snapshot) => {
       const liveData = snapshot.val();
       studyData = {
@@ -862,13 +871,11 @@
       if (state.step === 4) updateView();
     });
 
-    // 3. REALTIME ACTIVE USERS NUMBER COUNTER
     database.ref('registered_students').on('value', (snapshot) => {
       const count = snapshot.numChildren() || 0;
       document.getElementById('totalUsersCount').innerText = count;
     });
 
-    // 4. REALTIME SESSION GUARD
     function verifyStudentActive(phone) {
       const studentId = "student_" + phone;
       database.ref('registered_students/' + studentId).on('value', (snapshot) => {
@@ -880,7 +887,6 @@
       });
     }
 
-    // 5. SWITCH BETWEEN REGISTRATION & LOGIN
     function switchAuthMode(mode) {
       const tabReg = document.getElementById('tabRegisterBtn');
       const tabLog = document.getElementById('tabLoginBtn');
@@ -906,7 +912,6 @@
       }
     }
 
-    // 6. HANDLE NEW REGISTRATION
     function handleRegistration(e) {
       e.preventDefault();
       const name = document.getElementById('regNameInput').value.trim();
@@ -956,7 +961,6 @@
       });
     }
 
-    // 7. HANDLE RETURNING LOGIN
     function handleLogin(e) {
       e.preventDefault();
       const phone = document.getElementById('loginPhoneInput').value.trim();
@@ -1017,7 +1021,6 @@
       }
     }
 
-    // 8. COMMENT SUBMISSION (AUTO USER DETAILS ATTACH)
     function handleCommentSubmit(e) {
       e.preventDefault();
       const msg = document.getElementById('studentQueryInput').value.trim();
@@ -1053,7 +1056,6 @@
       });
     }
 
-    // 9. POPUP MODAL HANDLER FOR EMPTY DATA
     function showEmptyModal(title, message) {
       document.getElementById('emptyModalTitle').innerText = title || "Data Not Found";
       document.getElementById('emptyModalDesc').innerText = message || "Is resource ke liye link abhi add nahi ki gayi hai.";
@@ -1066,14 +1068,14 @@
 
     function openResource(type) {
       if (type === 'assignments') {
-        const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subject})`);
+        const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subjectName})`);
         window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
         return;
       }
 
       const courseData = studyData[state.course] || {};
       const semData = courseData[state.semester] || {};
-      const links = semData[state.subject] || {};
+      const links = semData[state.subjectKey] || {};
 
       let targetUrl = links[type];
 
@@ -1083,13 +1085,12 @@
         if (type === 'papers') labelName = "Previous Papers";
         if (type === 'exam') labelName = "Exam Preparation Material";
 
-        showEmptyModal("Data is Empty", `Abhi ${state.subject} ke liye '${labelName}' upload nahi hua hai.`);
+        showEmptyModal("Data is Empty", `Abhi ${state.subjectName} ke liye '${labelName}' upload nahi hua hai.`);
       } else {
         window.location.href = targetUrl.trim();
       }
     }
 
-    // 10. ACCOUNT SETTINGS TAB
     function openAccountTab() {
       state.previousHash = window.location.hash || '';
       state.inAccountTab = true;
@@ -1268,38 +1269,47 @@
       }
     });
 
-    // 11. ROUTER & REFRESH MANAGER
+    // 11. SAFE ROUTER & REFRESH MANAGER (SAFE FROM FORWARD SLASH CRASHES)
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
 
-      const hash = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''));
-      if (hash === 'account') {
+      const raw = window.location.hash.replace(/^#\/?/, '');
+      if (raw === 'account') {
         openAccountTab();
         return;
       }
 
-      if (!hash) {
+      if (!raw) {
         state.course = null;
         state.semester = null;
-        state.subject = null;
+        state.subjectKey = null;
+        state.subjectName = null;
         state.step = 1;
         updateView();
         return;
       }
 
-      const parts = hash.split('/');
+      // Hash format: course___semester___subjectKeySafe
+      const parts = raw.split('___');
       if (parts[0]) { state.course = parts[0]; state.step = 2; }
       if (parts[1]) { state.semester = parts[1]; state.step = 3; }
-      if (parts[2]) { state.subject = parts[2]; state.step = 4; }
+      if (parts[2]) {
+        state.subjectKey = parts[2];
+        const courseData = studyData[state.course] || {};
+        const semData = courseData[state.semester] || {};
+        const subObj = semData[state.subjectKey] || {};
+        state.subjectName = subObj.subjectName || decodeSub(state.subjectKey);
+        state.step = 4;
+      }
       updateView();
     }
 
     function setHash() {
       let path = '';
       if (state.step === 2) path = `${state.course}`;
-      else if (state.step === 3) path = `${state.course}/${state.semester}`;
-      else if (state.step === 4) path = `${state.course}/${state.semester}/${state.subject}`;
+      else if (state.step === 3) path = `${state.course}___${state.semester}`;
+      else if (state.step === 4) path = `${state.course}___${state.semester}___${state.subjectKey}`;
       
       window.location.hash = path ? `#/${path}` : '';
     }
@@ -1333,10 +1343,17 @@
         renderSubjects();
       } else if (state.step === 4) {
         document.getElementById('step-resources').classList.remove('hidden');
-        document.getElementById('subject-title').innerText = `${state.subject} Resources`;
+        
+        // Exact original full title displayed
+        const courseData = studyData[state.course] || {};
+        const semData = courseData[state.semester] || {};
+        const subObj = semData[state.subjectKey] || {};
+        const fullSubjectName = subObj.subjectName || decodeSub(state.subjectKey);
+
+        document.getElementById('subject-title').innerText = `${fullSubjectName} Resources`;
         backBtn.classList.remove('hidden');
         breadcrumb.classList.remove('hidden');
-        breadcrumb.innerText = `${state.course} > ${state.semester} > ${state.subject}`;
+        breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName}`;
       }
     }
 
@@ -1349,7 +1366,7 @@
       semesters.forEach(sem => {
         const btn = document.createElement('button');
         btn.className = 'btn-select';
-        btn.innerHTML = `${sem} <span>→</span>`;
+        btn.innerHTML = `<span class="btn-label">${sem}</span> <span>→</span>`;
         btn.onclick = () => selectSemester(sem);
         container.appendChild(btn);
       });
@@ -1360,18 +1377,22 @@
       container.innerHTML = '';
       const courseObj = studyData[state.course] || {};
       const semObj = courseObj[state.semester] || {};
-      const subjects = Object.keys(semObj);
+      const subjectKeys = Object.keys(semObj);
 
-      if (subjects.length === 0) {
+      if (subjectKeys.length === 0) {
         container.innerHTML = '<p style="color:var(--text-muted); padding:1rem 0; text-align:center;">No subjects added yet. Add from Admin panel!</p>';
         return;
       }
 
-      subjects.forEach(sub => {
+      subjectKeys.forEach(key => {
+        const item = semObj[key];
+        // Clean display of real name
+        const displayName = item.subjectName || decodeSub(key);
+
         const btn = document.createElement('button');
         btn.className = 'btn-select';
-        btn.innerHTML = `${sub} <span>→</span>`;
-        btn.onclick = () => selectSubject(sub);
+        btn.innerHTML = `<span class="btn-label">${displayName}</span> <span>→</span>`;
+        btn.onclick = () => selectSubject(key, displayName);
         container.appendChild(btn);
       });
     }
@@ -1390,8 +1411,9 @@
       updateView();
     }
 
-    function selectSubject(sub) {
-      state.subject = sub;
+    function selectSubject(key, displayName) {
+      state.subjectKey = key;
+      state.subjectName = displayName;
       state.step = 4;
       setHash();
       updateView();
