@@ -104,7 +104,7 @@
       border-radius: var(--radius);
       padding: 1.5rem;
       box-shadow: var(--shadow);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       position: relative;
     }
 
@@ -239,7 +239,6 @@
       margin-bottom: 1.25rem;
     }
 
-    /* Single Line Form Labels with Flex */
     .form-label {
       font-size: 0.78rem;
       font-weight: 700;
@@ -256,7 +255,6 @@
       letter-spacing: 0.02em;
     }
 
-    /* Beautiful Compact Pill Button */
     .btn-badge-action {
       background: #eff6ff;
       border: 1px solid #bfdbfe;
@@ -282,11 +280,7 @@
       transform: translateY(-1px);
     }
 
-    .btn-badge-action:active {
-      transform: translateY(0);
-    }
-
-    .input-box, .select-box {
+    .input-box, .select-box, .textarea-box {
       width: 100%;
       padding: 0.85rem 1rem;
       border: 1px solid var(--border);
@@ -298,7 +292,14 @@
       color: var(--text);
     }
 
-    .input-box:focus, .select-box:focus {
+    .textarea-box {
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+      line-height: 1.4;
+    }
+
+    .input-box:focus, .select-box:focus, .textarea-box:focus {
       border-color: var(--primary);
       background: #fff;
     }
@@ -344,7 +345,6 @@
       background: var(--primary-hover);
     }
 
-    /* Nested Inline Update Boxes */
     .inline-update-box {
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
@@ -385,6 +385,7 @@
       border-color: #fca5a5;
     }
 
+    /* ACTIVE USERS LIVE BOX */
     .active-users-box {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -394,6 +395,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-bottom: 1rem;
     }
 
     .active-users-title {
@@ -411,6 +413,33 @@
       border-radius: 9999px;
       font-size: 0.95rem;
       font-weight: 800;
+    }
+
+    /* COMMENT SUBMISSION TAB BOX */
+    .comment-section-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1rem;
+    }
+
+    .comment-box-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .comment-box-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+      margin-bottom: 0.85rem;
+      line-height: 1.35;
     }
 
     /* POPUP MODAL FOR EMPTY DATA */
@@ -478,6 +507,7 @@
 </head>
 <body>
 
+  <!-- Top Strip: Profile Icon -->
   <div class="top-bar">
     <div id="authProfileBar" class="hidden">
       <button class="profile-btn" onclick="openAccountTab()" title="Account Settings">
@@ -496,7 +526,6 @@
       
       <!-- GATEWAY 1: DUAL AUTH -->
       <section id="loginSection" class="login-gate">
-        
         <div class="auth-tab-switch">
           <button type="button" id="tabRegisterBtn" class="auth-tab-btn active" onclick="switchAuthMode('register')">New Registration</button>
           <button type="button" id="tabLoginBtn" class="auth-tab-btn" onclick="switchAuthMode('login')">Already Registered (Login)</button>
@@ -560,7 +589,7 @@
           </label>
           <div class="pin-input-wrap">
             <input type="password" id="loginPinInput" class="input-box" placeholder="Enter your 4-digit PIN" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('loginPinInput', this)">👁️️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('loginPinInput', this)">👁️</button>
           </div>
 
           <button type="submit" id="loginSubmitBtn" class="btn-primary-action">Login to Study Hub →</button>
@@ -617,7 +646,7 @@
       <section id="accountSection" class="hidden">
         <button class="card-close-btn" onclick="closeAccountTab()" title="Close and return">✕</button>
         
-        <h2 class="step-title">⚙️ Student Account Details</h2>
+        <h2 class="step-title">⚙️️ Student Account Details</h2>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
           Your current registered credentials. Tap update below if you wish to change mobile or PIN.
         </p>
@@ -628,7 +657,6 @@
           </label>
           <input type="text" id="accNameInput" class="input-box" required />
 
-          <!-- SINGLE-LINE LABEL WITH BEAUTIFUL BADGE ACTION BUTTON -->
           <div class="form-label">
             <span class="label-text-nowrap">REGISTERED MOBILE NUMBER</span>
             <button type="button" class="btn-badge-action" onclick="toggleMobileBox()">
@@ -637,7 +665,6 @@
           </div>
           <input type="tel" id="accCurrentPhone" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 0.4rem;" />
 
-          <!-- INLINE NUMBER UPDATE DRAWER -->
           <div id="mobileUpdateDrawer" class="inline-update-box hidden">
             <label class="form-label">
               <span class="label-text-nowrap">NEW 10-DIGIT MOBILE NUMBER</span>
@@ -675,7 +702,6 @@
             <option value="2028">2028</option>
           </select>
 
-          <!-- SINGLE-LINE PIN LABEL WITH BEAUTIFUL BADGE ACTION BUTTON -->
           <div class="form-label">
             <span class="label-text-nowrap">4-DIGIT SECURITY PIN</span>
             <button type="button" class="btn-badge-action" onclick="togglePinBox()">
@@ -687,7 +713,6 @@
             <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️</button>
           </div>
 
-          <!-- INLINE PIN UPDATE DRAWER -->
           <div id="pinUpdateDrawer" class="inline-update-box hidden">
             <label class="form-label">
               <span class="label-text-nowrap">EXISTING 4-DIGIT PIN</span>
@@ -715,13 +740,30 @@
 
     </div>
 
-    <!-- MINIMALIST BOTTOM ACTIVE USERS BOX -->
+    <!-- MINIMALIST ACTIVE USERS LIVE BOX -->
     <div class="active-users-box">
       <div class="active-users-title">
         <span>⚡ Active Scholars Joined:</span>
       </div>
       <span class="active-badge" id="totalUsersCount">0</span>
     </div>
+
+    <!-- STUDENT QUERY / COMMENT TAB -->
+    <div class="comment-section-box">
+      <div class="comment-box-title">
+        <span>💬</span>
+        <span>Comment your query</span>
+      </div>
+      <p class="comment-box-sub">
+        koi bhi question ya problem ho to comment me likh ke bata sakte ho.
+      </p>
+
+      <form onsubmit="handleCommentSubmit(event)">
+        <textarea id="studentQueryInput" class="textarea-box" placeholder="Apna question ya problem yahan likhein..." required></textarea>
+        <button type="submit" id="sendCommentBtn" class="btn-primary-action" style="padding: 0.75rem 1rem;">Send Query →</button>
+      </form>
+    </div>
+
   </main>
 
   <!-- EMPTY DATA / NOT FOUND POPUP MODAL -->
@@ -975,7 +1017,43 @@
       }
     }
 
-    // 8. POPUP MODAL HANDLER FOR EMPTY DATA
+    // 8. COMMENT SUBMISSION (AUTO USER DETAILS ATTACH)
+    function handleCommentSubmit(e) {
+      e.preventDefault();
+      const msg = document.getElementById('studentQueryInput').value.trim();
+      if (!msg) return;
+
+      const student = JSON.parse(localStorage.getItem('csh_student') || '{}');
+      const btn = document.getElementById('sendCommentBtn');
+
+      btn.innerText = "Sending Query...";
+      btn.disabled = true;
+
+      const commentData = {
+        userName: student.name || 'Anonymous Scholar',
+        userPhone: student.phone || 'N/A',
+        collegeYear: student.collegeYear || 'FYBA',
+        academicYear: student.academicYear || '2026',
+        message: msg,
+        timestamp: new Date().toISOString()
+      };
+
+      database.ref('student_comments').push(commentData).then(() => {
+        alert("Aapka comment/query bhej diya gaya hai! Admin jald hi review karega.");
+        document.getElementById('studentQueryInput').value = '';
+        btn.innerText = "Sent Successfully ✓";
+        setTimeout(() => {
+          btn.innerText = "Send Query →";
+          btn.disabled = false;
+        }, 800);
+      }).catch(err => {
+        alert("Error sending comment: " + err.message);
+        btn.innerText = "Send Query →";
+        btn.disabled = false;
+      });
+    }
+
+    // 9. POPUP MODAL HANDLER FOR EMPTY DATA
     function showEmptyModal(title, message) {
       document.getElementById('emptyModalTitle').innerText = title || "Data Not Found";
       document.getElementById('emptyModalDesc').innerText = message || "Is resource ke liye link abhi add nahi ki gayi hai.";
@@ -1011,7 +1089,7 @@
       }
     }
 
-    // 9. ACCOUNT SETTINGS TAB
+    // 10. ACCOUNT SETTINGS TAB
     function openAccountTab() {
       state.previousHash = window.location.hash || '';
       state.inAccountTab = true;
@@ -1190,7 +1268,7 @@
       }
     });
 
-    // 10. ROUTER & REFRESH MANAGER
+    // 11. ROUTER & REFRESH MANAGER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
