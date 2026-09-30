@@ -812,6 +812,19 @@
       }
     }
 
+    // STRICT SUBJECT ORDER: Sanskrit M1 -> Sanskrit M2 -> Gujrati minor -> MDC -> AEC -> SEC -> VAC
+    function getSubjectFixedPriority(subName) {
+      const clean = subName.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (clean.includes('sanskritm1') || clean === 'sanskrit1') return 10;
+      if (clean.includes('sanskritm2') || clean === 'sanskrit2') return 20;
+      if (clean.includes('gujratiminor') || clean.includes('gujaratiminor')) return 30;
+      if (clean.includes('mdc')) return 40;
+      if (clean.includes('aec')) return 50;
+      if (clean.includes('sec')) return 60;
+      if (clean.includes('vac')) return 70;
+      return 100;
+    }
+
     let studyData = {
       "FYBA": { "Semester 1": {}, "Semester 2": {} },
       "SYBA": { "Semester 3": {}, "Semester 4": {} },
@@ -1270,7 +1283,6 @@
       }
     });
 
-    // 11. BULLETPROOF ROUTER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
@@ -1382,7 +1394,7 @@
       });
     }
 
-    // STRICT CREATION-ORDER RENDERING (PEHLE ADD HUA TOP PAR, BAAD WALA NEECHE)
+    // STRICT ASCENDING ORDER (Sanskrit M1 -> Sanskrit M2 -> Gujrati minor -> Others)
     function renderSubjects() {
       const container = document.getElementById('subject-list');
       container.innerHTML = '';
@@ -1395,26 +1407,28 @@
         return;
       }
 
-      // Convert into an array to sort by creation timestamp
       const subjectsArray = subjectKeys.map(key => {
         const item = semObj[key] || {};
+        const displayName = item.subjectName || safeDecode(key);
+        
+        let priority = (typeof item.orderIndex !== 'undefined' && item.orderIndex !== null) 
+          ? item.orderIndex 
+          : getSubjectFixedPriority(displayName);
+
         return {
           key: key,
-          displayName: item.subjectName || safeDecode(key),
-          createdAt: item.createdAt || 0,
-          updatedAt: item.updatedAt || ''
+          displayName: displayName,
+          priority: priority,
+          createdAt: item.createdAt || 0
         };
       });
 
-      // Oldest first at top, newer subjects below it (NO ABCD sorting)
+      // Strict Ascending Sort: 10 (M1) -> 20 (M2) -> 30 (Minor) -> 40 (MDC) -> ...
       subjectsArray.sort((a, b) => {
-        if (a.createdAt && b.createdAt) {
-          return a.createdAt - b.createdAt;
+        if (a.priority !== b.priority) {
+          return a.priority - b.priority;
         }
-        if (a.updatedAt && b.updatedAt) {
-          return new Date(a.updatedAt) - new Date(b.updatedAt);
-        }
-        return 0;
+        return (a.createdAt || 0) - (b.createdAt || 0);
       });
 
       subjectsArray.forEach(sub => {
