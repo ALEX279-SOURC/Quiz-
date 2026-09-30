@@ -239,22 +239,51 @@
       margin-bottom: 1.25rem;
     }
 
+    /* Single Line Form Labels with Flex */
     .form-label {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: var(--text-muted);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.4rem;
+      gap: 0.5rem;
     }
 
-    .field-action-link {
+    .label-text-nowrap {
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+
+    /* Beautiful Compact Pill Button */
+    .btn-badge-action {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
       color: var(--primary);
-      font-size: 0.78rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
       cursor: pointer;
-      font-weight: 600;
-      text-decoration: underline;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
+      white-space: nowrap;
+    }
+
+    .btn-badge-action:hover {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .btn-badge-action:active {
+      transform: translateY(0);
     }
 
     .input-box, .select-box {
@@ -320,9 +349,9 @@
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
-      padding: 0.85rem;
-      margin: -0.3rem 0 1rem 0;
-      animation: expandBox 0.2s ease-out;
+      padding: 0.9rem;
+      margin: 0.2rem 0 1rem 0;
+      animation: expandBox 0.25s ease-out;
     }
 
     @keyframes expandBox {
@@ -449,7 +478,6 @@
 </head>
 <body>
 
-  <!-- Top Strip: Only Profile Icon -->
   <div class="top-bar">
     <div id="authProfileBar" class="hidden">
       <button class="profile-btn" onclick="openAccountTab()" title="Account Settings">
@@ -479,17 +507,23 @@
         
         <!-- REGISTRATION FORM -->
         <form id="enrollForm" onsubmit="handleRegistration(event)">
-          <label class="form-label">FULL NAME</label>
+          <label class="form-label">
+            <span class="label-text-nowrap">FULL NAME</span>
+          </label>
           <input type="text" id="regNameInput" class="input-box" placeholder="e.g. Amish Patel" required />
 
-          <label class="form-label">YEAR OF COLLEGE</label>
+          <label class="form-label">
+            <span class="label-text-nowrap">YEAR OF COLLEGE</span>
+          </label>
           <select id="regCollegeYearSelect" class="select-box" required>
             <option value="FYBA">FYBA</option>
             <option value="SYBA">SYBA</option>
             <option value="TYBA">TYBA</option>
           </select>
 
-          <label class="form-label">ACADEMIC YEAR</label>
+          <label class="form-label">
+            <span class="label-text-nowrap">ACADEMIC YEAR</span>
+          </label>
           <select id="regAcademicYearSelect" class="select-box" required>
             <option value="2026">2026</option>
             <option value="2025">2025</option>
@@ -498,10 +532,14 @@
             <option value="2028">2028</option>
           </select>
 
-          <label class="form-label">MOBILE NUMBER (10 DIGITS)</label>
+          <label class="form-label">
+            <span class="label-text-nowrap">MOBILE NUMBER (10 DIGITS)</span>
+          </label>
           <input type="tel" id="regPhoneInput" class="input-box" placeholder="WhatsApp / Mobile Number" pattern="[0-9]{10}" title="Enter valid 10-digit mobile number" required />
 
-          <label class="form-label">CREATE 4-DIGIT SECURITY PIN</label>
+          <label class="form-label">
+            <span class="label-text-nowrap">CREATE 4-DIGIT SECURITY PIN</span>
+          </label>
           <div class="pin-input-wrap">
             <input type="password" id="regPinInput" class="input-box" placeholder="e.g. 1234" pattern="[0-9]{4}" maxlength="4" required />
             <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️</button>
@@ -512,13 +550,17 @@
 
         <!-- RETURNING LOGIN FORM -->
         <form id="returningLoginForm" class="hidden" onsubmit="handleLogin(event)">
-          <label class="form-label">REGISTERED MOBILE NUMBER</label>
+          <label class="form-label">
+            <span class="label-text-nowrap">REGISTERED MOBILE NUMBER</span>
+          </label>
           <input type="tel" id="loginPhoneInput" class="input-box" placeholder="Enter your 10-digit registered number" pattern="[0-9]{10}" required />
 
-          <label class="form-label">ENTER 4-DIGIT SECURITY PIN</label>
+          <label class="form-label">
+            <span class="label-text-nowrap">ENTER 4-DIGIT SECURITY PIN</span>
+          </label>
           <div class="pin-input-wrap">
             <input type="password" id="loginPinInput" class="input-box" placeholder="Enter your 4-digit PIN" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('loginPinInput', this)">👁️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('loginPinInput', this)">👁️️</button>
           </div>
 
           <button type="submit" id="loginSubmitBtn" class="btn-primary-action">Login to Study Hub →</button>
@@ -530,7 +572,6 @@
         <div id="breadcrumb" class="breadcrumb hidden">Home</div>
         <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
 
-        <!-- STEP 1: SELECT COURSE -->
         <section id="step-course">
           <h2 class="step-title">Select Course</h2>
           <div class="grid" id="course-list">
@@ -540,19 +581,16 @@
           </div>
         </section>
 
-        <!-- STEP 2: SELECT SEMESTER -->
         <section id="step-semester" class="hidden">
           <h2 class="step-title">Select Semester</h2>
           <div class="grid" id="semester-list"></div>
         </section>
 
-        <!-- STEP 3: SELECT SUBJECT -->
         <section id="step-subject" class="hidden">
           <h2 class="step-title">Select Subject</h2>
           <div class="grid" id="subject-list"></div>
         </section>
 
-        <!-- STEP 4: RESOURCE HUB -->
         <section id="step-resources" class="hidden">
           <h2 class="step-title" id="subject-title">Resources</h2>
           <div class="grid">
@@ -575,7 +613,7 @@
         </section>
       </div>
 
-      <!-- GATEWAY 3: ACCOUNT DETAILS TAB (CLEAN DEFAULT VIEW + INLINE UPDATES) -->
+      <!-- GATEWAY 3: ACCOUNT DETAILS TAB -->
       <section id="accountSection" class="hidden">
         <button class="card-close-btn" onclick="closeAccountTab()" title="Close and return">✕</button>
         
@@ -584,24 +622,31 @@
           Your current registered credentials. Tap update below if you wish to change mobile or PIN.
         </p>
 
-        <!-- PRIMARY DETAILS FORM -->
         <form onsubmit="saveAccountSettings(event)">
-          <label class="form-label">FULL NAME</label>
+          <label class="form-label">
+            <span class="label-text-nowrap">FULL NAME</span>
+          </label>
           <input type="text" id="accNameInput" class="input-box" required />
 
-          <!-- MOBILE NUMBER FIELD WITH INLINE UPDATE TRIGGER -->
+          <!-- SINGLE-LINE LABEL WITH BEAUTIFUL BADGE ACTION BUTTON -->
           <div class="form-label">
-            <span>REGISTERED MOBILE NUMBER</span>
-            <span class="field-action-link" onclick="toggleMobileBox()">✏️ Update Number</span>
+            <span class="label-text-nowrap">REGISTERED MOBILE NUMBER</span>
+            <button type="button" class="btn-badge-action" onclick="toggleMobileBox()">
+              ✏️ Update Number
+            </button>
           </div>
           <input type="tel" id="accCurrentPhone" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 0.4rem;" />
 
           <!-- INLINE NUMBER UPDATE DRAWER -->
           <div id="mobileUpdateDrawer" class="inline-update-box hidden">
-            <label class="form-label">NEW 10-DIGIT MOBILE NUMBER</label>
+            <label class="form-label">
+              <span class="label-text-nowrap">NEW 10-DIGIT MOBILE NUMBER</span>
+            </label>
             <input type="tel" id="accNewPhoneInput" class="input-box" placeholder="Enter new 10 digits" pattern="[0-9]{10}" />
 
-            <label class="form-label">CURRENT 4-DIGIT PIN TO VERIFY</label>
+            <label class="form-label">
+              <span class="label-text-nowrap">CURRENT 4-DIGIT PIN TO VERIFY</span>
+            </label>
             <div class="pin-input-wrap">
               <input type="password" id="accVerifyPinForPhone" class="input-box" placeholder="Current PIN" pattern="[0-9]{4}" maxlength="4" />
               <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accVerifyPinForPhone', this)">👁️</button>
@@ -610,14 +655,18 @@
             <button type="button" id="btnUpdatePhone" class="btn-primary-action" style="background:#0f172a;" onclick="updateMobileNumberWithPin()">Verify & Save New Number</button>
           </div>
 
-          <label class="form-label" style="margin-top:0.4rem;">YEAR OF COLLEGE</label>
+          <label class="form-label" style="margin-top:0.4rem;">
+            <span class="label-text-nowrap">YEAR OF COLLEGE</span>
+          </label>
           <select id="accCollegeYearSelect" class="select-box" required>
             <option value="FYBA">FYBA</option>
             <option value="SYBA">SYBA</option>
             <option value="TYBA">TYBA</option>
           </select>
 
-          <label class="form-label">ACADEMIC YEAR</label>
+          <label class="form-label">
+            <span class="label-text-nowrap">ACADEMIC YEAR</span>
+          </label>
           <select id="accAcademicYearSelect" class="select-box" required>
             <option value="2026">2026</option>
             <option value="2025">2025</option>
@@ -626,10 +675,12 @@
             <option value="2028">2028</option>
           </select>
 
-          <!-- SECURITY PIN FIELD WITH INLINE UPDATE TRIGGER -->
+          <!-- SINGLE-LINE PIN LABEL WITH BEAUTIFUL BADGE ACTION BUTTON -->
           <div class="form-label">
-            <span>4-DIGIT SECURITY PIN</span>
-            <span class="field-action-link" onclick="togglePinBox()">✏️ Change PIN</span>
+            <span class="label-text-nowrap">4-DIGIT SECURITY PIN</span>
+            <button type="button" class="btn-badge-action" onclick="togglePinBox()">
+              ✏️ Change PIN
+            </button>
           </div>
           <div class="pin-input-wrap" style="margin-bottom: 0.4rem;">
             <input type="password" id="accDisplayPin" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed;" />
@@ -638,13 +689,17 @@
 
           <!-- INLINE PIN UPDATE DRAWER -->
           <div id="pinUpdateDrawer" class="inline-update-box hidden">
-            <label class="form-label">EXISTING 4-DIGIT PIN</label>
+            <label class="form-label">
+              <span class="label-text-nowrap">EXISTING 4-DIGIT PIN</span>
+            </label>
             <div class="pin-input-wrap">
               <input type="password" id="accOldPinInput" class="input-box" placeholder="Enter current PIN" pattern="[0-9]{4}" maxlength="4" />
               <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accOldPinInput', this)">👁️</button>
             </div>
 
-            <label class="form-label">NEW 4-DIGIT PIN</label>
+            <label class="form-label">
+              <span class="label-text-nowrap">NEW 4-DIGIT PIN</span>
+            </label>
             <div class="pin-input-wrap">
               <input type="password" id="accNewPinInput" class="input-box" placeholder="Enter new 4-digit PIN" pattern="[0-9]{4}" maxlength="4" />
               <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accNewPinInput', this)">👁️</button>
@@ -721,7 +776,6 @@
       previousHash: ''
     };
 
-    // Toggle Eye Show/Hide
     function togglePinVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -734,7 +788,6 @@
       }
     }
 
-    // Toggle Drawer Visibility
     function toggleMobileBox() {
       const el = document.getElementById('mobileUpdateDrawer');
       el.classList.toggle('hidden');
@@ -745,7 +798,7 @@
       el.classList.toggle('hidden');
     }
 
-    // 2. LIVE SYNC: STRICTLY ADMIN-ADDED SUBJECTS
+    // 2. LIVE SYNC: ADMIN DATA
     database.ref('study_data').on('value', (snapshot) => {
       const liveData = snapshot.val();
       studyData = {
@@ -925,7 +978,7 @@
     // 8. POPUP MODAL HANDLER FOR EMPTY DATA
     function showEmptyModal(title, message) {
       document.getElementById('emptyModalTitle').innerText = title || "Data Not Found";
-      document.getElementById('emptyModalDesc').innerText = message || "Is subject ke liye study material abhi upload nahi hua hai.";
+      document.getElementById('emptyModalDesc').innerText = message || "Is resource ke liye link abhi add nahi ki gayi hai.";
       document.getElementById('emptyDataModal').classList.remove('hidden');
     }
 
@@ -966,7 +1019,6 @@
       document.getElementById('studyContent').classList.add('hidden');
       document.getElementById('accountSection').classList.remove('hidden');
 
-      // Populate current saved values
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
       document.getElementById('accNameInput').value = current.name || '';
       document.getElementById('accCurrentPhone').value = current.phone || '';
@@ -974,7 +1026,6 @@
       document.getElementById('accCollegeYearSelect').value = current.collegeYear || 'FYBA';
       document.getElementById('accAcademicYearSelect').value = current.academicYear || '2026';
 
-      // Hide update drawers by default
       document.getElementById('mobileUpdateDrawer').classList.add('hidden');
       document.getElementById('pinUpdateDrawer').classList.add('hidden');
 
@@ -999,7 +1050,6 @@
       updateView();
     }
 
-    // Save Name and Academic details
     function saveAccountSettings(e) {
       e.preventDefault();
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
@@ -1030,7 +1080,6 @@
       });
     }
 
-    // Update Mobile Number via PIN
     function updateMobileNumberWithPin() {
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
       const newPhone = document.getElementById('accNewPhoneInput').value.trim();
@@ -1092,7 +1141,6 @@
       });
     }
 
-    // Update 4-Digit Security PIN
     function updateSecurityPin() {
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
       const oldPin = document.getElementById('accOldPinInput').value.trim();
