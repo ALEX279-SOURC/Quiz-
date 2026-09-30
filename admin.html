@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | Campus Study Hub</title>
+
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --success: #10b981;
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-nav {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.8rem;
+    }
+    .btn-nav:hover { color: #fff; border-color: #fff; }
+
+    main {
+      flex: 1;
+      max-width: 1000px;
+      width: 100%;
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    input, select {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-danger { background: var(--danger); font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+    .btn-danger:hover { background: #dc2626; }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+    th, td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+
+    /* Auth Screen */
+    .pin-gate {
+      max-width: 360px;
+      margin: 4rem auto;
+      text-align: center;
+    }
+    .pin-gate input {
+      text-align: center;
+      font-size: 1.25rem;
+      letter-spacing: 0.2em;
+      margin-bottom: 1rem;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ADMIN PASSCODE GATE -->
+  <div id="authGate" class="pin-gate card">
+    <h2 style="margin-bottom: 0.5rem;">🔒 Admin Access</h2>
+    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 1.25rem;">Enter Admin PIN to manage Campus Study Hub</p>
+    <input type="password" id="adminPinInput" placeholder="Enter PIN" maxlength="6" autofocus />
+    <button class="btn" style="width: 100%;" onclick="verifyPin()">Unlock Dashboard</button>
+  </div>
+
+  <!-- DASHBOARD WRAPPER -->
+  <div id="adminDashboard" class="hidden">
+    <header>
+      <h1>⚡ Campus Study Hub &bull; Control Center</h1>
+      <div style="display:flex; gap:0.5rem; align-items:center;">
+        <a href="index.html" class="btn-nav" target="_blank">View Live Site ↗</a>
+        <button class="btn-nav" onclick="lockAdmin()">Lock</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- CARD 1: ADD / UPDATE STUDY MATERIAL -->
+      <div class="card">
+        <h2 class="card-title">📚 Add or Update Subject Materials</h2>
+        <form onsubmit="saveSubjectData(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Course</label>
+              <select id="courseSelect" onchange="updateSemesterDropdown()" required>
+                <option value="FYBA">FYBA</option>
+                <option value="SYBA">SYBA</option>
+                <option value="TYBA">TYBA</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Semester</label>
+              <select id="semesterSelect" required></select>
+            </div>
+            <div class="form-group">
+              <label>Subject Name</label>
+              <input type="text" id="subjectNameInput" placeholder="e.g. Sanskrit, Gujarati" required />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Notes Drive Link</label>
+              <input type="url" id="notesLinkInput" placeholder="https://drive.google.com/..." />
+            </div>
+            <div class="form-group">
+              <label>Important Questions Link</label>
+              <input type="url" id="questionsLinkInput" placeholder="https://drive.google.com/..." />
+            </div>
+            <div class="form-group">
+              <label>Previous Year Papers Link</label>
+              <input type="url" id="papersLinkInput" placeholder="https://drive.google.com/..." />
+            </div>
+            <div class="form-group">
+              <label>Exam Prep Link</label>
+              <input type="url" id="examLinkInput" placeholder="https://drive.google.com/..." />
+            </div>
+          </div>
+
+          <button type="submit" id="saveBtn" class="btn">Save & Update Subject ↗</button>
+        </form>
+      </div>
+
+      <!-- CARD 2: SUBJECTS DIRECTORY LIST -->
+      <div class="card">
+        <h2 class="card-title">🗂 Existing Managed Subjects</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Semester</th>
+                <th>Subject</th>
+                <th>Drive Papers</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="subjectsTableBody">
+              <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Loading subjects...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CARD 3: REGISTERED USERS DIRECTORY -->
+      <div class="card">
+        <div class="card-title">
+          <span>👥 Enrolled Students Directory (<span id="userCount">0</span>)</span>
+          <button class="btn-nav" onclick="loadUsers()">Refresh</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone / WhatsApp</th>
+                <th>Department / Status</th>
+                <th>Joined Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Loading users...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // 1. ADMIN PIN (Aap is PIN ko yahan badal sakte hain)
+    const ADMIN_PIN = "1234";
+
+    // 2. FIREBASE CONFIGURATION
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzjHop1OV6agKwLsXxTj7x9xd9GQ9ZKsY",
+      authDomain: "campus-study-hub-6b8ab.firebaseapp.com",
+      databaseURL: "https://campus-study-hub-6b8ab-default-rtdb.firebaseio.com",
+      projectId: "campus-study-hub-6b8ab",
+      storageBucket: "campus-study-hub-6b8ab.firebasestorage.app",
+      messagingSenderId: "655468124613",
+      appId: "1:655468124613:web:6156466ab93f18541e5bac",
+      measurementId: "G-YE7EE087CY"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    // PIN Gate System
+    function verifyPin() {
+      const pin = document.getElementById('adminPinInput').value;
+      if (pin === ADMIN_PIN) {
+        sessionStorage.setItem('csh_admin_auth', 'true');
+        showDashboard();
+      } else {
+        alert("Incorrect PIN!");
+      }
+    }
+
+    function lockAdmin() {
+      sessionStorage.removeItem('csh_admin_auth');
+      window.location.reload();
+    }
+
+    function showDashboard() {
+      document.getElementById('authGate').classList.add('hidden');
+      document.getElementById('adminDashboard').classList.remove('hidden');
+      updateSemesterDropdown();
+      loadSubjects();
+      loadUsers();
+    }
+
+    // Dynamic Semesters for Dropdown
+    const courseSemMap = {
+      "FYBA": ["Semester 1", "Semester 2"],
+      "SYBA": ["Semester 3", "Semester 4"],
+      "TYBA": ["Semester 5", "Semester 6"]
+    };
+
+    function updateSemesterDropdown() {
+      const course = document.getElementById('courseSelect').value;
+      const semSelect = document.getElementById('semesterSelect');
+      semSelect.innerHTML = '';
+      (courseSemMap[course] || []).forEach(sem => {
+        const opt = document.createElement('option');
+        opt.value = sem;
+        opt.innerText = sem;
+        semSelect.appendChild(opt);
+      });
+    }
+
+    // Save or Update Subject Material
+    function saveSubjectData(e) {
+      e.preventDefault();
+      const course = document.getElementById('courseSelect').value;
+      const sem = document.getElementById('semesterSelect').value;
+      const subject = document.getElementById('subjectNameInput').value.trim();
+
+      const notes = document.getElementById('notesLinkInput').value.trim() || '#';
+      const questions = document.getElementById('questionsLinkInput').value.trim() || '#';
+      const papers = document.getElementById('papersLinkInput').value.trim() || '#';
+      const exam = document.getElementById('examLinkInput').value.trim() || '#';
+
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.innerText = "Saving to Firebase...";
+      saveBtn.disabled = true;
+
+      const path = `study_data/${course}/${sem}/${subject}`;
+      db.ref(path).set({
+        notes, questions, papers, exam
+      }).then(() => {
+        alert(`Subject '${subject}' updated successfully!`);
+        document.getElementById('subjectNameInput').value = '';
+        document.getElementById('notesLinkInput').value = '';
+        document.getElementById('questionsLinkInput').value = '';
+        document.getElementById('papersLinkInput').value = '';
+        document.getElementById('examLinkInput').value = '';
+        saveBtn.innerText = "Save & Update Subject ↗";
+        saveBtn.disabled = false;
+        loadSubjects();
+      }).catch(err => {
+        alert("Error saving: " + err.message);
+        saveBtn.disabled = false;
+      });
+    }
+
+    // Load & Render Subjects
+    function loadSubjects() {
+      const tbody = document.getElementById('subjectsTableBody');
+      db.ref('study_data').on('value', (snap) => {
+        tbody.innerHTML = '';
+        const data = snap.val();
+        if (!data) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No custom subjects found in database yet.</td></tr>';
+          return;
+        }
+
+        Object.keys(data).forEach(course => {
+          Object.keys(data[course]).forEach(sem => {
+            Object.keys(data[course][sem]).forEach(sub => {
+              const item = data[course][sem][sub];
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td><strong>${course}</strong></td>
+                <td>${sem}</td>
+                <td>${sub}</td>
+                <td>${item.papers !== '#' ? `<a href="${item.papers}" target="_blank" style="color:#60a5fa">Drive Folder ↗</a>` : '<span style="color:var(--text-muted)">Empty</span>'}</td>
+                <td>
+                  <button class="btn btn-danger" onclick="deleteSubject('${course}', '${sem}', '${sub}')">Delete</button>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          });
+        });
+      });
+    }
+
+    function deleteSubject(course, sem, sub) {
+      if (confirm(`Are you sure you want to remove ${sub}?`)) {
+        db.ref(`study_data/${course}/${sem}/${sub}`).remove();
+      }
+    }
+
+    // Load & Manage Registered Users
+    function loadUsers() {
+      const tbody = document.getElementById('usersTableBody');
+      const countEl = document.getElementById('userCount');
+      db.ref('registered_students').on('value', (snap) => {
+        tbody.innerHTML = '';
+        const count = snap.numChildren() || 0;
+        countEl.innerText = count;
+
+        const data = snap.val();
+        if (!data) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No registered students found.</td></tr>';
+          return;
+        }
+
+        Object.keys(data).forEach(key => {
+          const user = data[key];
+          const tr = document.createElement('tr');
+          const dateStr = user.joinedAt ? new Date(user.joinedAt).toLocaleDateString() : 'N/A';
+          tr.innerHTML = `
+            <td><strong>${user.name}</strong></td>
+            <td><a href="https://wa.me/91${user.phone}" target="_blank" style="color:#22c55e; text-decoration:none;">${user.phone} ↗</a></td>
+            <td>${user.college || 'Verified Scholar'}</td>
+            <td>${dateStr}</td>
+            <td>
+              <button class="btn btn-danger" onclick="deleteUser('${key}')">Remove</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    function deleteUser(key) {
+      if (confirm("Remove this user from the directory?")) {
+        db.ref('registered_students/' + key).remove();
+      }
+    }
+
+    // Auto check session
+    if (sessionStorage.getItem('csh_admin_auth') === 'true') {
+      showDashboard();
+    }
+  </script>
+</body>
+  </html>
+  
