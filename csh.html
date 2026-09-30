@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Campus Study Hub | College Notes</title>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --primary: #2563eb;
@@ -31,6 +37,64 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+    }
+
+    /* Top Strip: Live User Counter & Profile */
+    .top-bar {
+      background: #0f172a;
+      color: #fff;
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .user-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 600;
+    }
+
+    .user-counter span.badge {
+      background: #22c55e;
+      color: #0f172a;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .auth-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .auth-profile img {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid #64748b;
+      color: #cbd5e1;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-logout:hover {
+      background: #334155;
+      color: #fff;
     }
 
     header {
@@ -151,8 +215,48 @@
       font-size: 0.9rem;
     }
 
+    /* Login Gate Box */
+    .login-gate {
+      text-align: center;
+      padding: 2.5rem 1rem;
+    }
+
+    .login-gate h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-gate p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-google {
+      background: #ffffff;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+    }
+
+    .btn-google:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+      transform: translateY(-1px);
+    }
+
     .hidden {
-      display: none;
+      display: none !important;
     }
 
     footer {
@@ -165,6 +269,19 @@
 </head>
 <body>
 
+  <!-- Top Bar: Live Counter & User Account -->
+  <div class="top-bar">
+    <div class="user-counter">
+      👥 <span>Enrolled Scholars:</span>
+      <span class="badge" id="totalUsersCount">0</span>
+    </div>
+    <div id="authProfileBar" class="auth-profile hidden">
+      <img id="userAvatar" src="" alt="Avatar" />
+      <span id="userName" style="font-weight: 600;">Student</span>
+      <button class="btn-logout" onclick="logoutStudent()">Logout</button>
+    </div>
+  </div>
+
   <header>
     <h1>CAMPUS STUDY HUB</h1>
     <p>📚 Your College. Your Notes. One Place.</p>
@@ -172,53 +289,73 @@
 
   <main>
     <div class="card">
-      <div id="breadcrumb" class="breadcrumb hidden">Home</div>
-      <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
-
-      <!-- STEP 1: SELECT COURSE -->
-      <section id="step-course">
-        <h2 class="step-title">Select your course</h2>
-        <div class="grid" id="course-list">
-          <button class="btn-select" onclick="selectCourse('FYBA')">FYBA <span>→</span></button>
-          <button class="btn-select" onclick="selectCourse('SYBA')">SYBA <span>→</span></button>
-          <button class="btn-select" onclick="selectCourse('TYBA')">TYBA <span>→</span></button>
-          <button class="btn-select" onclick="selectCourse('Other courses')">Other courses <span>→</span></button>
-        </div>
+      
+      <!-- GATEWAY 1: GOOGLE LOGIN SCREEN -->
+      <section id="loginSection" class="login-gate">
+        <h2>Sign In to Access Study Hub</h2>
+        <p>Login with your student Google account to browse verified papers and semester notes.</p>
+        <button class="btn-google" onclick="loginWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 18 18">
+            <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
+            <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+            <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+            <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
+          </svg>
+          Continue with Google
+        </button>
       </section>
 
-      <!-- STEP 2: SELECT SEMESTER -->
-      <section id="step-semester" class="hidden">
-        <h2 class="step-title">Select Semester</h2>
-        <div class="grid" id="semester-list"></div>
-      </section>
+      <!-- GATEWAY 2: STUDY EXPLORER (SHOWN AFTER LOGIN) -->
+      <div id="studyContent" class="hidden">
+        <div id="breadcrumb" class="breadcrumb hidden">Home</div>
+        <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
 
-      <!-- STEP 3: SELECT SUBJECT -->
-      <section id="step-subject" class="hidden">
-        <h2 class="step-title">Select Subject</h2>
-        <div class="grid" id="subject-list"></div>
-      </section>
+        <!-- STEP 1: SELECT COURSE -->
+        <section id="step-course">
+          <h2 class="step-title">Select your course</h2>
+          <div class="grid" id="course-list">
+            <button class="btn-select" onclick="selectCourse('FYBA')">FYBA <span>→</span></button>
+            <button class="btn-select" onclick="selectCourse('SYBA')">SYBA <span>→</span></button>
+            <button class="btn-select" onclick="selectCourse('TYBA')">TYBA <span>→</span></button>
+            <button class="btn-select" onclick="selectCourse('Other courses')">Other courses <span>→</span></button>
+          </div>
+        </section>
 
-      <!-- STEP 4: RESOURCE HUB -->
-      <section id="step-resources" class="hidden">
-        <h2 class="step-title" id="subject-title">Resources</h2>
-        <div class="grid">
-          <a id="link-notes" href="#" class="resource-card" target="_blank">
-            <span>📖 Notes</span> <span>Download ↗</span>
-          </a>
-          <a id="link-questions" href="#" class="resource-card" target="_blank">
-            <span>📝 Important Questions</span> <span>View ↗</span>
-          </a>
-          <a id="link-papers" href="#" class="resource-card" target="_blank">
-            <span>📄 Previous Papers</span> <span>Download ↗</span>
-          </a>
-          <a id="link-exam" href="#" class="resource-card" target="_blank">
-            <span>🎯 Exam Preparation</span> <span>View ↗</span>
-          </a>
-          <a id="link-assignments" href="#" class="resource-card btn-order" target="_blank">
-            <span>📝 Order Assignments</span> <span>Order ↗</span>
-          </a>
-        </div>
-      </section>
+        <!-- STEP 2: SELECT SEMESTER -->
+        <section id="step-semester" class="hidden">
+          <h2 class="step-title">Select Semester</h2>
+          <div class="grid" id="semester-list"></div>
+        </section>
+
+        <!-- STEP 3: SELECT SUBJECT -->
+        <section id="step-subject" class="hidden">
+          <h2 class="step-title">Select Subject</h2>
+          <div class="grid" id="subject-list"></div>
+        </section>
+
+        <!-- STEP 4: RESOURCE HUB -->
+        <section id="step-resources" class="hidden">
+          <h2 class="step-title" id="subject-title">Resources</h2>
+          <div class="grid">
+            <a id="link-notes" href="#" class="resource-card" target="_blank">
+              <span>📖 Notes</span> <span>Download ↗</span>
+            </a>
+            <a id="link-questions" href="#" class="resource-card" target="_blank">
+              <span>📝 Important Questions</span> <span>View ↗</span>
+            </a>
+            <a id="link-papers" href="#" class="resource-card" target="_blank">
+              <span>📄 Previous Papers</span> <span>Download ↗</span>
+            </a>
+            <a id="link-exam" href="#" class="resource-card" target="_blank">
+              <span>🎯 Exam Preparation</span> <span>View ↗</span>
+            </a>
+            <a id="link-assignments" href="#" class="resource-card btn-order" target="_blank">
+              <span>📝 Order Assignments</span> <span>Order ↗</span>
+            </a>
+          </div>
+        </section>
+      </div>
+
     </div>
   </main>
 
@@ -227,10 +364,30 @@
   </footer>
 
   <script>
-    // AAPKA WHATSAPP NUMBER
+    // ==========================================
+    // 1. FIREBASE CONFIGURATION (PRE-CONFIGURED)
+    // ==========================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzjHop1OV6agKwLsXxTj7x9xd9GQ9ZKsY",
+      authDomain: "campus-study-hub-6b8ab.firebaseapp.com",
+      databaseURL: "https://campus-study-hub-6b8ab-default-rtdb.firebaseio.com",
+      projectId: "campus-study-hub-6b8ab",
+      storageBucket: "campus-study-hub-6b8ab.firebasestorage.app",
+      messagingSenderId: "655468124613",
+      appId: "1:655468124613:web:6156466ab93f18541e5bac",
+      measurementId: "G-YE7EE087CY"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    // ==========================================
+    // 2. WHATSAPP & STUDY DATA
+    // ==========================================
     const WHATSAPP_NUMBER = "916359217206";
 
-    // GOOGLE DRIVE LINKS KA DATA
     const studyData = {
       "FYBA": {
         "Semester 1": {
@@ -240,48 +397,17 @@
             papers: "https://drive.google.com/drive/folders/1dzsTueQ29szEzigely0evoGySmlFC4hq",
             exam: "#"
           },
-          "History": {
-            notes: "#",
-            questions: "#",
-            papers: "#",
-            exam: "#"
-          },
-          "English": {
-            notes: "#",
-            questions: "#",
-            papers: "#",
-            exam: "#"
-          },
-          "Political Science": {
-            notes: "#",
-            questions: "#",
-            papers: "#",
-            exam: "#"
-          }
+          "History": { notes: "#", questions: "#", papers: "#", exam: "#" },
+          "English": { notes: "#", questions: "#", papers: "#", exam: "#" },
+          "Political Science": { notes: "#", questions: "#", papers: "#", exam: "#" }
         },
         "Semester 2": {
-          "Sanskrit": {
-            notes: "#",
-            questions: "#",
-            papers: "#",
-            exam: "#"
-          },
-          "History": {
-            notes: "#",
-            questions: "#",
-            papers: "#",
-            exam: "#"
-          }
+          "Sanskrit": { notes: "#", questions: "#", papers: "#", exam: "#" },
+          "History": { notes: "#", questions: "#", papers: "#", exam: "#" }
         }
       },
-      "SYBA": {
-        "Semester 3": {},
-        "Semester 4": {}
-      },
-      "TYBA": {
-        "Semester 5": {},
-        "Semester 6": {}
-      }
+      "SYBA": { "Semester 3": {}, "Semester 4": {} },
+      "TYBA": { "Semester 5": {}, "Semester 6": {} }
     };
 
     const state = {
@@ -291,8 +417,67 @@
       step: 1
     };
 
-    // Refresh hone par current tab par hi rakhega
+    // ==========================================
+    // 3. AUTH & USER TRACKING ENGINE
+    // ==========================================
+    function loginWithGoogle() {
+      auth.signInWithPopup(provider).catch((error) => {
+        alert("Login failed: " + error.message);
+      });
+    }
+
+    function logoutStudent() {
+      auth.signOut().then(() => {
+        window.location.hash = '';
+      });
+    }
+
+    auth.onAuthStateChanged((user) => {
+      const loginSection = document.getElementById('loginSection');
+      const studyContent = document.getElementById('studyContent');
+      const authProfileBar = document.getElementById('authProfileBar');
+
+      if (user) {
+        loginSection.classList.add('hidden');
+        studyContent.classList.remove('hidden');
+        authProfileBar.classList.remove('hidden');
+
+        document.getElementById('userName').innerText = user.displayName ? user.displayName.split(' ')[0] : 'Student';
+        document.getElementById('userAvatar').src = user.photoURL || 'https://via.placeholder.com/26';
+
+        trackStudentInDatabase(user);
+        parseHash();
+      } else {
+        loginSection.classList.remove('hidden');
+        studyContent.classList.add('hidden');
+        authProfileBar.classList.add('hidden');
+      }
+    });
+
+    function trackStudentInDatabase(user) {
+      const userRef = database.ref('registered_students/' + user.uid);
+      userRef.once('value', (snapshot) => {
+        if (!snapshot.exists()) {
+          userRef.set({
+            name: user.displayName,
+            email: user.email,
+            joinedAt: new Date().toISOString()
+          });
+        }
+      });
+    }
+
+    database.ref('registered_students').on('value', (snapshot) => {
+      const count = snapshot.numChildren();
+      document.getElementById('totalUsersCount').innerText = count;
+    });
+
+    // ==========================================
+    // 4. ROUTER & REFRESH MANAGER
+    // ==========================================
     function parseHash() {
+      if (!auth.currentUser) return;
+
       const hash = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''));
       if (!hash) {
         state.course = null;
@@ -304,18 +489,9 @@
       }
 
       const parts = hash.split('/');
-      if (parts[0]) {
-        state.course = parts[0];
-        state.step = 2;
-      }
-      if (parts[1]) {
-        state.semester = parts[1];
-        state.step = 3;
-      }
-      if (parts[2]) {
-        state.subject = parts[2];
-        state.step = 4;
-      }
+      if (parts[0]) { state.course = parts[0]; state.step = 2; }
+      if (parts[1]) { state.semester = parts[1]; state.step = 3; }
+      if (parts[2]) { state.subject = parts[2]; state.step = 4; }
       updateView();
     }
 
@@ -441,7 +617,6 @@
     }
 
     window.addEventListener('hashchange', parseHash);
-    window.addEventListener('DOMContentLoaded', parseHash);
   </script>
 </body>
 </html>
