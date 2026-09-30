@@ -648,7 +648,7 @@
       <section id="accountSection" class="hidden">
         <button class="card-close-btn" onclick="closeAccountTab()" title="Close and return">✕</button>
         
-        <h2 class="step-title">⚙ Student Account Details</h2>
+        <h2 class="step-title">⚙️ Student Account Details</h2>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
           Your current registered credentials. Tap update below if you wish to change mobile or PIN.
         </p>
@@ -803,7 +803,9 @@
 
     const WHATSAPP_NUMBER = "916359217206";
 
-    function decodeSub(str) {
+    // Clean decode helper
+    function safeDecode(str) {
+      if (!str) return '';
       try {
         return decodeURIComponent(str);
       } catch(e) {
@@ -849,7 +851,7 @@
       el.classList.toggle('hidden');
     }
 
-    // 2. LIVE SYNC WITH PROPER SUBJECT NAME EXTRACTION
+    // 2. LIVE SYNC WITH FLEXIBLE COMPATIBILITY
     database.ref('study_data').on('value', (snapshot) => {
       const liveData = snapshot.val();
       studyData = {
@@ -862,7 +864,9 @@
         Object.keys(liveData).forEach(course => {
           if (!studyData[course]) studyData[course] = {};
           Object.keys(liveData[course]).forEach(sem => {
-            studyData[course][sem] = liveData[course][sem];
+            // Normalize semester key (handles 'Semester 1' or any variant)
+            const cleanSem = safeDecode(sem);
+            studyData[course][cleanSem] = liveData[course][sem];
           });
         });
       }
@@ -1269,12 +1273,13 @@
       }
     });
 
-    // 11. SAFE ROUTER & REFRESH MANAGER (SAFE FROM FORWARD SLASH CRASHES)
+    // 11. BULLETPROOF ROUTER (CLEANS %20 AND SPECIAL CHARACTERS)
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
 
-      const raw = window.location.hash.replace(/^#\/?/, '');
+      // Crucial: safely decode hash so "Semester%201" becomes "Semester 1"
+      const raw = safeDecode(window.location.hash.replace(/^#\/?/, ''));
       if (raw === 'account') {
         openAccountTab();
         return;
@@ -1290,16 +1295,27 @@
         return;
       }
 
-      // Hash format: course___semester___subjectKeySafe
-      const parts = raw.split('___');
+      // Supports both slash (/) and delimiter (___) separators
+      let parts = raw.includes('___') ? raw.split('___') : raw.split('/');
+      parts = parts.map(p => safeDecode(p.trim()));
+
       if (parts[0]) { state.course = parts[0]; state.step = 2; }
       if (parts[1]) { state.semester = parts[1]; state.step = 3; }
       if (parts[2]) {
         state.subjectKey = parts[2];
         const courseData = studyData[state.course] || {};
         const semData = courseData[state.semester] || {};
-        const subObj = semData[state.subjectKey] || {};
-        state.subjectName = subObj.subjectName || decodeSub(state.subjectKey);
+        
+        // Find subject object by direct key or normalized name
+        let subObj = semData[state.subjectKey];
+        if (!subObj) {
+          const matchKey = Object.keys(semData).find(k => (semData[k].subjectName || safeDecode(k)) === state.subjectKey);
+          if (matchKey) {
+            state.subjectKey = matchKey;
+            subObj = semData[matchKey];
+          }
+        }
+        state.subjectName = (subObj && subObj.subjectName) ? subObj.subjectName : state.subjectKey;
         state.step = 4;
       }
       updateView();
@@ -1309,7 +1325,7 @@
       let path = '';
       if (state.step === 2) path = `${state.course}`;
       else if (state.step === 3) path = `${state.course}___${state.semester}`;
-      else if (state.step === 4) path = `${state.course}___${state.semester}___${state.subjectKey}`;
+      else if (state.step === 4) path = `${state.course}___${state.semester}___${state.subjectName || state.subjectKey}`;
       
       window.location.hash = path ? `#/${path}` : '';
     }
@@ -1344,11 +1360,10 @@
       } else if (state.step === 4) {
         document.getElementById('step-resources').classList.remove('hidden');
         
-        // Exact original full title displayed
         const courseData = studyData[state.course] || {};
         const semData = courseData[state.semester] || {};
         const subObj = semData[state.subjectKey] || {};
-        const fullSubjectName = subObj.subjectName || decodeSub(state.subjectKey);
+        const fullSubjectName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey);
 
         document.getElementById('subject-title').innerText = `${fullSubjectName} Resources`;
         backBtn.classList.remove('hidden');
@@ -1364,10 +1379,11 @@
       const semesters = Object.keys(courseObj);
 
       semesters.forEach(sem => {
+        const cleanSemName = safeDecode(sem);
         const btn = document.createElement('button');
         btn.className = 'btn-select';
-        btn.innerHTML = `<span class="btn-label">${sem}</span> <span>→</span>`;
-        btn.onclick = () => selectSemester(sem);
+        btn.innerHTML = `<span class="btn-label">${cleanSemName}</span> <span>→</span>`;
+        btn.onclick = () => selectSemester(cleanSemName);
         container.appendChild(btn);
       });
     }
@@ -1386,8 +1402,7 @@
 
       subjectKeys.forEach(key => {
         const item = semObj[key];
-        // Clean display of real name
-        const displayName = item.subjectName || decodeSub(key);
+        const displayName = (item && item.subjectName) ? item.subjectName : safeDecode(key);
 
         const btn = document.createElement('button');
         btn.className = 'btn-select';
@@ -1405,7 +1420,7 @@
     }
 
     function selectSemester(sem) {
-      state.semester = sem;
+      state.semester = safeDecode(sem);
       state.step = 3;
       setHash();
       updateView();
