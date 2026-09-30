@@ -648,7 +648,6 @@
       <button class="drawer-close-btn" onclick="closeDrawer()" title="Close Menu">✕</button>
     </div>
 
-    <!-- ADMIN DETAILS -->
     <div class="admin-info-card">
       <div class="admin-info-header">Admin Profile</div>
       <div class="admin-row">
@@ -663,7 +662,6 @@
       </div>
     </div>
 
-    <!-- MENU LIST (SINGLE LINE TEXT) -->
     <div class="drawer-menu-list">
       <button class="menu-item-btn" onclick="navigateToTab('addSubjectTab')">
         <div class="item-content">
@@ -742,7 +740,7 @@
       </form>
     </section>
 
-    <!-- 1. HOME DASHBOARD (NO TABS BY DEFAULT) -->
+    <!-- 1. HOME DASHBOARD -->
     <section id="homeDashboard" class="dashboard-home hidden">
       <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">⚡</div>
       <h2 style="font-size: 1.5rem; font-weight: 800; color: #fff;">Campus Study Hub Control</h2>
@@ -831,7 +829,7 @@
       </form>
     </section>
 
-    <!-- TAB 2: EXISTING MANAGED SUBJECTS (WITH EDIT PENCIL & SAVE BUTTON) -->
+    <!-- TAB 2: EXISTING MANAGED SUBJECTS -->
     <section id="existingSubjectsTab" class="tab-card hidden">
       <div class="card-top-header">
         <div class="card-title-group">
@@ -841,14 +839,12 @@
         <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
       </div>
 
-      <!-- MAIN LIST VIEW -->
       <div id="subjectListView">
         <div class="item-list" id="existingSubjectsContainer">
           <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading managed subjects...</div>
         </div>
       </div>
 
-      <!-- STRUCTURED DETAIL & LIVE EDIT VIEW -->
       <div id="subjectDetailView" class="hidden">
         <button class="btn-detail-back" onclick="backToSubjectList()">← Back to Subjects List</button>
         <div class="detail-view-box" id="subjectDetailContent"></div>
@@ -923,7 +919,6 @@
     }
     const database = firebase.database();
 
-    // FIXED AUTH CREDENTIALS
     const REQUIRED_USER = "Alex";
     const REQUIRED_PIN = "4560";
 
@@ -932,7 +927,6 @@
     let cachedComments = {};
     let activeEditSubjectKey = null;
 
-    // PIN Show/Hide
     function togglePinVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -961,12 +955,13 @@
 
     function applyAdminSession() {
       document.getElementById('adminLoginSection').classList.add('hidden');
-      document.getElementById('homeDashboard').classList.remove('hidden');
       document.getElementById('menuTriggerBtn').classList.remove('hidden');
+      parseHash();
     }
 
     function adminLogout() {
       sessionStorage.removeItem('csh_admin_auth');
+      window.location.hash = '';
       closeDrawer();
       window.location.reload();
     }
@@ -1002,33 +997,98 @@
       document.getElementById('drawerOverlay').classList.remove('active');
     }
 
-    // 5. NAVIGATION
+    // 5. URL HASH ROUTER (SOLVES REFRESH ISSUE)
+    const tabMapToHash = {
+      'addSubjectTab': 'add-subject',
+      'existingSubjectsTab': 'subjects',
+      'studentsDirectoryTab': 'students',
+      'commentsTab': 'comments'
+    };
+
+    const hashToTabMap = {
+      'add-subject': 'addSubjectTab',
+      'subjects': 'existingSubjectsTab',
+      'students': 'studentsDirectoryTab',
+      'comments': 'commentsTab'
+    };
+
     function navigateToTab(tabId) {
       closeDrawer();
+      const hash = tabMapToHash[tabId] || '';
+      window.location.hash = hash;
+    }
+
+    function closeToHome() {
+      window.location.hash = '';
+    }
+
+    function hideAllTabs() {
       document.getElementById('homeDashboard').classList.add('hidden');
       document.getElementById('addSubjectTab').classList.add('hidden');
       document.getElementById('existingSubjectsTab').classList.add('hidden');
       document.getElementById('studentsDirectoryTab').classList.add('hidden');
       document.getElementById('commentsTab').classList.add('hidden');
+    }
 
-      backToStudentList();
-      backToSubjectList();
-      backToCommentList();
+    function parseHash() {
+      if (sessionStorage.getItem('csh_admin_auth') !== 'true') return;
 
-      const target = document.getElementById(tabId);
-      if (target) {
-        target.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      const rawHash = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''));
+      hideAllTabs();
+
+      if (!rawHash) {
+        document.getElementById('homeDashboard').classList.remove('hidden');
+        return;
+      }
+
+      // Check detail sub-routes
+      if (rawHash.startsWith('subject-detail/')) {
+        const subKey = rawHash.replace('subject-detail/', '');
+        document.getElementById('existingSubjectsTab').classList.remove('hidden');
+        if (cachedSubjects[subKey]) {
+          showSubjectDetail(subKey, false);
+        } else {
+          // Wait for data load
+          setTimeout(() => showSubjectDetail(subKey, false), 500);
+        }
+        return;
+      }
+
+      if (rawHash.startsWith('student-detail/')) {
+        const studentKey = rawHash.replace('student-detail/', '');
+        document.getElementById('studentsDirectoryTab').classList.remove('hidden');
+        if (cachedStudents[studentKey]) {
+          showStudentDetail(studentKey, false);
+        } else {
+          setTimeout(() => showStudentDetail(studentKey, false), 500);
+        }
+        return;
+      }
+
+      if (rawHash.startsWith('comment-detail/')) {
+        const commentKey = rawHash.replace('comment-detail/', '');
+        document.getElementById('commentsTab').classList.remove('hidden');
+        if (cachedComments[commentKey]) {
+          showCommentDetail(commentKey, false);
+        } else {
+          setTimeout(() => showCommentDetail(commentKey, false), 500);
+        }
+        return;
+      }
+
+      // Main tab routes
+      const tabId = hashToTabMap[rawHash];
+      if (tabId) {
+        document.getElementById(tabId).classList.remove('hidden');
+        if (tabId === 'existingSubjectsTab') backToSubjectList(false);
+        if (tabId === 'studentsDirectoryTab') backToStudentList(false);
+        if (tabId === 'commentsTab') backToCommentList(false);
+      } else {
+        document.getElementById('homeDashboard').classList.remove('hidden');
       }
     }
 
-    function closeToHome() {
-      document.getElementById('addSubjectTab').classList.add('hidden');
-      document.getElementById('existingSubjectsTab').classList.add('hidden');
-      document.getElementById('studentsDirectoryTab').classList.add('hidden');
-      document.getElementById('commentsTab').classList.add('hidden');
-      document.getElementById('homeDashboard').classList.remove('hidden');
-    }
+    window.addEventListener('hashchange', parseHash);
 
     // 6. ADD / PUBLISH SUBJECT
     function handleSubjectSubmit(e) {
@@ -1072,7 +1132,7 @@
       });
     }
 
-    // 7. RENDER SUBJECTS + EDIT WITH PENCILS & SAVE BUTTON
+    // 7. RENDER SUBJECTS + EDIT
     function listenToSubjects() {
       const container = document.getElementById('existingSubjectsContainer');
       database.ref('study_data').on('value', (snapshot) => {
@@ -1098,7 +1158,7 @@
               const row = document.createElement('div');
               row.className = 'clean-item-row';
               row.innerHTML = `
-                <div class="clickable-name-area" onclick="showSubjectDetail('${subKey}')" title="Click to view & edit links">
+                <div class="clickable-name-area" onclick="showSubjectDetail('${subKey}', true)" title="Click to view & edit links">
                   <span class="icon-badge">📘</span>
                   <span>${subName}</span>
                 </div>
@@ -1111,10 +1171,14 @@
       });
     }
 
-    function showSubjectDetail(subKey) {
+    function showSubjectDetail(subKey, updateHash = true) {
       activeEditSubjectKey = subKey;
       const s = cachedSubjects[subKey];
       if (!s) return;
+
+      if (updateHash) {
+        window.location.hash = `subject-detail/${encodeURIComponent(subKey)}`;
+      }
 
       const detailContainer = document.getElementById('subjectDetailContent');
       detailContainer.innerHTML = `
@@ -1127,7 +1191,6 @@
           <div class="detail-value">${s.course} • ${s.semester}</div>
         </div>
 
-        <!-- NOTES LINK WITH PENCIL -->
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">📖 Notes Link</span>
@@ -1136,7 +1199,6 @@
           <input type="text" id="editNotesInput" class="detail-input-edit" value="${s.notes && s.notes !== '#' ? s.notes : ''}" placeholder="Enter Drive link for notes" />
         </div>
 
-        <!-- QUESTIONS LINK WITH PENCIL -->
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">📝 Important Questions Link</span>
@@ -1145,7 +1207,6 @@
           <input type="text" id="editQuestionsInput" class="detail-input-edit" value="${s.questions && s.questions !== '#' ? s.questions : ''}" placeholder="Enter Drive link for questions" />
         </div>
 
-        <!-- PAPERS LINK WITH PENCIL -->
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">📄 Previous Year Papers Link</span>
@@ -1154,7 +1215,6 @@
           <input type="text" id="editPapersInput" class="detail-input-edit" value="${s.papers && s.papers !== '#' ? s.papers : ''}" placeholder="Enter Drive link for papers" />
         </div>
 
-        <!-- EXAM PREPARATION LINK WITH PENCIL -->
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">🎯 Exam Preparation Link</span>
@@ -1168,7 +1228,6 @@
           <div class="detail-value" style="font-size:0.85rem; color:var(--text-muted);">${s.updatedAt ? new Date(s.updatedAt).toLocaleString('en-IN') : 'N/A'}</div>
         </div>
 
-        <!-- SAVE CHANGES BUTTON -->
         <button type="button" class="btn-save-changes" id="btnSaveSubjectLinks" onclick="saveSubjectLinksChanges()">💾 Save Changes & Update Website</button>
       `;
 
@@ -1209,7 +1268,7 @@
         alert(`Links for '${s.subject}' updated successfully on the main website!`);
         saveBtn.innerText = "Saved Successfully ✓";
         setTimeout(() => {
-          backToSubjectList();
+          backToSubjectList(true);
         }, 500);
       }).catch(err => {
         alert("Error saving links: " + err.message);
@@ -1218,7 +1277,8 @@
       });
     }
 
-    function backToSubjectList() {
+    function backToSubjectList(updateHash = true) {
+      if (updateHash) window.location.hash = 'subjects';
       document.getElementById('subjectDetailView').classList.add('hidden');
       document.getElementById('subjectListView').classList.remove('hidden');
     }
@@ -1227,7 +1287,7 @@
       if (confirm(`Are you sure you want to remove '${subject}' from ${course} (${sem})?`)) {
         database.ref(`study_data/${course}/${sem}/${subject}`).remove().then(() => {
           alert(`Subject '${subject}' removed from live site.`);
-          backToSubjectList();
+          backToSubjectList(true);
         });
       }
     }
@@ -1255,7 +1315,7 @@
           const row = document.createElement('div');
           row.className = 'clean-item-row';
           row.innerHTML = `
-            <div class="clickable-name-area" onclick="showStudentDetail('${key}')" title="Click to view full registration details">
+            <div class="clickable-name-area" onclick="showStudentDetail('${key}', true)" title="Click to view full registration details">
               <span class="icon-badge">👤</span>
               <span>${student.name}</span>
             </div>
@@ -1266,9 +1326,13 @@
       });
     }
 
-    function showStudentDetail(studentKey) {
+    function showStudentDetail(studentKey, updateHash = true) {
       const s = cachedStudents[studentKey];
       if (!s) return;
+
+      if (updateHash) {
+        window.location.hash = `student-detail/${encodeURIComponent(studentKey)}`;
+      }
 
       const detailContainer = document.getElementById('studentDetailContent');
       detailContainer.innerHTML = `
@@ -1305,7 +1369,8 @@
       document.getElementById('studentDetailView').classList.remove('hidden');
     }
 
-    function backToStudentList() {
+    function backToStudentList(updateHash = true) {
+      if (updateHash) window.location.hash = 'students';
       document.getElementById('studentDetailView').classList.add('hidden');
       document.getElementById('studentListView').classList.remove('hidden');
     }
@@ -1314,7 +1379,7 @@
       if (confirm(`Remove scholar '${name}'? This will automatically log them out of Campus Study Hub.`)) {
         database.ref(`registered_students/${studentId}`).remove().then(() => {
           alert(`Scholar '${name}' removed.`);
-          backToStudentList();
+          backToStudentList(true);
         });
       }
     }
@@ -1341,7 +1406,7 @@
           const row = document.createElement('div');
           row.className = 'clean-item-row';
           row.innerHTML = `
-            <div class="clickable-name-area" onclick="showCommentDetail('${key}')" title="Click to view full comment details">
+            <div class="clickable-name-area" onclick="showCommentDetail('${key}', true)" title="Click to view full comment details">
               <span class="icon-badge">💬</span>
               <span>${item.userName || 'Scholar'}</span>
             </div>
@@ -1352,9 +1417,13 @@
       });
     }
 
-    function showCommentDetail(commentKey) {
+    function showCommentDetail(commentKey, updateHash = true) {
       const c = cachedComments[commentKey];
       if (!c) return;
+
+      if (updateHash) {
+        window.location.hash = `comment-detail/${encodeURIComponent(commentKey)}`;
+      }
 
       const timeFormatted = c.timestamp ? new Date(c.timestamp).toLocaleString('en-IN', {
         dateStyle: 'medium',
@@ -1388,7 +1457,8 @@
       document.getElementById('commentDetailView').classList.remove('hidden');
     }
 
-    function backToCommentList() {
+    function backToCommentList(updateHash = true) {
+      if (updateHash) window.location.hash = 'comments';
       document.getElementById('commentDetailView').classList.add('hidden');
       document.getElementById('commentListView').classList.remove('hidden');
     }
@@ -1396,12 +1466,12 @@
     function deleteComment(commentId) {
       if (confirm("Delete this comment permanently?")) {
         database.ref(`student_comments/${commentId}`).remove().then(() => {
-          backToCommentList();
+          backToCommentList(true);
         });
       }
     }
 
-    // Auto-detect existing logged-in session
+    // Initialize listeners & dropdown on load
     document.addEventListener('DOMContentLoaded', () => {
       updateSemesterDropdown();
       listenToSubjects();
