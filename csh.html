@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Campus Study Hub | College Notes</title>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -39,7 +39,6 @@
       flex-direction: column;
     }
 
-    /* Top Strip: Live User Counter & Profile */
     .top-bar {
       background: #0f172a;
       color: #fff;
@@ -90,11 +89,6 @@
       font-size: 0.75rem;
       cursor: pointer;
       font-weight: 600;
-    }
-
-    .btn-logout:hover {
-      background: #334155;
-      color: #fff;
     }
 
     header {
@@ -172,7 +166,6 @@
     .btn-select:hover {
       border-color: var(--primary);
       background: #eff6ff;
-      transform: translateY(-1px);
     }
 
     .resource-card {
@@ -185,21 +178,12 @@
       text-decoration: none;
       color: var(--text);
       font-weight: 600;
-      transition: background 0.2s;
-    }
-
-    .resource-card:hover {
-      background: #f1f5f9;
     }
 
     .btn-order {
       background: #f59e0b;
       color: #fff !important;
       border-color: #d97706;
-    }
-
-    .btn-order:hover {
-      background: #d97706 !important;
     }
 
     .back-btn {
@@ -215,7 +199,6 @@
       font-size: 0.9rem;
     }
 
-    /* Login Gate Box */
     .login-gate {
       text-align: center;
       padding: 2.5rem 1rem;
@@ -237,22 +220,20 @@
       background: #ffffff;
       color: #374151;
       border: 1px solid #d1d5db;
-      padding: 0.75rem 1.25rem;
+      padding: 0.85rem 1.4rem;
       border-radius: 8px;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.75rem;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
       transition: all 0.2s ease;
     }
 
-    .btn-google:hover {
-      background: #f9fafb;
-      border-color: #9ca3af;
-      transform: translateY(-1px);
+    .btn-google:active {
+      transform: scale(0.98);
     }
 
     .hidden {
@@ -269,11 +250,10 @@
 </head>
 <body>
 
-  <!-- Top Bar: Live Counter & User Account -->
   <div class="top-bar">
     <div class="user-counter">
       👥 <span>Enrolled Scholars:</span>
-      <span class="badge" id="totalUsersCount">0</span>
+      <span class="badge" id="totalUsersCount">...</span>
     </div>
     <div id="authProfileBar" class="auth-profile hidden">
       <img id="userAvatar" src="" alt="Avatar" />
@@ -294,14 +274,14 @@
       <section id="loginSection" class="login-gate">
         <h2>Sign In to Access Study Hub</h2>
         <p>Login with your student Google account to browse verified papers and semester notes.</p>
-        <button class="btn-google" onclick="loginWithGoogle()">
+        <button id="googleBtn" class="btn-google" onclick="loginWithGoogle()">
           <svg width="18" height="18" viewBox="0 0 18 18">
             <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
             <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
             <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
             <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
           </svg>
-          Continue with Google
+          <span id="btnText">Continue with Google</span>
         </button>
       </section>
 
@@ -310,7 +290,6 @@
         <div id="breadcrumb" class="breadcrumb hidden">Home</div>
         <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
 
-        <!-- STEP 1: SELECT COURSE -->
         <section id="step-course">
           <h2 class="step-title">Select your course</h2>
           <div class="grid" id="course-list">
@@ -321,19 +300,16 @@
           </div>
         </section>
 
-        <!-- STEP 2: SELECT SEMESTER -->
         <section id="step-semester" class="hidden">
           <h2 class="step-title">Select Semester</h2>
           <div class="grid" id="semester-list"></div>
         </section>
 
-        <!-- STEP 3: SELECT SUBJECT -->
         <section id="step-subject" class="hidden">
           <h2 class="step-title">Select Subject</h2>
           <div class="grid" id="subject-list"></div>
         </section>
 
-        <!-- STEP 4: RESOURCE HUB -->
         <section id="step-resources" class="hidden">
           <h2 class="step-title" id="subject-title">Resources</h2>
           <div class="grid">
@@ -364,9 +340,6 @@
   </footer>
 
   <script>
-    // ==========================================
-    // 1. FIREBASE CONFIGURATION
-    // ==========================================
     const firebaseConfig = {
       apiKey: "AIzaSyBzjHop1OV6agKwLsXxTj7x9xd9GQ9ZKsY",
       authDomain: "campus-study-hub-6b8ab.firebaseapp.com",
@@ -378,15 +351,14 @@
       measurementId: "G-YE7EE087CY"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const auth = firebase.auth();
     const database = firebase.database();
     const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
 
-    // ==========================================
-    // 2. WHATSAPP & STUDY DATA
-    // ==========================================
     const WHATSAPP_NUMBER = "916359217206";
 
     const studyData = {
@@ -418,25 +390,37 @@
       step: 1
     };
 
-    // ==========================================
-    // 3. AUTH & USER TRACKING ENGINE (MOBILE-SAFE)
-    // ==========================================
+    // Fail-safe Google Login Handler
     function loginWithGoogle() {
-      auth.signInWithRedirect(provider);
+      const btnText = document.getElementById('btnText');
+      if (btnText) btnText.innerText = "Connecting...";
+
+      // Pehle Popup try karega, agar phone block kare toh Redirect use karega
+      auth.signInWithPopup(provider).catch((error) => {
+        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+          auth.signInWithRedirect(provider);
+        } else {
+          alert("Login note: " + error.message);
+          if (btnText) btnText.innerText = "Continue with Google";
+        }
+      });
     }
 
+    // Check Redirect Return
     auth.getRedirectResult().catch((error) => {
-      if (error && error.code !== "auth/null-user") {
-        console.error("Auth Error:", error);
+      if (error && error.code) {
+        alert("Redirect Error: " + error.message);
       }
     });
 
     function logoutStudent() {
       auth.signOut().then(() => {
         window.location.hash = '';
+        window.location.reload();
       });
     }
 
+    // Auth State Monitor
     auth.onAuthStateChanged((user) => {
       const loginSection = document.getElementById('loginSection');
       const studyContent = document.getElementById('studyContent');
@@ -460,26 +444,30 @@
     });
 
     function trackStudentInDatabase(user) {
-      const userRef = database.ref('registered_students/' + user.uid);
-      userRef.once('value', (snapshot) => {
-        if (!snapshot.exists()) {
-          userRef.set({
-            name: user.displayName,
-            email: user.email,
-            joinedAt: new Date().toISOString()
-          });
-        }
-      });
+      try {
+        const userRef = database.ref('registered_students/' + user.uid);
+        userRef.once('value').then((snapshot) => {
+          if (!snapshot.exists()) {
+            userRef.set({
+              name: user.displayName,
+              email: user.email,
+              joinedAt: new Date().toISOString()
+            });
+          }
+        }).catch(err => console.log("DB silent:", err));
+      } catch (e) {}
     }
 
-    database.ref('registered_students').on('value', (snapshot) => {
-      const count = snapshot.numChildren();
-      document.getElementById('totalUsersCount').innerText = count;
-    });
+    // Live Registered Count
+    try {
+      database.ref('registered_students').on('value', (snapshot) => {
+        const count = snapshot.numChildren() || 0;
+        document.getElementById('totalUsersCount').innerText = count;
+      });
+    } catch (e) {
+      document.getElementById('totalUsersCount').innerText = "0";
+    }
 
-    // ==========================================
-    // 4. ROUTER & REFRESH MANAGER
-    // ==========================================
     function parseHash() {
       if (!auth.currentUser) return;
 
