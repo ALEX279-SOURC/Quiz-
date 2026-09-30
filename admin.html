@@ -828,22 +828,31 @@
       </form>
     </section>
 
-    <!-- TAB 2: EXISTING MANAGED SUBJECTS -->
+    <!-- TAB 2: EXISTING MANAGED SUBJECTS (SEMESTER 1 TO 6 VIEW) -->
     <section id="existingSubjectsTab" class="tab-card hidden">
       <div class="card-top-header">
         <div class="card-title-group">
           <h2 class="section-title">🗂 Existing Managed Subjects</h2>
-          <p class="section-desc">Click on any subject to inspect and edit resource links.</p>
+          <p class="section-desc" id="subjectTabSubtitle">Select a semester to manage its subjects.</p>
         </div>
         <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
       </div>
 
-      <div id="subjectListView">
+      <!-- VIEW 1: SEMESTER 1 SE 6 CARDS -->
+      <div id="semesterSelectView">
+        <div class="item-list" id="semesterGridContainer"></div>
+      </div>
+
+      <!-- VIEW 2: SELECTED SEMESTER'S SUBJECT LIST -->
+      <div id="subjectListView" class="hidden">
+        <button class="btn-detail-back" onclick="backToSemesterGrid()">← Back to Semesters</button>
+        <h3 id="currentSemesterTitle" style="font-size:1.05rem; font-weight:800; margin-bottom:0.75rem; color:#38bdf8;"></h3>
         <div class="item-list" id="existingSubjectsContainer">
-          <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading managed subjects...</div>
+          <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading subjects...</div>
         </div>
       </div>
 
+      <!-- VIEW 3: STRUCTURED DETAIL & LIVE EDIT VIEW -->
       <div id="subjectDetailView" class="hidden">
         <button class="btn-detail-back" onclick="backToSubjectList()">← Back to Subjects List</button>
         <div class="detail-view-box" id="subjectDetailContent"></div>
@@ -931,9 +940,22 @@
       }
     }
 
+    // 1 se 6 Semesters Definition with respective Course
+    const SEMESTER_CONFIG = [
+      { name: "Semester 1", course: "FYBA" },
+      { name: "Semester 2", course: "FYBA" },
+      { name: "Semester 3", course: "SYBA" },
+      { name: "Semester 4", course: "SYBA" },
+      { name: "Semester 5", course: "TYBA" },
+      { name: "Semester 6", course: "TYBA" }
+    ];
+
+    let globalStudyData = null;
     let cachedStudents = {};
     let cachedSubjects = {};
     let cachedComments = {};
+    let currentSelectedSemester = null;
+    let currentSelectedCourse = null;
     let activeEditSubjectKey = null;
 
     function togglePinVisibility(inputId, btn) {
@@ -1057,6 +1079,18 @@
         return;
       }
 
+      if (rawHash.startsWith('subjects/')) {
+        const semParam = decodeURIComponent(rawHash.replace('subjects/', ''));
+        document.getElementById('existingSubjectsTab').classList.remove('hidden');
+        const matched = SEMESTER_CONFIG.find(sc => sc.name.toLowerCase() === semParam.toLowerCase());
+        if (matched) {
+          openSemesterSubjects(matched.name, matched.course, false);
+        } else {
+          backToSemesterGrid(false);
+        }
+        return;
+      }
+
       if (rawHash.startsWith('student-detail/')) {
         const studentKey = rawHash.replace('student-detail/', '');
         document.getElementById('studentsDirectoryTab').classList.remove('hidden');
@@ -1082,7 +1116,7 @@
       const tabId = hashToTabMap[rawHash];
       if (tabId) {
         document.getElementById(tabId).classList.remove('hidden');
-        if (tabId === 'existingSubjectsTab') backToSubjectList(false);
+        if (tabId === 'existingSubjectsTab') backToSemesterGrid(false);
         if (tabId === 'studentsDirectoryTab') backToStudentList(false);
         if (tabId === 'commentsTab') backToCommentList(false);
       } else {
@@ -1092,7 +1126,7 @@
 
     window.addEventListener('hashchange', parseHash);
 
-    // ADD / UPDATE SUBJECT - PRESERVES CREATION TIMESTAMP FOR SEQUENTIAL ORDER
+    // ADD / UPDATE SUBJECT
     function handleSubjectSubmit(e) {
       e.preventDefault();
       const course = document.getElementById('courseSelect').value;
@@ -1115,7 +1149,6 @@
 
       database.ref(path).once('value').then((snap) => {
         const existing = snap.val() || {};
-        // Pehle se add hua time ya naya current timestamp
         const createdAt = existing.createdAt || Date.now();
 
         database.ref(path).set({
@@ -1135,7 +1168,7 @@
           document.getElementById('examLinkInput').value = '';
           btn.innerText = "Save & Publish to Live Site →";
           btn.disabled = false;
-          navigateToTab('existingSubjectsTab');
+          openSemesterSubjects(semester, course, true);
         }).catch(err => {
           alert("Error publishing subject: " + err.message);
           btn.innerText = "Save & Publish to Live Site →";
@@ -1144,28 +1177,21 @@
       });
     }
 
-    // RENDER SUBJECTS IN STRICT CREATION ORDER (PEHLE ADD HUA TOP PAR, BAAD WALA NEECHE)
+    // 1 SE 6 SEMESTERS RENDERER & LOGIC
     function listenToSubjects() {
-      const container = document.getElementById('existingSubjectsContainer');
       database.ref('study_data').on('value', (snapshot) => {
-        const data = snapshot.val();
+        globalStudyData = snapshot.val() || {};
         cachedSubjects = {};
-        if (!data) {
-          container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem;">No custom subjects added yet. Add one from the menu!</div>`;
-          return;
-        }
 
-        container.innerHTML = '';
-        const allSubjectsList = [];
-
-        Object.keys(data).forEach(course => {
-          Object.keys(data[course]).forEach(semester => {
-            Object.keys(data[course][semester]).forEach(subKeyRaw => {
-              const item = data[course][semester][subKeyRaw];
+        // Cache all subjects for direct link editing
+        Object.keys(globalStudyData).forEach(course => {
+          Object.keys(globalStudyData[course]).forEach(semester => {
+            Object.keys(globalStudyData[course][semester]).forEach(subKeyRaw => {
+              const item = globalStudyData[course][semester][subKeyRaw];
               const realSubjectName = item.subjectName || decodeSubKey(subKeyRaw);
               const compositeKey = `${course}___${semester}___${subKeyRaw}`;
 
-              const subjectObj = {
+              cachedSubjects[compositeKey] = {
                 course,
                 semester,
                 subKeyRaw,
@@ -1175,37 +1201,116 @@
                 compositeKey: compositeKey,
                 ...item
               };
-
-              cachedSubjects[compositeKey] = subjectObj;
-              allSubjectsList.push(subjectObj);
             });
           });
         });
 
-        // SORTING: Oldest first at top, newer subjects below it (NO ABCD sorting)
-        allSubjectsList.sort((a, b) => {
-          if (a.createdAt && b.createdAt) {
-            return a.createdAt - b.createdAt;
-          }
-          if (a.updatedAt && b.updatedAt) {
-            return new Date(a.updatedAt) - new Date(b.updatedAt);
-          }
-          return 0;
-        });
+        renderSemesterGrid();
 
-        allSubjectsList.forEach(s => {
-          const row = document.createElement('div');
-          row.className = 'clean-item-row';
-          row.innerHTML = `
-            <div class="clickable-name-area" onclick="showSubjectDetail('${s.compositeKey}', true)" title="Click to view & edit links">
-              <span style="font-size:1.15rem;">📘</span>
-              <span class="subject-title-text">${s.subject}</span>
-            </div>
-            <button class="btn-delete-item" onclick="deleteSubject('${s.course}', '${s.semester}', '${s.subKeyRaw}', '${s.subject.replace(/'/g, "\\'")}')">Delete Subject</button>
-          `;
-          container.appendChild(row);
-        });
+        if (currentSelectedSemester && currentSelectedCourse) {
+          renderSubjectsForCurrentSemester();
+        }
       });
+    }
+
+    // Render Semester 1 to 6 Cards
+    function renderSemesterGrid() {
+      const container = document.getElementById('semesterGridContainer');
+      container.innerHTML = '';
+
+      SEMESTER_CONFIG.forEach(sc => {
+        const courseData = globalStudyData[sc.course] || {};
+        const semData = courseData[sc.name] || {};
+        const count = Object.keys(semData).length;
+
+        const row = document.createElement('div');
+        row.className = 'clean-item-row';
+        row.innerHTML = `
+          <div class="clickable-name-area" onclick="openSemesterSubjects('${sc.name}', '${sc.course}', true)" style="cursor:pointer;">
+            <span style="font-size:1.25rem;">📁</span>
+            <div>
+              <div style="font-weight:700; font-size:0.98rem; color:#fff;">${sc.name}</div>
+              <div style="font-size:0.75rem; color:#38bdf8; font-weight:600;">${sc.course}</div>
+            </div>
+          </div>
+          <span class="counter-pill" style="font-size:0.8rem; padding:0.25rem 0.65rem;">${count} Subjects</span>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // Open Subjects belonging ONLY to the clicked semester
+    function openSemesterSubjects(semName, courseName, updateHash = true) {
+      currentSelectedSemester = semName;
+      currentSelectedCourse = courseName;
+
+      if (updateHash) {
+        window.location.hash = `subjects/${encodeURIComponent(semName)}`;
+      }
+
+      document.getElementById('semesterSelectView').classList.add('hidden');
+      document.getElementById('subjectDetailView').classList.add('hidden');
+      document.getElementById('subjectListView').classList.remove('hidden');
+
+      document.getElementById('currentSemesterTitle').innerText = `📘 ${semName} (${courseName}) - Added Subjects`;
+      document.getElementById('subjectTabSubtitle').innerText = `Showing subjects added for ${semName}`;
+
+      renderSubjectsForCurrentSemester();
+    }
+
+    function renderSubjectsForCurrentSemester() {
+      const container = document.getElementById('existingSubjectsContainer');
+      container.innerHTML = '';
+
+      const courseData = globalStudyData[currentSelectedCourse] || {};
+      const semData = courseData[currentSelectedSemester] || {};
+      const subKeys = Object.keys(semData);
+
+      if (subKeys.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:2rem 1rem;">No subjects added in ${currentSelectedSemester} yet.<br><span style="font-size:0.8rem;">Add subjects from the Menu!</span></div>`;
+        return;
+      }
+
+      const list = [];
+      subKeys.forEach(subKeyRaw => {
+        const compositeKey = `${currentSelectedCourse}___${currentSelectedSemester}___${subKeyRaw}`;
+        if (cachedSubjects[compositeKey]) {
+          list.push(cachedSubjects[compositeKey]);
+        }
+      });
+
+      // Strict Creation Order: Oldest first at top, newer below it
+      list.sort((a, b) => {
+        if (a.createdAt && b.createdAt) return a.createdAt - b.createdAt;
+        if (a.updatedAt && b.updatedAt) return new Date(a.updatedAt) - new Date(b.updatedAt);
+        return 0;
+      });
+
+      list.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'clean-item-row';
+        row.innerHTML = `
+          <div class="clickable-name-area" onclick="showSubjectDetail('${s.compositeKey}', true)" title="Click to view & edit links">
+            <span style="font-size:1.15rem;">📘</span>
+            <span class="subject-title-text">${s.subject}</span>
+          </div>
+          <button class="btn-delete-item" onclick="deleteSubject('${s.course}', '${s.semester}', '${s.subKeyRaw}', '${s.subject.replace(/'/g, "\\'")}')">Delete Subject</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function backToSemesterGrid(updateHash = true) {
+      currentSelectedSemester = null;
+      currentSelectedCourse = null;
+      if (updateHash) window.location.hash = 'subjects';
+
+      document.getElementById('subjectListView').classList.add('hidden');
+      document.getElementById('subjectDetailView').classList.add('hidden');
+      document.getElementById('semesterSelectView').classList.remove('hidden');
+
+      document.getElementById('subjectTabSubtitle').innerText = "Select a semester to manage its subjects.";
+      renderSemesterGrid();
     }
 
     function showSubjectDetail(subKey, updateHash = true) {
@@ -1255,7 +1360,7 @@
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">🎯 Exam Preparation Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editExamInput')">✏️️ Edit</button>
+            <button type="button" class="btn-inline-pencil" onclick="focusField('editExamInput')">✏️ Edit</button>
           </div>
           <input type="text" id="editExamInput" class="detail-input-edit" value="${s.exam && s.exam !== '#' ? s.exam : ''}" placeholder="Enter Drive link for exam prep" />
         </div>
@@ -1268,6 +1373,7 @@
         <button type="button" class="btn-save-changes" id="btnSaveSubjectLinks" onclick="saveSubjectLinksChanges()">💾 Save Changes & Update Website</button>
       `;
 
+      document.getElementById('semesterSelectView').classList.add('hidden');
       document.getElementById('subjectListView').classList.add('hidden');
       document.getElementById('subjectDetailView').classList.remove('hidden');
     }
@@ -1315,16 +1421,20 @@
     }
 
     function backToSubjectList(updateHash = true) {
-      if (updateHash) window.location.hash = 'subjects';
-      document.getElementById('subjectDetailView').classList.add('hidden');
-      document.getElementById('subjectListView').classList.remove('hidden');
+      if (currentSelectedSemester) {
+        if (updateHash) window.location.hash = `subjects/${encodeURIComponent(currentSelectedSemester)}`;
+        document.getElementById('subjectDetailView').classList.add('hidden');
+        document.getElementById('subjectListView').classList.remove('hidden');
+      } else {
+        backToSemesterGrid(updateHash);
+      }
     }
 
     function deleteSubject(course, sem, subKeyRaw, subjectName) {
       if (confirm(`Are you sure you want to remove '${subjectName}' from ${course} (${sem})?`)) {
         database.ref(`study_data/${course}/${sem}/${subKeyRaw}`).remove().then(() => {
           alert(`Subject '${subjectName}' removed from live site.`);
-          backToSubjectList(true);
+          renderSubjectsForCurrentSemester();
         });
       }
     }
