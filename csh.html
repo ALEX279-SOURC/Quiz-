@@ -7,7 +7,6 @@
 
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
   <style>
@@ -73,11 +72,17 @@
       gap: 0.6rem;
     }
 
-    .auth-profile img {
+    .auth-profile .avatar-circle {
       width: 26px;
       height: 26px;
       border-radius: 50%;
-      border: 1px solid #cbd5e1;
+      background: #2563eb;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
     }
 
     .btn-logout {
@@ -89,11 +94,6 @@
       font-size: 0.75rem;
       cursor: pointer;
       font-weight: 600;
-    }
-
-    .btn-logout:hover {
-      background: #334155;
-      color: #fff;
     }
 
     header {
@@ -185,18 +185,10 @@
       font-weight: 600;
     }
 
-    .resource-card:hover {
-      background: #f1f5f9;
-    }
-
     .btn-order {
       background: #f59e0b;
       color: #fff !important;
       border-color: #d97706;
-    }
-
-    .btn-order:hover {
-      background: #d97706 !important;
     }
 
     .back-btn {
@@ -212,41 +204,55 @@
       font-size: 0.9rem;
     }
 
+    /* Clean Enrollment Form */
     .login-gate {
       text-align: center;
-      padding: 2.5rem 1rem;
+      padding: 1.5rem 0.5rem;
     }
 
     .login-gate h2 {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 800;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
     }
 
     .login-gate p {
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       margin-bottom: 1.5rem;
     }
 
-    .btn-google {
-      background: #ffffff;
-      color: #374151;
-      border: 1px solid #d1d5db;
-      padding: 0.85rem 1.4rem;
+    .input-box {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border);
       border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.75rem;
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+      outline: none;
+      background: #f8fafc;
     }
 
-    .btn-google:active {
-      transform: scale(0.98);
+    .input-box:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    .btn-submit-enroll {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-submit-enroll:hover {
+      background: var(--primary-hover);
     }
 
     .hidden {
@@ -270,9 +276,9 @@
       <span class="badge" id="totalUsersCount">0</span>
     </div>
     <div id="authProfileBar" class="auth-profile hidden">
-      <img id="userAvatar" src="" alt="Avatar" />
+      <div class="avatar-circle" id="userInitial">S</div>
       <span id="userName" style="font-weight: 600;">Student</span>
-      <button class="btn-logout" onclick="logoutStudent()">Logout</button>
+      <button class="btn-logout" onclick="logoutStudent()">Change User</button>
     </div>
   </div>
 
@@ -284,22 +290,19 @@
   <main>
     <div class="card">
       
-      <!-- GATEWAY 1: GOOGLE LOGIN SCREEN -->
+      <!-- GATEWAY 1: INSTANT ENROLLMENT SCREEN -->
       <section id="loginSection" class="login-gate">
-        <h2>Sign In to Access Study Hub</h2>
-        <p>Login with your student Google account to browse verified papers and semester notes.</p>
-        <button id="googleBtn" class="btn-google" onclick="loginWithGoogle()">
-          <svg width="18" height="18" viewBox="0 0 18 18">
-            <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
-            <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
-            <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
-            <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
-          </svg>
-          <span id="btnText">Continue with Google</span>
-        </button>
+        <h2>Enter Student Details to Access</h2>
+        <p>Join Campus Study Hub to view papers, syllabus, and study notes.</p>
+        
+        <form onsubmit="enrollStudent(event)">
+          <input type="text" id="studentNameInput" class="input-box" placeholder="Your Full Name (e.g. Rahul Patel)" required />
+          <input type="tel" id="studentPhoneInput" class="input-box" placeholder="WhatsApp / Mobile Number" pattern="[0-9]{10}" title="Please enter 10 digit number" required />
+          <button type="submit" id="enrollBtn" class="btn-submit-enroll">Access Notes & Papers →</button>
+        </form>
       </section>
 
-      <!-- GATEWAY 2: STUDY EXPLORER (SHOWN AFTER LOGIN) -->
+      <!-- GATEWAY 2: STUDY EXPLORER (SHOWN AFTER ENROLLMENT) -->
       <div id="studyContent" class="hidden">
         <div id="breadcrumb" class="breadcrumb hidden">Home</div>
         <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
@@ -373,9 +376,7 @@
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
-    const auth = firebase.auth();
     const database = firebase.database();
-    const provider = new firebase.auth.GoogleAuthProvider();
 
     // 2. DATA REPOSITORY
     const WHATSAPP_NUMBER = "916359217206";
@@ -409,77 +410,72 @@
       step: 1
     };
 
-    // 3. AUTHENTICATION (POP-UP FIRST)
-    function loginWithGoogle() {
-      const btnText = document.getElementById('btnText');
-      if (btnText) btnText.innerText = "Opening Google...";
+    // 3. STUDENT ENROLLMENT & LIVE COUNTER
+    function enrollStudent(e) {
+      e.preventDefault();
+      const name = document.getElementById('studentNameInput').value.trim();
+      const phone = document.getElementById('studentPhoneInput').value.trim();
+      if (!name || !phone) return;
 
-      auth.signInWithPopup(provider)
-        .then((result) => {
-          console.log("Logged in:", result.user);
-        })
-        .catch((error) => {
-          alert("Login error: " + error.message);
-          if (btnText) btnText.innerText = "Continue with Google";
-        });
-    }
+      const btn = document.getElementById('enrollBtn');
+      btn.innerText = "Connecting...";
+      btn.disabled = true;
 
-    function logoutStudent() {
-      auth.signOut().then(() => {
-        window.location.hash = '';
-        window.location.reload();
+      // Unique key using phone number
+      const studentId = "student_" + phone;
+      const userRef = database.ref('registered_students/' + studentId);
+
+      userRef.set({
+        name: name,
+        phone: phone,
+        joinedAt: new Date().toISOString()
+      }).then(() => {
+        // Local state save
+        localStorage.setItem('csh_student', JSON.stringify({ name, phone }));
+        applyLoggedInState({ name, phone });
+      }).catch((err) => {
+        // Fallback: Agar offline/database rule block kare toh bhi user allow ho jaye
+        localStorage.setItem('csh_student', JSON.stringify({ name, phone }));
+        applyLoggedInState({ name, phone });
       });
     }
 
-    auth.onAuthStateChanged((user) => {
-      const loginSection = document.getElementById('loginSection');
-      const studyContent = document.getElementById('studyContent');
-      const authProfileBar = document.getElementById('authProfileBar');
+    function applyLoggedInState(student) {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('studyContent').classList.remove('hidden');
+      document.getElementById('authProfileBar').classList.remove('hidden');
 
-      if (user) {
-        loginSection.classList.add('hidden');
-        studyContent.classList.remove('hidden');
-        authProfileBar.classList.remove('hidden');
+      const firstName = student.name.split(' ')[0];
+      document.getElementById('userName').innerText = firstName;
+      document.getElementById('userInitial').innerText = firstName.charAt(0).toUpperCase();
 
-        document.getElementById('userName').innerText = user.displayName ? user.displayName.split(' ')[0] : 'Student';
-        document.getElementById('userAvatar').src = user.photoURL || 'https://via.placeholder.com/26';
-
-        trackStudentInDatabase(user);
-        parseHash();
-      } else {
-        loginSection.classList.remove('hidden');
-        studyContent.classList.add('hidden');
-        authProfileBar.classList.add('hidden');
-      }
-    });
-
-    function trackStudentInDatabase(user) {
-      try {
-        const userRef = database.ref('registered_students/' + user.uid);
-        userRef.once('value').then((snapshot) => {
-          if (!snapshot.exists()) {
-            userRef.set({
-              name: user.displayName,
-              email: user.email,
-              joinedAt: new Date().toISOString()
-            });
-          }
-        }).catch(err => console.log("DB silent:", err));
-      } catch (e) {}
+      parseHash();
     }
 
-    try {
+    function logoutStudent() {
+      localStorage.removeItem('csh_student');
+      window.location.hash = '';
+      window.location.reload();
+    }
+
+    // Auto check if already enrolled
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedStudent = localStorage.getItem('csh_student');
+      if (savedStudent) {
+        applyLoggedInState(JSON.parse(savedStudent));
+      }
+
+      // Realtime listener for total students count
       database.ref('registered_students').on('value', (snapshot) => {
         const count = snapshot.numChildren() || 0;
         document.getElementById('totalUsersCount').innerText = count;
       });
-    } catch (e) {
-      document.getElementById('totalUsersCount').innerText = "0";
-    }
+    });
 
     // 4. ROUTER & REFRESH MANAGER
     function parseHash() {
-      if (!auth.currentUser) return;
+      const saved = localStorage.getItem('csh_student');
+      if (!saved) return;
 
       const hash = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''));
       if (!hash) {
