@@ -448,7 +448,7 @@
       background: #0b1329;
       border: 1px solid var(--card-border);
       border-radius: 10px;
-      padding: 0.85rem 1rem;
+      padding: 0.75rem 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -483,11 +483,43 @@
       line-height: 1.35;
     }
 
+    .row-actions-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .btn-order-arrow {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .btn-order-arrow:hover:not(:disabled) {
+      background: #3b82f6;
+      color: #fff;
+      border-color: #3b82f6;
+    }
+
+    .btn-order-arrow:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
     .btn-delete-item {
       background: #2d1520;
       color: #f87171;
       border: 1px solid #7f1d1d;
-      padding: 0.4rem 0.75rem;
+      padding: 0.35rem 0.65rem;
       border-radius: 6px;
       font-size: 0.8rem;
       font-weight: 700;
@@ -731,7 +763,7 @@
           <label class="form-label">4-DIGIT PIN</label>
           <div class="pin-input-wrap">
             <input type="password" id="adminPinField" class="input-box" placeholder="Enter 4-digit PIN" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('adminPinField', this)">👁️️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('adminPinField', this)">👁️</button>
           </div>
         </div>
 
@@ -949,9 +981,22 @@
       { name: "Semester 6", course: "TYBA" }
     ];
 
+    // Priority map ensuring Sanskrit M1 and M2 stay on top as originally intended
+    function getDefaultPriority(subName) {
+      const clean = subName.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (clean.includes('sanskritm1') || clean === 'sanskrit1') return 10;
+      if (clean.includes('sanskritm2') || clean === 'sanskrit2') return 20;
+      if (clean.includes('gujratiminor') || clean.includes('gujaratiminor')) return 30;
+      if (clean.includes('mdc')) return 40;
+      if (clean.includes('aec')) return 50;
+      if (clean.includes('sec')) return 60;
+      if (clean.includes('vac')) return 70;
+      return 100;
+    }
+
     let globalStudyData = null;
-    let cachedStudents = {};
     let cachedSubjects = {};
+    let cachedStudents = {};
     let cachedComments = {};
     let currentSelectedSemester = null;
     let currentSelectedCourse = null;
@@ -1157,7 +1202,7 @@
 
     window.addEventListener('hashchange', parseHash);
 
-    // ADD / UPDATE SUBJECT - LOCKS ORDER INDEX PERMANENTLY
+    // ADD / UPDATE SUBJECT
     function handleSubjectSubmit(e) {
       e.preventDefault();
       const course = document.getElementById('courseSelect').value;
@@ -1183,11 +1228,9 @@
         const semData = semSnap.val() || {};
         const existing = semData[safeKey] || {};
 
-        // Calculate permanent order index
         let permanentIndex = existing.orderIndex;
         if (typeof permanentIndex === 'undefined' || permanentIndex === null) {
-          const currentCount = Object.keys(semData).length;
-          permanentIndex = currentCount + 1;
+          permanentIndex = getDefaultPriority(subject);
         }
 
         const createdAt = existing.createdAt || Date.now();
@@ -1219,7 +1262,6 @@
       });
     }
 
-    // LISTEN & CACHE SUBJECTS
     function listenToSubjects() {
       database.ref('study_data').on('value', (snapshot) => {
         globalStudyData = snapshot.val() || {};
@@ -1232,12 +1274,17 @@
               const realSubjectName = item.subjectName || decodeSubKey(subKeyRaw);
               const compositeKey = `${course}___${semester}___${subKeyRaw}`;
 
+              let assignedOrder = item.orderIndex;
+              if (typeof assignedOrder === 'undefined' || assignedOrder === null) {
+                assignedOrder = getDefaultPriority(realSubjectName);
+              }
+
               cachedSubjects[compositeKey] = {
                 course,
                 semester,
                 subKeyRaw,
                 subject: realSubjectName,
-                orderIndex: (typeof item.orderIndex !== 'undefined') ? item.orderIndex : 9999,
+                orderIndex: assignedOrder,
                 createdAt: item.createdAt || 0,
                 updatedAt: item.updatedAt || '',
                 compositeKey: compositeKey,
@@ -1299,7 +1346,7 @@
       renderSubjectsForCurrentSemester();
     }
 
-    // STRICT PERMANENT ORDERING (NEVER SHUFFLES UPON EDITING OR SAVING)
+    // RENDER SUBJECTS WITH ⬆ / ⬇ POSITION CONTROL BUTTONS
     function renderSubjectsForCurrentSemester() {
       const container = document.getElementById('existingSubjectsContainer');
       container.innerHTML = '';
@@ -1321,15 +1368,13 @@
         }
       });
 
-      // SORT STRICTLY BY orderIndex, THEN BY createdAt (updatedAt is ignored to prevent shuffling!)
-      list.sort((a, b) => {
-        if (a.orderIndex !== b.orderIndex) {
-          return a.orderIndex - b.orderIndex;
-        }
-        return (a.createdAt || 0) - (b.createdAt || 0);
-      });
+      // Strict Sorting: Sanskrit M1 (10) -> Sanskrit M2 (20) -> Others
+      list.sort((a, b) => a.orderIndex - b.orderIndex);
 
-      list.forEach(s => {
+      list.forEach((s, idx) => {
+        const isFirst = idx === 0;
+        const isLast = idx === list.length - 1;
+
         const row = document.createElement('div');
         row.className = 'clean-item-row';
         row.innerHTML = `
@@ -1337,9 +1382,54 @@
             <span style="font-size:1.15rem;">📘</span>
             <span class="subject-title-text">${s.subject}</span>
           </div>
-          <button class="btn-delete-item" onclick="deleteSubject('${s.course}', '${s.semester}', '${s.subKeyRaw}', '${s.subject.replace(/'/g, "\\'")}')">Delete Subject</button>
+
+          <div class="row-actions-wrap">
+            <button class="btn-order-arrow" title="Move Up" ${isFirst ? 'disabled' : ''} onclick="moveSubjectPosition('${s.compositeKey}', -1)">▲</button>
+            <button class="btn-order-arrow" title="Move Down" ${isLast ? 'disabled' : ''} onclick="moveSubjectPosition('${s.compositeKey}', 1)">▼</button>
+            <button class="btn-delete-item" onclick="deleteSubject('${s.course}', '${s.semester}', '${s.subKeyRaw}', '${s.subject.replace(/'/g, "\\'")}')">Delete</button>
+          </div>
         `;
         container.appendChild(row);
+      });
+    }
+
+    // SWAP POSITION FUNCTION
+    function moveSubjectPosition(compositeKey, direction) {
+      const courseData = (globalStudyData && globalStudyData[currentSelectedCourse]) ? globalStudyData[currentSelectedCourse] : {};
+      const semData = courseData[currentSelectedSemester] || {};
+      const subKeys = Object.keys(semData);
+
+      const list = [];
+      subKeys.forEach(subKeyRaw => {
+        const compKey = `${currentSelectedCourse}___${currentSelectedSemester}___${subKeyRaw}`;
+        if (cachedSubjects[compKey]) {
+          list.push(cachedSubjects[compKey]);
+        }
+      });
+
+      list.sort((a, b) => a.orderIndex - b.orderIndex);
+
+      const currentIndex = list.findIndex(item => item.compositeKey === compositeKey);
+      if (currentIndex === -1) return;
+
+      const targetIndex = currentIndex + direction;
+      if (targetIndex < 0 || targetIndex >= list.length) return;
+
+      // Swap items in list
+      const temp = list[currentIndex];
+      list[currentIndex] = list[targetIndex];
+      list[targetIndex] = temp;
+
+      // Re-assign orderIndex sequentially
+      const updates = {};
+      list.forEach((item, index) => {
+        const newOrder = (index + 1) * 10;
+        item.orderIndex = newOrder;
+        updates[`study_data/${item.course}/${item.semester}/${item.subKeyRaw}/orderIndex`] = newOrder;
+      });
+
+      database.ref().update(updates).then(() => {
+        renderSubjectsForCurrentSemester();
       });
     }
 
@@ -1406,7 +1496,7 @@
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">🎯 Exam Preparation Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editExamInput')">✏️️ Edit</button>
+            <button type="button" class="btn-inline-pencil" onclick="focusField('editExamInput')">✏️ Edit</button>
           </div>
           <input type="text" id="editExamInput" class="detail-input-edit" value="${s.exam && s.exam !== '#' ? s.exam : ''}" placeholder="Enter Drive link for exam prep" />
         </div>
@@ -1432,7 +1522,6 @@
       }
     }
 
-    // SAVES ONLY LINKS — PRESERVES THE ORIGINAL POSITION / ORDER
     function saveSubjectLinksChanges() {
       if (!activeEditSubjectKey) return;
       const s = cachedSubjects[activeEditSubjectKey];
@@ -1449,7 +1538,6 @@
 
       const path = `study_data/${s.course}/${s.semester}/${s.subKeyRaw}`;
       
-      // Update links without changing position/orderIndex
       database.ref(path).update({
         notes: notes,
         questions: questions,
@@ -1457,7 +1545,6 @@
         exam: exam,
         updatedAt: new Date().toISOString()
       }).then(() => {
-        // Cache update
         s.notes = notes;
         s.questions = questions;
         s.papers = papers;
@@ -1494,7 +1581,6 @@
       }
     }
 
-    // 8. RENDER STUDENTS
     function listenToStudents() {
       const container = document.getElementById('studentsListContainer');
       database.ref('registered_students').on('value', (snapshot) => {
@@ -1588,7 +1674,6 @@
       }
     }
 
-    // 9. RENDER COMMENTS
     function listenToComments() {
       const container = document.getElementById('commentsContainer');
       database.ref('student_comments').on('value', (snapshot) => {
