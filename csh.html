@@ -41,7 +41,7 @@
     .top-bar {
       background: #0f172a;
       color: #fff;
-      padding: 0.6rem 1.25rem;
+      padding: 0.6rem 12px;
       display: flex;
       justify-content: flex-end;
       align-items: center;
@@ -155,13 +155,19 @@
       padding: 1rem;
       border: 1px solid var(--border);
       border-radius: 8px;
-      text-decoration: none;
+      background: var(--card-bg);
+      cursor: pointer;
+      font-size: 1rem;
       color: var(--text);
       font-weight: 600;
+      transition: all 0.2s ease;
+      width: 100%;
+      text-align: left;
     }
 
     .resource-card:hover {
       background: #f1f5f9;
+      border-color: var(--primary);
     }
 
     .btn-order {
@@ -310,6 +316,82 @@
       font-weight: 800;
     }
 
+    /* POPUP MODAL FOR EMPTY / NOT FOUND DATA */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem 1.5rem;
+      max-width: 380px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      animation: modalPop 0.2s ease-out;
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #f1f5f9;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .modal-close-btn:hover {
+      background: #fee2e2;
+      color: #ef4444;
+    }
+
+    .modal-icon {
+      font-size: 2.8rem;
+      margin-bottom: 0.5rem;
+      line-height: 1;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.4rem;
+    }
+
+    .modal-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      line-height: 1.4;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -342,10 +424,9 @@
   <main>
     <div class="card">
       
-      <!-- GATEWAY 1: DUAL AUTH (REGISTRATION & RETURNING LOGIN VIA 4-DIGIT PIN) -->
+      <!-- GATEWAY 1: DUAL AUTH -->
       <section id="loginSection" class="login-gate">
         
-        <!-- Tab Switch Buttons -->
         <div class="auth-tab-switch">
           <button type="button" id="tabRegisterBtn" class="auth-tab-btn active" onclick="switchAuthMode('register')">New Registration</button>
           <button type="button" id="tabLoginBtn" class="auth-tab-btn" onclick="switchAuthMode('login')">Already Registered (Login)</button>
@@ -354,7 +435,7 @@
         <h2 id="authHeading">Student Registration</h2>
         <p id="authSubheading">Register with your details & 4-digit PIN to access study materials.</p>
         
-        <!-- FORM A: NEW REGISTRATION -->
+        <!-- REGISTRATION FORM -->
         <form id="enrollForm" onsubmit="handleRegistration(event)">
           <label class="form-label">FULL NAME</label>
           <input type="text" id="regNameInput" class="input-box" placeholder="e.g. Amish Patel" required />
@@ -384,7 +465,7 @@
           <button type="submit" id="regSubmitBtn" class="btn-primary-action">Create Account & Enter →</button>
         </form>
 
-        <!-- FORM B: RETURNING LOGIN -->
+        <!-- RETURNING LOGIN FORM -->
         <form id="returningLoginForm" class="hidden" onsubmit="handleLogin(event)">
           <label class="form-label">REGISTERED MOBILE NUMBER</label>
           <input type="tel" id="loginPhoneInput" class="input-box" placeholder="Enter your 10-digit registered number" pattern="[0-9]{10}" title="Enter valid 10-digit mobile number" required />
@@ -396,7 +477,7 @@
         </form>
       </section>
 
-      <!-- GATEWAY 2: STUDY EXPLORER (STRICTLY ADMIN CONTENT) -->
+      <!-- GATEWAY 2: STUDY EXPLORER -->
       <div id="studyContent" class="hidden">
         <div id="breadcrumb" class="breadcrumb hidden">Home</div>
         <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
@@ -427,21 +508,21 @@
         <section id="step-resources" class="hidden">
           <h2 class="step-title" id="subject-title">Resources</h2>
           <div class="grid">
-            <a id="link-notes" href="#" class="resource-card" target="_blank">
+            <button class="resource-card" onclick="openResource('notes')">
               <span>📖 Notes</span> <span>Download ↗</span>
-            </a>
-            <a id="link-questions" href="#" class="resource-card" target="_blank">
+            </button>
+            <button class="resource-card" onclick="openResource('questions')">
               <span>📝 Important Questions</span> <span>View ↗</span>
-            </a>
-            <a id="link-papers" href="#" class="resource-card" target="_blank">
+            </button>
+            <button class="resource-card" onclick="openResource('papers')">
               <span>📄 Previous Papers</span> <span>Download ↗</span>
-            </a>
-            <a id="link-exam" href="#" class="resource-card" target="_blank">
+            </button>
+            <button class="resource-card" onclick="openResource('exam')">
               <span>🎯 Exam Preparation</span> <span>View ↗</span>
-            </a>
-            <a id="link-assignments" href="#" class="resource-card btn-order" target="_blank">
+            </button>
+            <button class="resource-card btn-order" onclick="openResource('assignments')">
               <span>📝 Order Assignments</span> <span>Order ↗</span>
-            </a>
+            </button>
           </div>
         </section>
       </div>
@@ -496,6 +577,19 @@
     </div>
   </main>
 
+  <!-- EMPTY DATA / NOT FOUND POPUP MODAL -->
+  <div id="emptyDataModal" class="modal-overlay hidden" onclick="closeEmptyModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeEmptyModal()" title="Close">❌</button>
+      <div class="modal-icon">📂</div>
+      <h3 class="modal-title" id="emptyModalTitle">Data Not Found</h3>
+      <p class="modal-text" id="emptyModalDesc">
+        Is resource ke liye link abhi add nahi ki gayi hai. Admin jald hi study material upload karega.
+      </p>
+      <button class="btn-primary-action" onclick="closeEmptyModal()">Theek Hai (OK)</button>
+    </div>
+  </div>
+
   <footer>
     &copy; Campus Study Hub. Built for college students.
   </footer>
@@ -520,7 +614,6 @@
 
     const WHATSAPP_NUMBER = "916359217206";
 
-    // Strictly populated from Admin Database
     let studyData = {
       "FYBA": { "Semester 1": {}, "Semester 2": {} },
       "SYBA": { "Semester 3": {}, "Semester 4": {} },
@@ -621,7 +714,6 @@
 
       const studentId = "student_" + phone;
 
-      // Duplicate Check
       database.ref('registered_students/' + studentId).once('value').then((snapshot) => {
         if (snapshot.exists()) {
           alert("Yeh number pehle se registered hai! Direct Login tab me jaakar apna PIN dalein.");
@@ -713,7 +805,47 @@
       }
     }
 
-    // 8. ACCOUNT SETTINGS TAB
+    // 8. POPUP MODAL HANDLER FOR EMPTY / NOT FOUND DATA
+    function showEmptyModal(title, message) {
+      document.getElementById('emptyModalTitle').innerText = title || "Data Not Found";
+      document.getElementById('emptyModalDesc').innerText = message || "Is subject ke liye study material abhi upload nahi hua hai.";
+      document.getElementById('emptyDataModal').classList.remove('hidden');
+    }
+
+    function closeEmptyModal() {
+      document.getElementById('emptyDataModal').classList.add('hidden');
+    }
+
+    // 9. DYNAMIC RESOURCE OPENER (SAME WINDOW / SAME TAB NAVIGATION)
+    function openResource(type) {
+      if (type === 'assignments') {
+        const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subject})`);
+        // Opens in the same tab/window instead of opening a new tab
+        window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
+        return;
+      }
+
+      const courseData = studyData[state.course] || {};
+      const semData = courseData[state.semester] || {};
+      const links = semData[state.subject] || {};
+
+      let targetUrl = links[type];
+
+      // Agar link invalid, '#' ya empty hai toh popup show karein
+      if (!targetUrl || targetUrl.trim() === '' || targetUrl.trim() === '#' || !targetUrl.startsWith('http')) {
+        let labelName = "Notes";
+        if (type === 'questions') labelName = "Important Questions";
+        if (type === 'papers') labelName = "Previous Papers";
+        if (type === 'exam') labelName = "Exam Preparation Material";
+
+        showEmptyModal("Data is Empty", `Abhi ${state.subject} ke liye '${labelName}' upload nahi hua hai.`);
+      } else {
+        // Same tab me Google Drive link khulegi (No new tab)
+        window.location.href = targetUrl.trim();
+      }
+    }
+
+    // 10. ACCOUNT SETTINGS TAB
     function openAccountTab() {
       state.inAccountTab = true;
       document.getElementById('studyContent').classList.add('hidden');
@@ -775,7 +907,6 @@
       });
     }
 
-    // Auto-detect existing logged-in session
     document.addEventListener('DOMContentLoaded', () => {
       const savedStudent = localStorage.getItem('csh_student');
       if (savedStudent) {
@@ -783,7 +914,7 @@
       }
     });
 
-    // 9. ROUTER & REFRESH MANAGER
+    // 11. ROUTER & REFRESH MANAGER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
@@ -852,18 +983,6 @@
         backBtn.classList.remove('hidden');
         breadcrumb.classList.remove('hidden');
         breadcrumb.innerText = `${state.course} > ${state.semester} > ${state.subject}`;
-
-        const courseData = studyData[state.course] || {};
-        const semData = courseData[state.semester] || {};
-        const links = semData[state.subject] || {};
-
-        document.getElementById('link-notes').href = links.notes || '#';
-        document.getElementById('link-questions').href = links.questions || '#';
-        document.getElementById('link-papers').href = links.papers || '#';
-        document.getElementById('link-exam').href = links.exam || '#';
-
-        const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subject})`);
-        document.getElementById('link-assignments').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
       }
     }
 
