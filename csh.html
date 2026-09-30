@@ -7,6 +7,7 @@
 
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
   <style>
@@ -38,60 +39,37 @@
       flex-direction: column;
     }
 
+    /* Minimalist Top Bar with Profile Icon only */
     .top-bar {
       background: #0f172a;
       color: #fff;
-      padding: 0.6rem 1rem;
-      font-size: 0.85rem;
+      padding: 0.6rem 1.25rem;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 0.5rem;
     }
 
-    .user-counter {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-weight: 600;
-    }
-
-    .user-counter span.badge {
-      background: #22c55e;
-      color: #0f172a;
-      padding: 0.15rem 0.5rem;
-      border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
-
-    .auth-profile {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
+    .profile-btn {
       background: #1e293b;
-      padding: 0.3rem 0.75rem;
-      border-radius: 20px;
-      transition: background 0.2s;
-    }
-
-    .auth-profile:hover {
-      background: #334155;
-    }
-
-    .auth-profile .avatar-circle {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #2563eb;
+      border: 1px solid #334155;
       color: #fff;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 700;
+      cursor: pointer;
+      font-size: 1.15rem;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .profile-btn:hover {
+      background: #334155;
+    }
+
+    .profile-btn:active {
+      transform: scale(0.95);
     }
 
     header {
@@ -211,9 +189,10 @@
       font-size: 0.9rem;
     }
 
+    /* Auth & Enrollment Forms */
     .login-gate {
       text-align: center;
-      padding: 1.5rem 0.5rem;
+      padding: 1rem 0.25rem;
     }
 
     .login-gate h2 {
@@ -225,21 +204,31 @@
     .login-gate p {
       color: var(--text-muted);
       font-size: 0.88rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
-    .input-box {
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: block;
+      text-align: left;
+      margin-bottom: 0.35rem;
+    }
+
+    .input-box, .select-box {
       width: 100%;
       padding: 0.85rem 1rem;
       border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 0.95rem;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.85rem;
       outline: none;
       background: #f8fafc;
+      color: var(--text);
     }
 
-    .input-box:focus {
+    .input-box:focus, .select-box:focus {
       border-color: var(--primary);
       background: #fff;
     }
@@ -261,57 +250,38 @@
       background: var(--primary-hover);
     }
 
-    .community-box {
+    .btn-primary-action:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Active Users Live Box */
+    .active-users-box {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.25rem;
+      padding: 1rem 1.5rem;
       box-shadow: var(--shadow);
-    }
-
-    .community-header {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 0.75rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .student-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      max-height: 220px;
-      overflow-y: auto;
-    }
-
-    .student-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #f8fafc;
-      padding: 0.6rem 0.85rem;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      font-size: 0.85rem;
-    }
-
-    .student-name-box {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-    }
-
-    .badge-member {
-      background: #dcfce7;
-      color: #166534;
-      font-size: 0.7rem;
+    .active-users-title {
+      font-size: 0.95rem;
       font-weight: 700;
-      padding: 0.15rem 0.45rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .active-badge {
+      background: #22c55e;
+      color: #0f172a;
+      padding: 0.25rem 0.75rem;
       border-radius: 9999px;
+      font-size: 0.95rem;
+      font-weight: 800;
     }
 
     .hidden {
@@ -329,15 +299,12 @@
 </head>
 <body>
 
+  <!-- Top Strip: Only Profile Icon -->
   <div class="top-bar">
-    <div class="user-counter">
-      👥 <span>Enrolled Scholars:</span>
-      <span class="badge" id="totalUsersCount">0</span>
-    </div>
-    <div id="authProfileBar" class="auth-profile hidden" onclick="openAccountTab()" title="Open Account Settings">
-      <div class="avatar-circle" id="userInitial">S</div>
-      <span id="userName" style="font-weight: 600;">Student</span>
-      <span style="font-size: 0.75rem; opacity: 0.8;">⚙️ Edit</span>
+    <div id="authProfileBar" class="hidden">
+      <button class="profile-btn" onclick="openAccountTab()" title="Account Settings">
+        👤
+      </button>
     </div>
   </div>
 
@@ -349,31 +316,61 @@
   <main>
     <div class="card">
       
-      <!-- GATEWAY 1: ENROLLMENT FORM -->
+      <!-- GATEWAY 1: STUDENT ENROLLMENT (NAME + COLLEGE YEAR + ACADEMIC YEAR + PHONE OTP) -->
       <section id="loginSection" class="login-gate">
-        <h2>Enter Student Details to Access</h2>
-        <p>Join Campus Study Hub to view papers, syllabus, and study notes.</p>
+        <h2>Student Registration</h2>
+        <p>Register with your details & phone verification to access verified notes and papers.</p>
         
-        <form onsubmit="enrollStudent(event)">
-          <input type="text" id="studentNameInput" class="input-box" placeholder="Your Full Name (e.g. Rahul Patel)" required />
-          <input type="tel" id="studentPhoneInput" class="input-box" placeholder="WhatsApp / Mobile Number" pattern="[0-9]{10}" title="Please enter 10 digit number" required />
-          <button type="submit" id="enrollBtn" class="btn-primary-action">Access Notes & Papers →</button>
+        <!-- Step 1: Student Details & Mobile -->
+        <form id="enrollForm" onsubmit="requestOtp(event)">
+          <label class="form-label">FULL NAME</label>
+          <input type="text" id="studentNameInput" class="input-box" placeholder="e.g. Amish Patel" required />
+
+          <label class="form-label">YEAR OF COLLEGE</label>
+          <select id="collegeYearSelect" class="select-box" required>
+            <option value="FYBA">FYBA</option>
+            <option value="SYBA">SYBA</option>
+            <option value="TYBA">TYBA</option>
+          </select>
+
+          <label class="form-label">ACADEMIC YEAR</label>
+          <select id="academicYearSelect" class="select-box" required>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+          </select>
+
+          <label class="form-label">MOBILE NUMBER (10 DIGITS)</label>
+          <input type="tel" id="studentPhoneInput" class="input-box" placeholder="WhatsApp / Mobile Number" pattern="[0-9]{10}" title="Enter valid 10-digit mobile number" required />
+
+          <!-- Invisible reCAPTCHA container -->
+          <div id="recaptcha-container"></div>
+
+          <button type="submit" id="sendOtpBtn" class="btn-primary-action">Send Verification OTP →</button>
         </form>
+
+        <!-- Step 2: OTP Verification Box -->
+        <div id="otpSection" class="hidden" style="margin-top: 1rem;">
+          <label class="form-label">ENTER 6-DIGIT OTP</label>
+          <input type="number" id="otpInput" class="input-box" placeholder="Enter 6-digit OTP sent to phone" style="text-align: center; letter-spacing: 0.25rem; font-size: 1.15rem;" />
+          <button type="button" id="verifyOtpBtn" class="btn-primary-action" onclick="verifyOtp()">Verify & Complete Registration ✓</button>
+        </div>
       </section>
 
-      <!-- GATEWAY 2: STUDY EXPLORER -->
+      <!-- GATEWAY 2: STUDY EXPLORER (SHOWN AFTER REGISTRATION) -->
       <div id="studyContent" class="hidden">
         <div id="breadcrumb" class="breadcrumb hidden">Home</div>
         <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
 
         <!-- STEP 1: SELECT COURSE -->
         <section id="step-course">
-          <h2 class="step-title">Select your course</h2>
+          <h2 class="step-title">Select Course</h2>
           <div class="grid" id="course-list">
             <button class="btn-select" onclick="selectCourse('FYBA')">FYBA <span>→</span></button>
             <button class="btn-select" onclick="selectCourse('SYBA')">SYBA <span>→</span></button>
             <button class="btn-select" onclick="selectCourse('TYBA')">TYBA <span>→</span></button>
-            <button class="btn-select" onclick="selectCourse('Other courses')">Other courses <span>→</span></button>
           </div>
         </section>
 
@@ -415,36 +412,46 @@
       <!-- GATEWAY 3: ACCOUNT SETTINGS TAB -->
       <section id="accountSection" class="hidden">
         <button class="back-btn" onclick="closeAccountTab()">← Back to Study Hub</button>
-        <h2 class="step-title">⚙️ Student Account Settings</h2>
+        <h2 class="step-title">⚙️ Student Account Details</h2>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-          Update your student profile. Changes will reflect automatically on your registered record.
+          Your verified student credentials. Name and College details can be updated.
         </p>
 
         <form onsubmit="saveAccountSettings(event)">
-          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display:block; margin-bottom: 0.25rem;">STUDENT FULL NAME</label>
+          <label class="form-label">FULL NAME</label>
           <input type="text" id="accNameInput" class="input-box" required />
 
-          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display:block; margin-bottom: 0.25rem;">WHATSAPP / MOBILE NUMBER</label>
-          <input type="tel" id="accPhoneInput" class="input-box" pattern="[0-9]{10}" disabled style="opacity:0.6; cursor:not-allowed;" />
+          <label class="form-label">VERIFIED MOBILE NUMBER</label>
+          <input type="tel" id="accPhoneInput" class="input-box" disabled style="opacity:0.6; cursor:not-allowed;" />
 
-          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display:block; margin-bottom: 0.25rem;">COLLEGE / DEPARTMENT</label>
-          <input type="text" id="accCollegeInput" class="input-box" placeholder="e.g. Arts College" />
+          <label class="form-label">YEAR OF COLLEGE</label>
+          <select id="accCollegeYearSelect" class="select-box" required>
+            <option value="FYBA">FYBA</option>
+            <option value="SYBA">SYBA</option>
+            <option value="TYBA">TYBA</option>
+          </select>
 
-          <button type="submit" id="saveAccBtn" class="btn-primary-action" style="margin-top: 0.5rem;">Save Details</button>
+          <label class="form-label">ACADEMIC YEAR</label>
+          <select id="accAcademicYearSelect" class="select-box" required>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+          </select>
+
+          <button type="submit" id="saveAccBtn" class="btn-primary-action" style="margin-top: 0.5rem;">Save Changes</button>
         </form>
       </section>
 
     </div>
 
-    <!-- RECENT SCHOLARS DIRECTORY -->
-    <div class="community-box" id="communityBox">
-      <div class="community-header">
-        <span>🎓 Recently Joined Scholars</span>
-        <span style="font-size: 0.75rem; color: var(--text-muted);">Verified Directory</span>
+    <!-- MINIMALIST BOTTOM ACTIVE USERS BOX (ONLY NUMBERS) -->
+    <div class="active-users-box">
+      <div class="active-users-title">
+        <span>⚡ Active Scholars Joined:</span>
       </div>
-      <div class="student-list" id="recentStudentsList">
-        <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 0.5rem;">Loading active scholars...</div>
-      </div>
+      <span class="active-badge" id="totalUsersCount">0</span>
     </div>
   </main>
 
@@ -468,29 +475,14 @@
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
+    const auth = firebase.auth();
     const database = firebase.database();
 
-    // 2. DATA REPOSITORY & DEFAULT STRUCTURE
     const WHATSAPP_NUMBER = "916359217206";
 
-    const studyData = {
-      "FYBA": {
-        "Semester 1": {
-          "Sanskrit": {
-            notes: "#",
-            questions: "#",
-            papers: "https://drive.google.com/drive/folders/1dzsTueQ29szEzigely0evoGySmlFC4hq",
-            exam: "#"
-          },
-          "History": { notes: "#", questions: "#", papers: "#", exam: "#" },
-          "English": { notes: "#", questions: "#", papers: "#", exam: "#" },
-          "Political Science": { notes: "#", questions: "#", papers: "#", exam: "#" }
-        },
-        "Semester 2": {
-          "Sanskrit": { notes: "#", questions: "#", papers: "#", exam: "#" },
-          "History": { notes: "#", questions: "#", papers: "#", exam: "#" }
-        }
-      },
+    // Dynamic Study Data - strictly populated by Admin
+    let studyData = {
+      "FYBA": { "Semester 1": {}, "Semester 2": {} },
       "SYBA": { "Semester 3": {}, "Semester 4": {} },
       "TYBA": { "Semester 5": {}, "Semester 6": {} }
     };
@@ -503,61 +495,137 @@
       inAccountTab: false
     };
 
-    // 3. LIVE SYNC: ADMIN PANEL SUBJECTS
+    let confirmationResult = null;
+    let tempStudentData = null;
+
+    // 2. LIVE SYNC: STRICTLY ADMIN-ADDED SUBJECTS
     database.ref('study_data').on('value', (snapshot) => {
       const liveData = snapshot.val();
+      studyData = {
+        "FYBA": { "Semester 1": {}, "Semester 2": {} },
+        "SYBA": { "Semester 3": {}, "Semester 4": {} },
+        "TYBA": { "Semester 5": {}, "Semester 6": {} }
+      };
+
       if (liveData) {
         Object.keys(liveData).forEach(course => {
           if (!studyData[course]) studyData[course] = {};
           Object.keys(liveData[course]).forEach(sem => {
-            if (!studyData[course][sem]) studyData[course][sem] = {};
-            Object.assign(studyData[course][sem], liveData[course][sem]);
+            studyData[course][sem] = liveData[course][sem];
           });
         });
-        if (state.step === 3) renderSubjects();
-        if (state.step === 4) updateView();
       }
+
+      if (state.step === 3) renderSubjects();
+      if (state.step === 4) updateView();
     });
 
-    // 4. REALTIME SESSION GUARD (AUTO LOGOUT AGAR ADMIN NE USER KO REMOVE KIYA)
+    // 3. REALTIME ACTIVE USERS NUMBER COUNTER
+    database.ref('registered_students').on('value', (snapshot) => {
+      const count = snapshot.numChildren() || 0;
+      document.getElementById('totalUsersCount').innerText = count;
+    });
+
+    // 4. REALTIME SESSION GUARD (AUTO-LOGOUT IF REMOVED BY ADMIN)
     function verifyStudentActive(phone) {
       const studentId = "student_" + phone;
       database.ref('registered_students/' + studentId).on('value', (snapshot) => {
         if (!snapshot.exists()) {
           localStorage.removeItem('csh_student');
-          alert("Your account was removed by the admin.");
+          alert("Your account was removed by the administrator.");
           window.location.reload();
         }
       });
     }
 
-    // 5. STUDENT ENROLLMENT
-    function enrollStudent(e) {
+    // 5. PHONE AUTH & OTP FLOW (NO DUPLICATE NUMBERS ALLOWED)
+    function initRecaptcha() {
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+          size: 'invisible'
+        });
+      }
+    }
+
+    function requestOtp(e) {
       e.preventDefault();
       const name = document.getElementById('studentNameInput').value.trim();
+      const collegeYear = document.getElementById('collegeYearSelect').value;
+      const academicYear = document.getElementById('academicYearSelect').value;
       const phone = document.getElementById('studentPhoneInput').value.trim();
-      if (!name || !phone) return;
 
-      const btn = document.getElementById('enrollBtn');
-      btn.innerText = "Connecting...";
-      btn.disabled = true;
+      if (!name || !phone || phone.length !== 10) {
+        alert("Please enter a valid 10-digit mobile number.");
+        return;
+      }
+
+      const sendOtpBtn = document.getElementById('sendOtpBtn');
+      sendOtpBtn.innerText = "Checking Mobile Number...";
+      sendOtpBtn.disabled = true;
 
       const studentId = "student_" + phone;
-      const userRef = database.ref('registered_students/' + studentId);
 
-      const record = {
-        name: name,
-        phone: phone,
-        college: "Verified Scholar",
-        joinedAt: new Date().toISOString()
-      };
+      // Duplicate Check in Database
+      database.ref('registered_students/' + studentId).once('value').then((snapshot) => {
+        if (snapshot.exists()) {
+          alert("This mobile number is already registered! One number can only be used once.");
+          sendOtpBtn.innerText = "Send Verification OTP →";
+          sendOtpBtn.disabled = false;
+          return;
+        }
 
-      userRef.set(record).then(() => {
-        localStorage.setItem('csh_student', JSON.stringify(record));
-        applyLoggedInState(record);
-      }).catch(() => {
-        localStorage.setItem('csh_student', JSON.stringify(record));
-        applyLoggedInState(record);
+        // Proceed to send OTP
+        sendOtpBtn.innerText = "Sending SMS OTP...";
+        initRecaptcha();
+        const phoneNumber = "+91" + phone;
+
+        auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+          .then((res) => {
+            confirmationResult = res;
+            tempStudentData = { name, collegeYear, academicYear, phone };
+            document.getElementById('enrollForm').classList.add('hidden');
+            document.getElementById('otpSection').classList.remove('hidden');
+          })
+          .catch((error) => {
+            alert("OTP Error: " + error.message);
+            sendOtpBtn.innerText = "Send Verification OTP →";
+            sendOtpBtn.disabled = false;
+            if (window.recaptchaVerifier) {
+              window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
+            }
+          });
+      });
+    }
+
+    function verifyOtp() {
+      const code = document.getElementById('otpInput').value.trim();
+      if (code.length !== 6) {
+        alert("Please enter the 6-digit OTP received via SMS.");
+        return;
+      }
+
+      const verifyBtn = document.getElementById('verifyOtpBtn');
+      verifyBtn.innerText = "Verifying...";
+      verifyBtn.disabled = true;
+
+      confirmationResult.confirm(code).then(() => {
+        const studentId = "student_" + tempStudentData.phone;
+        const record = {
+          name: tempStudentData.name,
+          phone: tempStudentData.phone,
+          collegeYear: tempStudentData.collegeYear,
+          academicYear: tempStudentData.academicYear,
+          joinedAt: new Date().toISOString()
+        };
+
+        database.ref('registered_students/' + studentId).set(record).then(() => {
+          localStorage.setItem('csh_student', JSON.stringify(record));
+          applyLoggedInState(record);
+        });
+      }).catch((error) => {
+        alert("Invalid or expired OTP: " + error.message);
+        verifyBtn.innerText = "Verify & Complete Registration ✓";
+        verifyBtn.disabled = false;
       });
     }
 
@@ -565,10 +633,6 @@
       document.getElementById('loginSection').classList.add('hidden');
       document.getElementById('studyContent').classList.remove('hidden');
       document.getElementById('authProfileBar').classList.remove('hidden');
-
-      const firstName = student.name.split(' ')[0];
-      document.getElementById('userName').innerText = firstName;
-      document.getElementById('userInitial').innerText = firstName.charAt(0).toUpperCase();
 
       verifyStudentActive(student.phone);
       parseHash();
@@ -583,7 +647,8 @@
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
       document.getElementById('accNameInput').value = current.name || '';
       document.getElementById('accPhoneInput').value = current.phone || '';
-      document.getElementById('accCollegeInput').value = current.college || '';
+      document.getElementById('accCollegeYearSelect').value = current.collegeYear || 'FYBA';
+      document.getElementById('accAcademicYearSelect').value = current.academicYear || '2026';
 
       window.location.hash = '#/account';
     }
@@ -598,75 +663,44 @@
 
     function saveAccountSettings(e) {
       e.preventDefault();
-      const name = document.getElementById('accNameInput').value.trim();
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
-      const phone = current.phone;
-      const college = document.getElementById('accCollegeInput').value.trim() || 'Verified Scholar';
+      const name = document.getElementById('accNameInput').value.trim();
+      const collegeYear = document.getElementById('accCollegeYearSelect').value;
+      const academicYear = document.getElementById('accAcademicYearSelect').value;
 
       const saveBtn = document.getElementById('saveAccBtn');
       saveBtn.innerText = "Saving Changes...";
       saveBtn.disabled = true;
 
       const updatedRecord = {
+        ...current,
         name: name,
-        phone: phone,
-        college: college,
+        collegeYear: collegeYear,
+        academicYear: academicYear,
         updatedAt: new Date().toISOString()
       };
 
-      const studentId = "student_" + phone;
+      const studentId = "student_" + current.phone;
       database.ref('registered_students/' + studentId).update(updatedRecord).finally(() => {
         localStorage.setItem('csh_student', JSON.stringify(updatedRecord));
-        applyLoggedInState(updatedRecord);
         saveBtn.innerText = "Saved Successfully!";
         setTimeout(() => {
-          saveBtn.innerText = "Save Details";
+          saveBtn.innerText = "Save Changes";
           saveBtn.disabled = false;
           closeAccountTab();
-        }, 800);
+        }, 600);
       });
     }
 
-    // 7. DIRECTORY LISTENER
-    function listenToUsersDirectory() {
-      const listEl = document.getElementById('recentStudentsList');
-      database.ref('registered_students').on('value', (snapshot) => {
-        const count = snapshot.numChildren() || 0;
-        document.getElementById('totalUsersCount').innerText = count;
-
-        const data = snapshot.val();
-        if (!data) {
-          listEl.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); text-align:center;">No enrolled users yet. Be the first!</div>`;
-          return;
-        }
-
-        listEl.innerHTML = '';
-        const allStudents = Object.values(data);
-        allStudents.reverse().slice(0, 10).forEach(student => {
-          const item = document.createElement('div');
-          item.className = 'student-item';
-          const maskedPhone = student.phone ? student.phone.slice(0, 3) + '****' + student.phone.slice(-3) : '';
-          item.innerHTML = `
-            <div class="student-name-box">
-              <span>👤 ${student.name}</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">${student.college || maskedPhone}</span>
-            </div>
-            <span class="badge-member">✓ Enrolled</span>
-          `;
-          listEl.appendChild(item);
-        });
-      });
-    }
-
+    // Auto-detect existing logged-in session
     document.addEventListener('DOMContentLoaded', () => {
       const savedStudent = localStorage.getItem('csh_student');
       if (savedStudent) {
         applyLoggedInState(JSON.parse(savedStudent));
       }
-      listenToUsersDirectory();
     });
 
-    // 8. ROUTER & REFRESH MANAGER
+    // 7. ROUTER & REFRESH MANAGER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
@@ -756,11 +790,6 @@
       const courseObj = studyData[state.course] || {};
       const semesters = Object.keys(courseObj);
 
-      if (semesters.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted); padding:1rem 0;">Coming soon...</p>';
-        return;
-      }
-
       semesters.forEach(sem => {
         const btn = document.createElement('button');
         btn.className = 'btn-select';
@@ -778,7 +807,7 @@
       const subjects = Object.keys(semObj);
 
       if (subjects.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted); padding:1rem 0;">No subjects added yet. Add from Admin panel!</p>';
+        container.innerHTML = '<p style="color:var(--text-muted); padding:1rem 0; text-align:center;">No subjects added yet. Add from Admin panel!</p>';
         return;
       }
 
