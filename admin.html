@@ -731,7 +731,7 @@
           <label class="form-label">4-DIGIT PIN</label>
           <div class="pin-input-wrap">
             <input type="password" id="adminPinField" class="input-box" placeholder="Enter 4-digit PIN" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('adminPinField', this)">👁️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('adminPinField', this)">👁️️</button>
           </div>
         </div>
 
@@ -1060,7 +1060,6 @@
       document.getElementById('commentsTab').classList.add('hidden');
     }
 
-    // BULLETPROOF HASH ROUTER (NEVER BOUNCES TO HOME OR SEMESTER LIST ON REFRESH)
     function parseHash() {
       if (sessionStorage.getItem('csh_admin_auth') !== 'true') return;
 
@@ -1072,7 +1071,6 @@
         return;
       }
 
-      // 1. Refreshing inside a Subject Link Edit view
       if (rawHash.startsWith('subject-detail/')) {
         const subKey = decodeURIComponent(rawHash.replace('subject-detail/', ''));
         document.getElementById('existingSubjectsTab').classList.remove('hidden');
@@ -1080,7 +1078,6 @@
         if (isSubjectsLoaded && cachedSubjects[subKey]) {
           showSubjectDetail(subKey, false);
         } else {
-          // Wait for Firebase subjects callback then open directly
           const checkSubInterval = setInterval(() => {
             if (isSubjectsLoaded) {
               clearInterval(checkSubInterval);
@@ -1095,7 +1092,6 @@
         return;
       }
 
-      // 2. Refreshing inside a Semester Subjects list view
       if (rawHash.startsWith('subjects/')) {
         const semParam = decodeURIComponent(rawHash.replace('subjects/', ''));
         document.getElementById('existingSubjectsTab').classList.remove('hidden');
@@ -1118,7 +1114,6 @@
         return;
       }
 
-      // 3. Refreshing inside Student Detail
       if (rawHash.startsWith('student-detail/')) {
         const studentKey = decodeURIComponent(rawHash.replace('student-detail/', ''));
         document.getElementById('studentsDirectoryTab').classList.remove('hidden');
@@ -1134,7 +1129,6 @@
         return;
       }
 
-      // 4. Refreshing inside Comment Detail
       if (rawHash.startsWith('comment-detail/')) {
         const commentKey = decodeURIComponent(rawHash.replace('comment-detail/', ''));
         document.getElementById('commentsTab').classList.remove('hidden');
@@ -1150,7 +1144,6 @@
         return;
       }
 
-      // 5. Standard Tab level
       const tabId = hashToTabMap[rawHash];
       if (tabId) {
         document.getElementById(tabId).classList.remove('hidden');
@@ -1164,7 +1157,7 @@
 
     window.addEventListener('hashchange', parseHash);
 
-    // ADD / UPDATE SUBJECT
+    // ADD / UPDATE SUBJECT - LOCKS ORDER INDEX PERMANENTLY
     function handleSubjectSubmit(e) {
       e.preventDefault();
       const course = document.getElementById('courseSelect').value;
@@ -1183,10 +1176,20 @@
       btn.disabled = true;
 
       const safeKey = encodeSubKey(subject);
-      const path = `study_data/${course}/${semester}/${safeKey}`;
+      const semPath = `study_data/${course}/${semester}`;
+      const path = `${semPath}/${safeKey}`;
 
-      database.ref(path).once('value').then((snap) => {
-        const existing = snap.val() || {};
+      database.ref(semPath).once('value').then((semSnap) => {
+        const semData = semSnap.val() || {};
+        const existing = semData[safeKey] || {};
+
+        // Calculate permanent order index
+        let permanentIndex = existing.orderIndex;
+        if (typeof permanentIndex === 'undefined' || permanentIndex === null) {
+          const currentCount = Object.keys(semData).length;
+          permanentIndex = currentCount + 1;
+        }
+
         const createdAt = existing.createdAt || Date.now();
 
         database.ref(path).set({
@@ -1195,6 +1198,7 @@
           questions: questions,
           papers: papers,
           exam: exam,
+          orderIndex: permanentIndex,
           createdAt: createdAt,
           updatedAt: new Date().toISOString()
         }).then(() => {
@@ -1215,7 +1219,7 @@
       });
     }
 
-    // 1 SE 6 SEMESTERS RENDERER & LOGIC
+    // LISTEN & CACHE SUBJECTS
     function listenToSubjects() {
       database.ref('study_data').on('value', (snapshot) => {
         globalStudyData = snapshot.val() || {};
@@ -1233,6 +1237,7 @@
                 semester,
                 subKeyRaw,
                 subject: realSubjectName,
+                orderIndex: (typeof item.orderIndex !== 'undefined') ? item.orderIndex : 9999,
                 createdAt: item.createdAt || 0,
                 updatedAt: item.updatedAt || '',
                 compositeKey: compositeKey,
@@ -1245,7 +1250,6 @@
         isSubjectsLoaded = true;
         renderSemesterGrid();
 
-        // Agar user pehle se kisi semester me hai toh usko refresh par live render karein
         if (currentSelectedSemester && currentSelectedCourse) {
           renderSubjectsForCurrentSemester();
         }
@@ -1295,6 +1299,7 @@
       renderSubjectsForCurrentSemester();
     }
 
+    // STRICT PERMANENT ORDERING (NEVER SHUFFLES UPON EDITING OR SAVING)
     function renderSubjectsForCurrentSemester() {
       const container = document.getElementById('existingSubjectsContainer');
       container.innerHTML = '';
@@ -1316,10 +1321,12 @@
         }
       });
 
+      // SORT STRICTLY BY orderIndex, THEN BY createdAt (updatedAt is ignored to prevent shuffling!)
       list.sort((a, b) => {
-        if (a.createdAt && b.createdAt) return a.createdAt - b.createdAt;
-        if (a.updatedAt && b.updatedAt) return new Date(a.updatedAt) - new Date(b.updatedAt);
-        return 0;
+        if (a.orderIndex !== b.orderIndex) {
+          return a.orderIndex - b.orderIndex;
+        }
+        return (a.createdAt || 0) - (b.createdAt || 0);
       });
 
       list.forEach(s => {
@@ -1399,7 +1406,7 @@
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">🎯 Exam Preparation Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editExamInput')">✏️ Edit</button>
+            <button type="button" class="btn-inline-pencil" onclick="focusField('editExamInput')">✏️️ Edit</button>
           </div>
           <input type="text" id="editExamInput" class="detail-input-edit" value="${s.exam && s.exam !== '#' ? s.exam : ''}" placeholder="Enter Drive link for exam prep" />
         </div>
@@ -1425,6 +1432,7 @@
       }
     }
 
+    // SAVES ONLY LINKS — PRESERVES THE ORIGINAL POSITION / ORDER
     function saveSubjectLinksChanges() {
       if (!activeEditSubjectKey) return;
       const s = cachedSubjects[activeEditSubjectKey];
@@ -1440,6 +1448,8 @@
       saveBtn.disabled = true;
 
       const path = `study_data/${s.course}/${s.semester}/${s.subKeyRaw}`;
+      
+      // Update links without changing position/orderIndex
       database.ref(path).update({
         notes: notes,
         questions: questions,
@@ -1447,11 +1457,17 @@
         exam: exam,
         updatedAt: new Date().toISOString()
       }).then(() => {
-        alert(`Links for '${s.subject}' updated successfully on the main website!`);
+        // Cache update
+        s.notes = notes;
+        s.questions = questions;
+        s.papers = papers;
+        s.exam = exam;
+
+        alert(`Links for '${s.subject}' updated successfully!`);
         saveBtn.innerText = "Saved Successfully ✓";
         setTimeout(() => {
           backToSubjectList(true);
-        }, 500);
+        }, 400);
       }).catch(err => {
         alert("Error saving links: " + err.message);
         saveBtn.innerText = "💾 Save Changes & Update Website";
