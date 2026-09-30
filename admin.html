@@ -20,7 +20,6 @@
       --text-muted: #94a3b8;
       --danger: #ef4444;
       --danger-hover: #dc2626;
-      --success: #10b981;
       --radius: 14px;
       --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
     }
@@ -250,7 +249,7 @@
       border-radius: 9999px;
     }
 
-    /* MAIN CONTENT VIEW */
+    /* MAIN VIEW CONTAINER */
     main {
       flex: 1;
       max-width: 760px;
@@ -305,14 +304,13 @@
       color: var(--text-muted);
     }
 
-    /* SECTION DETAIL CARDS WITH TOP-RIGHT ❌ ICON */
+    /* SECTION DETAIL CARDS - FIXED HEADER WITHOUT OVERLAPS */
     .tab-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: var(--radius);
-      padding: 1.75rem 1.5rem;
+      padding: 1.5rem;
       box-shadow: var(--shadow);
-      position: relative;
       animation: tabEnter 0.2s ease-out;
     }
 
@@ -321,21 +319,46 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
+    .card-top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card-title-group {
+      flex: 1;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .section-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
     .tab-close-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
       background: #1e293b;
       border: 1px solid var(--card-border);
       color: var(--text-muted);
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1rem;
       transition: all 0.2s;
     }
 
@@ -343,22 +366,6 @@
       background: #ef4444;
       color: #fff;
       border-color: #ef4444;
-    }
-
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 0.35rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .section-desc {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 1.5rem;
     }
 
     /* FORMS & INPUTS */
@@ -409,7 +416,7 @@
       background: var(--primary-hover);
     }
 
-    /* DIRECTORY LIST & SUBJECT ITEMS */
+    /* CLEAN CLICKABLE ITEM ROWS */
     .item-list {
       display: flex;
       flex-direction: column;
@@ -418,34 +425,40 @@
       overflow-y: auto;
     }
 
-    .list-card {
+    .clean-item-row {
       background: #0b1329;
       border: 1px solid var(--card-border);
       border-radius: 10px;
-      padding: 0.9rem 1.15rem;
+      padding: 0.85rem 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 0.75rem;
+      transition: border-color 0.2s;
     }
 
-    .list-card-content {
-      overflow: hidden;
+    .clean-item-row:hover {
+      border-color: rgba(59, 130, 246, 0.5);
     }
 
-    .list-card-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #fff;
+    .clickable-name-area {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      cursor: pointer;
+      flex: 1;
+      padding: 0.2rem 0;
     }
 
-    .list-card-sub {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 0.15rem;
+    .clickable-name-area:hover {
+      color: #38bdf8;
+    }
+
+    .clickable-name-area span.icon-badge {
+      font-size: 1.15rem;
     }
 
     .btn-delete-item {
@@ -466,41 +479,66 @@
       color: #fff;
     }
 
-    /* COMMENTS ITEM CARD */
-    .comment-card {
+    /* DETAIL VIEW CARD (STRUCTURED LAYOUT) */
+    .detail-view-box {
       background: #0b1329;
       border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 1rem;
-      margin-bottom: 0.75rem;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-top: 0.5rem;
+      animation: tabEnter 0.2s ease-out;
     }
 
-    .comment-header {
+    .detail-row-item {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.4rem;
+      flex-direction: column;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0.65rem 0;
     }
 
-    .comment-user {
-      font-size: 0.9rem;
+    .detail-row-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .detail-label {
+      font-size: 0.75rem;
       font-weight: 700;
       color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.2rem;
     }
 
-    .comment-time {
-      font-size: 0.72rem;
-      color: var(--text-muted);
+    .detail-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+      word-break: break-all;
     }
 
-    .comment-body {
-      font-size: 0.88rem;
-      color: var(--text);
-      line-height: 1.4;
-      background: #131f3f;
-      padding: 0.65rem 0.85rem;
+    .detail-value a {
+      color: #60a5fa;
+      text-decoration: underline;
+    }
+
+    .btn-detail-back {
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 0.5rem 0.9rem;
       border-radius: 6px;
-      margin-top: 0.35rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .btn-detail-back:hover {
+      background: #334155;
     }
 
     .hidden {
@@ -603,7 +641,7 @@
   <!-- MAIN VIEW CONTAINER -->
   <main>
     
-    <!-- HOME CLEAN SCREEN (NO TABS BY DEFAULT) -->
+    <!-- HOME DASHBOARD (NO TABS BY DEFAULT) -->
     <section id="homeDashboard" class="dashboard-home">
       <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">⚡</div>
       <h2 style="font-size: 1.5rem; font-weight: 800; color: #fff;">Campus Study Hub Control</h2>
@@ -621,13 +659,13 @@
         <div class="quick-card" onclick="navigateToTab('existingSubjectsTab')">
           <div class="quick-icon">🗂</div>
           <div class="quick-title">Existing Subjects</div>
-          <div class="quick-desc">Manage, inspect, or delete live semester courses.</div>
+          <div class="quick-desc">Inspect or delete live semester courses and material links.</div>
         </div>
 
         <div class="quick-card" onclick="navigateToTab('studentsDirectoryTab')">
           <div class="quick-icon">👥</div>
           <div class="quick-title">Students Directory (<span id="quickUserCount">0</span>)</div>
-          <div class="quick-desc">Inspect registered scholars and manage active student sessions.</div>
+          <div class="quick-desc">View registered student profiles and their complete credentials.</div>
         </div>
 
         <div class="quick-card" onclick="navigateToTab('commentsTab')">
@@ -640,10 +678,13 @@
 
     <!-- TAB 1: ADD OR UPDATE SUBJECT MATERIALS -->
     <section id="addSubjectTab" class="tab-card hidden">
-      <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
-
-      <h2 class="section-title">📚 Add or Update Subject Materials</h2>
-      <p class="section-desc">Changes will instantly sync with the main Campus Study Hub website.</p>
+      <div class="card-top-header">
+        <div class="card-title-group">
+          <h2 class="section-title">📚 Add or Update Subject Materials</h2>
+          <p class="section-desc">Changes will instantly sync with the main Campus Study Hub website.</p>
+        </div>
+        <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+      </div>
 
       <form onsubmit="handleSubjectSubmit(event)">
         <div class="form-group">
@@ -691,37 +732,73 @@
 
     <!-- TAB 2: EXISTING MANAGED SUBJECTS -->
     <section id="existingSubjectsTab" class="tab-card hidden">
-      <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+      <div class="card-top-header">
+        <div class="card-title-group">
+          <h2 class="section-title">🗂 Existing Managed Subjects</h2>
+          <p class="section-desc">Click on any subject to inspect resource links.</p>
+        </div>
+        <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+      </div>
 
-      <h2 class="section-title">🗂 Existing Managed Subjects</h2>
-      <p class="section-desc">Subjects currently live on the main portal. Delete to remove immediately.</p>
+      <!-- MAIN LIST VIEW -->
+      <div id="subjectListView">
+        <div class="item-list" id="existingSubjectsContainer">
+          <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading managed subjects...</div>
+        </div>
+      </div>
 
-      <div class="item-list" id="existingSubjectsContainer">
-        <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading managed subjects...</div>
+      <!-- STRUCTURED DETAIL VIEW -->
+      <div id="subjectDetailView" class="hidden">
+        <button class="btn-detail-back" onclick="backToSubjectList()">← Back to Subjects List</button>
+        <div class="detail-view-box" id="subjectDetailContent"></div>
       </div>
     </section>
 
     <!-- TAB 3: ENROLLED STUDENTS DIRECTORY -->
     <section id="studentsDirectoryTab" class="tab-card hidden">
-      <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+      <div class="card-top-header">
+        <div class="card-title-group">
+          <h2 class="section-title">👥 Enrolled Students Directory</h2>
+          <p class="section-desc">Click on student's name to view complete registration details.</p>
+        </div>
+        <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+      </div>
 
-      <h2 class="section-title">👥 Enrolled Students Directory</h2>
-      <p class="section-desc">Total verified scholars on Campus Study Hub. Deleting forces an instant logout on their phone.</p>
+      <!-- MAIN LIST VIEW -->
+      <div id="studentListView">
+        <div class="item-list" id="studentsListContainer">
+          <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading enrolled students...</div>
+        </div>
+      </div>
 
-      <div class="item-list" id="studentsListContainer">
-        <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading enrolled students...</div>
+      <!-- STRUCTURED DETAIL VIEW -->
+      <div id="studentDetailView" class="hidden">
+        <button class="btn-detail-back" onclick="backToStudentList()">← Back to Students List</button>
+        <div class="detail-view-box" id="studentDetailContent"></div>
       </div>
     </section>
 
-    <!-- TAB 4: COMMENTS (WITH USER NAME, TIME & DATE) -->
+    <!-- TAB 4: COMMENTS -->
     <section id="commentsTab" class="tab-card hidden">
-      <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+      <div class="card-top-header">
+        <div class="card-title-group">
+          <h2 class="section-title">✉️ Student Comments & Queries</h2>
+          <p class="section-desc">Click on comment to view full query and details.</p>
+        </div>
+        <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+      </div>
 
-      <h2 class="section-title">✉️ Student Comments & Queries</h2>
-      <p class="section-desc">Feedback and requests submitted from the Campus Study Hub portal.</p>
+      <!-- MAIN LIST VIEW -->
+      <div id="commentListView">
+        <div class="item-list" id="commentsContainer">
+          <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No student comments posted yet.</div>
+        </div>
+      </div>
 
-      <div id="commentsContainer">
-        <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No student comments found yet.</div>
+      <!-- STRUCTURED DETAIL VIEW -->
+      <div id="commentDetailView" class="hidden">
+        <button class="btn-detail-back" onclick="backToCommentList()">← Back to Comments List</button>
+        <div class="detail-view-box" id="commentDetailContent"></div>
       </div>
     </section>
 
@@ -751,6 +828,11 @@
 
     const ADMIN_DEFAULT_PIN = "1234";
     let isPinVisible = false;
+
+    // Cache objects for instant detail inspection
+    let cachedStudents = {};
+    let cachedSubjects = {};
+    let cachedComments = {};
 
     // 2. SEMESTER OPTIONS MAP
     const semesterMap = {
@@ -797,6 +879,11 @@
       document.getElementById('existingSubjectsTab').classList.add('hidden');
       document.getElementById('studentsDirectoryTab').classList.add('hidden');
       document.getElementById('commentsTab').classList.add('hidden');
+
+      // Reset detail views to lists
+      backToStudentList();
+      backToSubjectList();
+      backToCommentList();
 
       const target = document.getElementById(tabId);
       if (target) {
@@ -855,11 +942,12 @@
       });
     }
 
-    // 6. RENDER EXISTING MANAGED SUBJECTS
+    // 6. RENDER EXISTING MANAGED SUBJECTS (ONLY NAME ON LIST, FULL DATA ON CLICK)
     function listenToSubjects() {
       const container = document.getElementById('existingSubjectsContainer');
       database.ref('study_data').on('value', (snapshot) => {
         const data = snapshot.val();
+        cachedSubjects = {};
         if (!data) {
           container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem;">No custom subjects added yet. Add one from the menu!</div>`;
           return;
@@ -869,31 +957,89 @@
         Object.keys(data).forEach(course => {
           Object.keys(data[course]).forEach(semester => {
             Object.keys(data[course][semester]).forEach(subName => {
-              const card = document.createElement('div');
-              card.className = 'list-card';
-              card.innerHTML = `
-                <div class="list-card-content">
-                  <div class="list-card-title">📘 ${subName}</div>
-                  <div class="list-card-sub">${course} • ${semester}</div>
+              const subKey = `${course}___${semester}___${subName}`;
+              cachedSubjects[subKey] = {
+                course,
+                semester,
+                subject: subName,
+                ...data[course][semester][subName]
+              };
+
+              const row = document.createElement('div');
+              row.className = 'clean-item-row';
+              row.innerHTML = `
+                <div class="clickable-name-area" onclick="showSubjectDetail('${subKey}')" title="Click to view resource links">
+                  <span class="icon-badge">📘</span>
+                  <span>${subName}</span>
                 </div>
                 <button class="btn-delete-item" onclick="deleteSubject('${course}', '${semester}', '${subName}')">Delete Subject</button>
               `;
-              container.appendChild(card);
+              container.appendChild(row);
             });
           });
         });
       });
     }
 
+    function showSubjectDetail(subKey) {
+      const s = cachedSubjects[subKey];
+      if (!s) return;
+
+      const detailContainer = document.getElementById('subjectDetailContent');
+      detailContainer.innerHTML = `
+        <div class="detail-row-item">
+          <div class="detail-label">📘 Subject Name</div>
+          <div class="detail-value">${s.subject}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">🎓 Course</div>
+          <div class="detail-value">${s.course}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">📅 Semester</div>
+          <div class="detail-value">${s.semester}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">📖 Notes Link</div>
+          <div class="detail-value">${s.notes && s.notes !== '#' ? `<a href="${s.notes}" target="_blank">${s.notes}</a>` : '<span style="color:var(--text-muted);">Not added</span>'}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">📝 Important Questions Link</div>
+          <div class="detail-value">${s.questions && s.questions !== '#' ? `<a href="${s.questions}" target="_blank">${s.questions}</a>` : '<span style="color:var(--text-muted);">Not added</span>'}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">📄 Previous Year Papers Link</div>
+          <div class="detail-value">${s.papers && s.papers !== '#' ? `<a href="${s.papers}" target="_blank">${s.papers}</a>` : '<span style="color:var(--text-muted);">Not added</span>'}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">🎯 Exam Preparation Link</div>
+          <div class="detail-value">${s.exam && s.exam !== '#' ? `<a href="${s.exam}" target="_blank">${s.exam}</a>` : '<span style="color:var(--text-muted);">Not added</span>'}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">🕒 Last Updated</div>
+          <div class="detail-value" style="font-size:0.85rem; color:var(--text-muted);">${s.updatedAt ? new Date(s.updatedAt).toLocaleString('en-IN') : 'N/A'}</div>
+        </div>
+      `;
+
+      document.getElementById('subjectListView').classList.add('hidden');
+      document.getElementById('subjectDetailView').classList.remove('hidden');
+    }
+
+    function backToSubjectList() {
+      document.getElementById('subjectDetailView').classList.add('hidden');
+      document.getElementById('subjectListView').classList.remove('hidden');
+    }
+
     function deleteSubject(course, sem, subject) {
       if (confirm(`Are you sure you want to remove '${subject}' from ${course} (${sem})?`)) {
         database.ref(`study_data/${course}/${sem}/${subject}`).remove().then(() => {
           alert(`Subject '${subject}' removed from live site.`);
+          backToSubjectList();
         });
       }
     }
 
-    // 7. RENDER ENROLLED STUDENTS DIRECTORY
+    // 7. RENDER ENROLLED STUDENTS DIRECTORY (ONLY 👤 NAME ON LIST, FULL DATA ON CLICK)
     function listenToStudents() {
       const container = document.getElementById('studentsListContainer');
       database.ref('registered_students').on('value', (snapshot) => {
@@ -902,6 +1048,7 @@
         document.getElementById('quickUserCount').innerText = count;
 
         const data = snapshot.val();
+        cachedStudents = {};
         if (!data) {
           container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem;">No enrolled students registered yet.</div>`;
           return;
@@ -910,29 +1057,76 @@
         container.innerHTML = '';
         Object.keys(data).forEach(key => {
           const student = data[key];
-          const card = document.createElement('div');
-          card.className = 'list-card';
-          card.innerHTML = `
-            <div class="list-card-content">
-              <div class="list-card-title">👤 ${student.name} <span style="font-size:0.75rem; color:#38bdf8;">(${student.collegeYear || 'FYBA'} - ${student.academicYear || '2026'})</span></div>
-              <div class="list-card-sub">📱 +91 ${student.phone} | PIN: <span style="font-family:monospace; color:#fff;">${student.pin || '••••'}</span></div>
+          cachedStudents[key] = student;
+
+          const row = document.createElement('div');
+          row.className = 'clean-item-row';
+          row.innerHTML = `
+            <div class="clickable-name-area" onclick="showStudentDetail('${key}')" title="Click to view full registration details">
+              <span class="icon-badge">👤</span>
+              <span>${student.name}</span>
             </div>
             <button class="btn-delete-item" onclick="removeStudent('${key}', '${student.name}')">Remove Student</button>
           `;
-          container.appendChild(card);
+          container.appendChild(row);
         });
       });
+    }
+
+    function showStudentDetail(studentKey) {
+      const s = cachedStudents[studentKey];
+      if (!s) return;
+
+      const detailContainer = document.getElementById('studentDetailContent');
+      detailContainer.innerHTML = `
+        <div class="detail-row-item">
+          <div class="detail-label">👤 Student Full Name</div>
+          <div class="detail-value">${s.name}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">📞 Registered Mobile Number</div>
+          <div class="detail-value">+91 ${s.phone}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">🎓 Year of College</div>
+          <div class="detail-value">${s.collegeYear || 'FYBA'}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">📅 Academic Year</div>
+          <div class="detail-value">${s.academicYear || '2026'}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">🔐 4-Digit Security PIN</div>
+          <div class="detail-value" style="font-family:monospace; color:#38bdf8; font-size:1.1rem; letter-spacing:0.1em;">${s.pin || '••••'}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">🕒 Registration Timestamp</div>
+          <div class="detail-value" style="font-size:0.85rem; color:var(--text-muted);">${s.joinedAt ? new Date(s.joinedAt).toLocaleString('en-IN') : 'N/A'}</div>
+        </div>
+        <div style="margin-top:1.25rem;">
+          <button class="btn-delete-item" style="width:100%; padding:0.75rem;" onclick="removeStudent('${studentKey}', '${s.name}')">Remove & Logout Scholar</button>
+        </div>
+      `;
+
+      document.getElementById('studentListView').classList.add('hidden');
+      document.getElementById('studentDetailView').classList.remove('hidden');
+    }
+
+    function backToStudentList() {
+      document.getElementById('studentDetailView').classList.add('hidden');
+      document.getElementById('studentListView').classList.remove('hidden');
     }
 
     function removeStudent(studentId, name) {
       if (confirm(`Remove scholar '${name}'? This will automatically log them out of Campus Study Hub.`)) {
         database.ref(`registered_students/${studentId}`).remove().then(() => {
           alert(`Scholar '${name}' removed.`);
+          backToStudentList();
         });
       }
     }
 
-    // 8. RENDER COMMENTS (WITH STUDENT NAME, DATE & TIME)
+    // 8. RENDER COMMENTS (NAME + COMMENT ON LIST, FULL DATA ON CLICK)
     function listenToComments() {
       const container = document.getElementById('commentsContainer');
       database.ref('student_comments').on('value', (snapshot) => {
@@ -941,43 +1135,80 @@
         document.getElementById('quickCommentCount').innerText = count;
 
         const data = snapshot.val();
+        cachedComments = {};
         if (!data) {
-          container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem;">No comments posted by students yet.</div>`;
+          container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem;">No student comments posted yet.</div>`;
           return;
         }
 
         container.innerHTML = '';
-        const commentsArr = Object.entries(data);
-        commentsArr.reverse().forEach(([key, item]) => {
-          const timeFormatted = item.timestamp ? new Date(item.timestamp).toLocaleString('en-IN', {
-            dateStyle: 'medium',
-            timeStyle: 'short'
-          }) : 'Just now';
+        Object.entries(data).reverse().forEach(([key, item]) => {
+          cachedComments[key] = item;
 
-          const card = document.createElement('div');
-          card.className = 'comment-card';
-          card.innerHTML = `
-            <div class="comment-header">
-              <span class="comment-user">💬 ${item.userName || 'Anonymous Scholar'} (${item.userPhone ? '+91 ' + item.userPhone : 'Student'})</span>
-              <span class="comment-time">${timeFormatted}</span>
+          const row = document.createElement('div');
+          row.className = 'clean-item-row';
+          row.innerHTML = `
+            <div class="clickable-name-area" onclick="showCommentDetail('${key}')" title="Click to view full comment details">
+              <span class="icon-badge">💬</span>
+              <span>${item.userName || 'Scholar'}</span>
             </div>
-            <div class="comment-body">${item.message || ''}</div>
-            <div style="display:flex; justify-content:flex-end; margin-top:0.4rem;">
-              <button class="btn-delete-item" style="padding:0.25rem 0.55rem; font-size:0.75rem;" onclick="deleteComment('${key}')">Delete</button>
-            </div>
+            <button class="btn-delete-item" onclick="deleteComment('${key}')">Delete</button>
           `;
-          container.appendChild(card);
+          container.appendChild(row);
         });
       });
     }
 
+    function showCommentDetail(commentKey) {
+      const c = cachedComments[commentKey];
+      if (!c) return;
+
+      const timeFormatted = c.timestamp ? new Date(c.timestamp).toLocaleString('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }) : 'Just now';
+
+      const detailContainer = document.getElementById('commentDetailContent');
+      detailContainer.innerHTML = `
+        <div class="detail-row-item">
+          <div class="detail-label">👤 Student Name</div>
+          <div class="detail-value">${c.userName || 'Anonymous Scholar'}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">📞 Mobile Number</div>
+          <div class="detail-value">${c.userPhone ? '+91 ' + c.userPhone : 'Not Provided'}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">🕒 Date & Time</div>
+          <div class="detail-value">${timeFormatted}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">💬 Comment / Query Message</div>
+          <div class="detail-value" style="background:#131f3f; padding:0.85rem; border-radius:8px; margin-top:0.35rem; line-height:1.5;">${c.message || ''}</div>
+        </div>
+        <div style="margin-top:1.25rem;">
+          <button class="btn-delete-item" style="width:100%; padding:0.75rem;" onclick="deleteComment('${commentKey}')">Delete Comment</button>
+        </div>
+      `;
+
+      document.getElementById('commentListView').classList.add('hidden');
+      document.getElementById('commentDetailView').classList.remove('hidden');
+    }
+
+    function backToCommentList() {
+      document.getElementById('commentDetailView').classList.add('hidden');
+      document.getElementById('commentListView').classList.remove('hidden');
+    }
+
     function deleteComment(commentId) {
       if (confirm("Delete this comment permanently?")) {
-        database.ref(`student_comments/${commentId}`).remove();
+        database.ref(`student_comments/${commentId}`).remove().then(() => {
+          backToCommentList();
+        });
       }
     }
 
-    // Initialize listeners & dropdown on page load
+    // Initialize listeners & dropdown on load
     document.addEventListener('DOMContentLoaded', () => {
       updateSemesterDropdown();
       listenToSubjects();
