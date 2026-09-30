@@ -26,7 +26,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
@@ -194,6 +194,10 @@
       border-color: #d97706;
     }
 
+    .btn-order:hover {
+      background: #d97706 !important;
+    }
+
     .back-btn {
       background: transparent;
       border: none;
@@ -257,7 +261,6 @@
       background: var(--primary-hover);
     }
 
-    /* Community Enrolled Users Directory */
     .community-box {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -326,7 +329,6 @@
 </head>
 <body>
 
-  <!-- Top Strip: Counter & Account Entry Point -->
   <div class="top-bar">
     <div class="user-counter">
       👥 <span>Enrolled Scholars:</span>
@@ -347,7 +349,7 @@
   <main>
     <div class="card">
       
-      <!-- GATEWAY 1: INSTANT ENROLLMENT SCREEN -->
+      <!-- GATEWAY 1: ENROLLMENT FORM -->
       <section id="loginSection" class="login-gate">
         <h2>Enter Student Details to Access</h2>
         <p>Join Campus Study Hub to view papers, syllabus, and study notes.</p>
@@ -359,7 +361,7 @@
         </form>
       </section>
 
-      <!-- GATEWAY 2: STUDY EXPLORER (SHOWN AFTER ENROLLMENT) -->
+      <!-- GATEWAY 2: STUDY EXPLORER -->
       <div id="studyContent" class="hidden">
         <div id="breadcrumb" class="breadcrumb hidden">Home</div>
         <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
@@ -410,7 +412,7 @@
         </section>
       </div>
 
-      <!-- GATEWAY 3: DEDICATED ACCOUNT SETTINGS TAB -->
+      <!-- GATEWAY 3: ACCOUNT SETTINGS TAB -->
       <section id="accountSection" class="hidden">
         <button class="back-btn" onclick="closeAccountTab()">← Back to Study Hub</button>
         <h2 class="step-title">⚙️ Student Account Settings</h2>
@@ -423,9 +425,9 @@
           <input type="text" id="accNameInput" class="input-box" required />
 
           <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display:block; margin-bottom: 0.25rem;">WHATSAPP / MOBILE NUMBER</label>
-          <input type="tel" id="accPhoneInput" class="input-box" pattern="[0-9]{10}" required />
+          <input type="tel" id="accPhoneInput" class="input-box" pattern="[0-9]{10}" disabled style="opacity:0.6; cursor:not-allowed;" />
 
-          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display:block; margin-bottom: 0.25rem;">COLLEGE / DEPARTMENT (OPTIONAL)</label>
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display:block; margin-bottom: 0.25rem;">COLLEGE / DEPARTMENT</label>
           <input type="text" id="accCollegeInput" class="input-box" placeholder="e.g. Arts College" />
 
           <button type="submit" id="saveAccBtn" class="btn-primary-action" style="margin-top: 0.5rem;">Save Details</button>
@@ -434,7 +436,7 @@
 
     </div>
 
-    <!-- REGISTERED STUDENTS REPOSITORY (LIVE BOTTOM DIRECTORY) -->
+    <!-- RECENT SCHOLARS DIRECTORY -->
     <div class="community-box" id="communityBox">
       <div class="community-header">
         <span>🎓 Recently Joined Scholars</span>
@@ -468,7 +470,7 @@
     }
     const database = firebase.database();
 
-    // 2. DATA REPOSITORY
+    // 2. DATA REPOSITORY & DEFAULT STRUCTURE
     const WHATSAPP_NUMBER = "916359217206";
 
     const studyData = {
@@ -501,7 +503,35 @@
       inAccountTab: false
     };
 
-    // 3. STUDENT ENROLLMENT & STORAGE
+    // 3. LIVE SYNC: ADMIN PANEL SUBJECTS
+    database.ref('study_data').on('value', (snapshot) => {
+      const liveData = snapshot.val();
+      if (liveData) {
+        Object.keys(liveData).forEach(course => {
+          if (!studyData[course]) studyData[course] = {};
+          Object.keys(liveData[course]).forEach(sem => {
+            if (!studyData[course][sem]) studyData[course][sem] = {};
+            Object.assign(studyData[course][sem], liveData[course][sem]);
+          });
+        });
+        if (state.step === 3) renderSubjects();
+        if (state.step === 4) updateView();
+      }
+    });
+
+    // 4. REALTIME SESSION GUARD (AUTO LOGOUT AGAR ADMIN NE USER KO REMOVE KIYA)
+    function verifyStudentActive(phone) {
+      const studentId = "student_" + phone;
+      database.ref('registered_students/' + studentId).on('value', (snapshot) => {
+        if (!snapshot.exists()) {
+          localStorage.removeItem('csh_student');
+          alert("Your account was removed by the admin.");
+          window.location.reload();
+        }
+      });
+    }
+
+    // 5. STUDENT ENROLLMENT
     function enrollStudent(e) {
       e.preventDefault();
       const name = document.getElementById('studentNameInput').value.trim();
@@ -540,10 +570,11 @@
       document.getElementById('userName').innerText = firstName;
       document.getElementById('userInitial').innerText = firstName.charAt(0).toUpperCase();
 
+      verifyStudentActive(student.phone);
       parseHash();
     }
 
-    // 4. DEDICATED ACCOUNT SETTINGS TAB
+    // 6. ACCOUNT SETTINGS TAB
     function openAccountTab() {
       state.inAccountTab = true;
       document.getElementById('studyContent').classList.add('hidden');
@@ -568,7 +599,8 @@
     function saveAccountSettings(e) {
       e.preventDefault();
       const name = document.getElementById('accNameInput').value.trim();
-      const phone = document.getElementById('accPhoneInput').value.trim();
+      const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
+      const phone = current.phone;
       const college = document.getElementById('accCollegeInput').value.trim() || 'Verified Scholar';
 
       const saveBtn = document.getElementById('saveAccBtn');
@@ -595,7 +627,7 @@
       });
     }
 
-    // 5. LIVE RECENT USERS DIRECTORY
+    // 7. DIRECTORY LISTENER
     function listenToUsersDirectory() {
       const listEl = document.getElementById('recentStudentsList');
       database.ref('registered_students').on('value', (snapshot) => {
@@ -610,7 +642,6 @@
 
         listEl.innerHTML = '';
         const allStudents = Object.values(data);
-        // Show recent users first (up to last 10)
         allStudents.reverse().slice(0, 10).forEach(student => {
           const item = document.createElement('div');
           item.className = 'student-item';
@@ -627,7 +658,6 @@
       });
     }
 
-    // Auto-detect session on start
     document.addEventListener('DOMContentLoaded', () => {
       const savedStudent = localStorage.getItem('csh_student');
       if (savedStudent) {
@@ -636,7 +666,7 @@
       listenToUsersDirectory();
     });
 
-    // 6. ROUTER & REFRESH MANAGER
+    // 8. ROUTER & REFRESH MANAGER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
@@ -748,7 +778,7 @@
       const subjects = Object.keys(semObj);
 
       if (subjects.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted); padding:1rem 0;">Coming soon...</p>';
+        container.innerHTML = '<p style="color:var(--text-muted); padding:1rem 0;">No subjects added yet. Add from Admin panel!</p>';
         return;
       }
 
