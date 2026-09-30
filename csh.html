@@ -574,7 +574,7 @@
           </label>
           <div class="pin-input-wrap">
             <input type="password" id="regPinInput" class="input-box" placeholder="e.g. 1234" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️️</button>
           </div>
 
           <button type="submit" id="regSubmitBtn" class="btn-primary-action">Create Account & Enter →</button>
@@ -662,7 +662,7 @@
           <div class="form-label">
             <span class="label-text-nowrap">REGISTERED MOBILE NUMBER</span>
             <button type="button" class="btn-badge-action" onclick="toggleMobileBox()">
-              ✏️ Update Number
+              ✏️️ Update Number
             </button>
           </div>
           <input type="tel" id="accCurrentPhone" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 0.4rem;" />
@@ -812,7 +812,6 @@
       }
     }
 
-    // STRICT SUBJECT ORDER: Sanskrit M1 -> Sanskrit M2 -> Gujrati minor -> MDC -> AEC -> SEC -> VAC
     function getSubjectFixedPriority(subName) {
       const clean = subName.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (clean.includes('sanskritm1') || clean === 'sanskrit1') return 10;
@@ -840,6 +839,43 @@
       inAccountTab: false,
       previousHash: ''
     };
+
+    // BULLETPROOF SUBJECT RESOLVER: Finds subject and links under any key, space or encoding
+    function getActiveSubjectData() {
+      const courseData = studyData[state.course] || {};
+      const semData = courseData[state.semester] || {};
+      if (!semData) return {};
+
+      // 1. Direct match by current key
+      if (state.subjectKey && semData[state.subjectKey]) {
+        return semData[state.subjectKey];
+      }
+
+      // 2. Encoded key match
+      if (state.subjectKey) {
+        const encodedKey = encodeURIComponent(state.subjectKey).replace(/\./g, '%2E');
+        if (semData[encodedKey]) {
+          state.subjectKey = encodedKey;
+          return semData[encodedKey];
+        }
+      }
+
+      // 3. Name or fuzzy key match
+      const targetQuery = (state.subjectName || state.subjectKey || '').toLowerCase().trim();
+      const keys = Object.keys(semData);
+      const matchedKey = keys.find(k => {
+        const item = semData[k] || {};
+        const itemName = (item.subjectName || safeDecode(k) || '').toLowerCase().trim();
+        return itemName === targetQuery || safeDecode(k).toLowerCase().trim() === targetQuery;
+      });
+
+      if (matchedKey) {
+        state.subjectKey = matchedKey;
+        return semData[matchedKey];
+      }
+
+      return {};
+    }
 
     function togglePinVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
@@ -1080,6 +1116,7 @@
       document.getElementById('emptyDataModal').classList.add('hidden');
     }
 
+    // FIXED: Resolves active subject data reliably even after Android intent cancel
     function openResource(type) {
       if (type === 'assignments') {
         const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subjectName})`);
@@ -1087,11 +1124,9 @@
         return;
       }
 
-      const courseData = studyData[state.course] || {};
-      const semData = courseData[state.semester] || {};
-      const links = semData[state.subjectKey] || {};
-
-      let targetUrl = links[type];
+      // Always resolve from live memory
+      const subObj = getActiveSubjectData();
+      let targetUrl = subObj[type];
 
       if (!targetUrl || targetUrl.trim() === '' || targetUrl.trim() === '#' || !targetUrl.startsWith('http')) {
         let labelName = "Notes";
@@ -1099,7 +1134,8 @@
         if (type === 'papers') labelName = "Previous Papers";
         if (type === 'exam') labelName = "Exam Preparation Material";
 
-        showEmptyModal("Data is Empty", `Abhi ${state.subjectName} ke liye '${labelName}' upload nahi hua hai.`);
+        const displayName = subObj.subjectName || state.subjectName || "Subject";
+        showEmptyModal("Data is Empty", `Abhi ${displayName} ke liye '${labelName}' upload nahi hua hai.`);
       } else {
         window.location.href = targetUrl.trim();
       }
@@ -1310,19 +1346,14 @@
       if (parts[1]) { state.semester = parts[1]; state.step = 3; }
       if (parts[2]) {
         state.subjectKey = parts[2];
-        const courseData = studyData[state.course] || {};
-        const semData = courseData[state.semester] || {};
-        
-        let subObj = semData[state.subjectKey];
-        if (!subObj) {
-          const matchKey = Object.keys(semData).find(k => (semData[k].subjectName || safeDecode(k)) === state.subjectKey);
-          if (matchKey) {
-            state.subjectKey = matchKey;
-            subObj = semData[matchKey];
-          }
-        }
-        state.subjectName = (subObj && subObj.subjectName) ? subObj.subjectName : state.subjectKey;
+        state.subjectName = parts[2];
         state.step = 4;
+        
+        // Dynamically resolve exact subject object
+        const subObj = getActiveSubjectData();
+        if (subObj && subObj.subjectName) {
+          state.subjectName = subObj.subjectName;
+        }
       }
       updateView();
     }
@@ -1366,9 +1397,7 @@
       } else if (state.step === 4) {
         document.getElementById('step-resources').classList.remove('hidden');
         
-        const courseData = studyData[state.course] || {};
-        const semData = courseData[state.semester] || {};
-        const subObj = semData[state.subjectKey] || {};
+        const subObj = getActiveSubjectData();
         const fullSubjectName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey);
 
         document.getElementById('subject-title').innerText = `${fullSubjectName} Resources`;
@@ -1394,7 +1423,7 @@
       });
     }
 
-    // STRICT ASCENDING ORDER (Sanskrit M1 -> Sanskrit M2 -> Gujrati minor -> Others)
+    // STRICT ASCENDING ORDER
     function renderSubjects() {
       const container = document.getElementById('subject-list');
       container.innerHTML = '';
@@ -1423,7 +1452,7 @@
         };
       });
 
-      // Strict Ascending Sort: 10 (M1) -> 20 (M2) -> 30 (Minor) -> 40 (MDC) -> ...
+      // Strict Sorting: Sanskrit M1 (10) -> Sanskrit M2 (20) -> Gujrati minor (30) ...
       subjectsArray.sort((a, b) => {
         if (a.priority !== b.priority) {
           return a.priority - b.priority;
