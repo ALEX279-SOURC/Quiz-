@@ -69,12 +69,21 @@
     .auth-profile {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.5rem;
+      cursor: pointer;
+      background: #1e293b;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      transition: background 0.2s;
+    }
+
+    .auth-profile:hover {
+      background: #334155;
     }
 
     .auth-profile .avatar-circle {
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: #2563eb;
       color: #fff;
@@ -83,17 +92,6 @@
       justify-content: center;
       font-size: 0.75rem;
       font-weight: 700;
-    }
-
-    .btn-logout {
-      background: transparent;
-      border: 1px solid #64748b;
-      color: #cbd5e1;
-      padding: 0.2rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      font-weight: 600;
     }
 
     header {
@@ -120,7 +118,7 @@
       flex: 1;
       max-width: 650px;
       width: 100%;
-      margin: 2rem auto;
+      margin: 1.5rem auto 2.5rem;
       padding: 0 1rem;
     }
 
@@ -130,6 +128,7 @@
       border-radius: var(--radius);
       padding: 1.5rem;
       box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
     }
 
     .step-title {
@@ -185,6 +184,10 @@
       font-weight: 600;
     }
 
+    .resource-card:hover {
+      background: #f1f5f9;
+    }
+
     .btn-order {
       background: #f59e0b;
       color: #fff !important;
@@ -204,7 +207,6 @@
       font-size: 0.9rem;
     }
 
-    /* Clean Enrollment Form */
     .login-gate {
       text-align: center;
       padding: 1.5rem 0.5rem;
@@ -238,7 +240,7 @@
       background: #fff;
     }
 
-    .btn-submit-enroll {
+    .btn-primary-action {
       width: 100%;
       background: var(--primary);
       color: #fff;
@@ -251,8 +253,62 @@
       transition: background 0.2s;
     }
 
-    .btn-submit-enroll:hover {
+    .btn-primary-action:hover {
       background: var(--primary-hover);
+    }
+
+    /* Community Enrolled Users Directory */
+    .community-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .community-header {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .student-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .student-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    .student-name-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+    }
+
+    .badge-member {
+      background: #dcfce7;
+      color: #166534;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 9999px;
     }
 
     .hidden {
@@ -264,21 +320,22 @@
       padding: 1.5rem;
       color: var(--text-muted);
       font-size: 0.85rem;
+      margin-top: auto;
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Bar: Live Counter & User Account -->
+  <!-- Top Strip: Counter & Account Entry Point -->
   <div class="top-bar">
     <div class="user-counter">
       👥 <span>Enrolled Scholars:</span>
       <span class="badge" id="totalUsersCount">0</span>
     </div>
-    <div id="authProfileBar" class="auth-profile hidden">
+    <div id="authProfileBar" class="auth-profile hidden" onclick="openAccountTab()" title="Open Account Settings">
       <div class="avatar-circle" id="userInitial">S</div>
       <span id="userName" style="font-weight: 600;">Student</span>
-      <button class="btn-logout" onclick="logoutStudent()">Change User</button>
+      <span style="font-size: 0.75rem; opacity: 0.8;">⚙️ Edit</span>
     </div>
   </div>
 
@@ -298,7 +355,7 @@
         <form onsubmit="enrollStudent(event)">
           <input type="text" id="studentNameInput" class="input-box" placeholder="Your Full Name (e.g. Rahul Patel)" required />
           <input type="tel" id="studentPhoneInput" class="input-box" placeholder="WhatsApp / Mobile Number" pattern="[0-9]{10}" title="Please enter 10 digit number" required />
-          <button type="submit" id="enrollBtn" class="btn-submit-enroll">Access Notes & Papers →</button>
+          <button type="submit" id="enrollBtn" class="btn-primary-action">Access Notes & Papers →</button>
         </form>
       </section>
 
@@ -353,6 +410,39 @@
         </section>
       </div>
 
+      <!-- GATEWAY 3: DEDICATED ACCOUNT SETTINGS TAB -->
+      <section id="accountSection" class="hidden">
+        <button class="back-btn" onclick="closeAccountTab()">← Back to Study Hub</button>
+        <h2 class="step-title">⚙️ Student Account Settings</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Update your student profile. Changes will reflect automatically on your registered record.
+        </p>
+
+        <form onsubmit="saveAccountSettings(event)">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display:block; margin-bottom: 0.25rem;">STUDENT FULL NAME</label>
+          <input type="text" id="accNameInput" class="input-box" required />
+
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display:block; margin-bottom: 0.25rem;">WHATSAPP / MOBILE NUMBER</label>
+          <input type="tel" id="accPhoneInput" class="input-box" pattern="[0-9]{10}" required />
+
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display:block; margin-bottom: 0.25rem;">COLLEGE / DEPARTMENT (OPTIONAL)</label>
+          <input type="text" id="accCollegeInput" class="input-box" placeholder="e.g. Arts College" />
+
+          <button type="submit" id="saveAccBtn" class="btn-primary-action" style="margin-top: 0.5rem;">Save Details</button>
+        </form>
+      </section>
+
+    </div>
+
+    <!-- REGISTERED STUDENTS REPOSITORY (LIVE BOTTOM DIRECTORY) -->
+    <div class="community-box" id="communityBox">
+      <div class="community-header">
+        <span>🎓 Recently Joined Scholars</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Verified Directory</span>
+      </div>
+      <div class="student-list" id="recentStudentsList">
+        <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 0.5rem;">Loading active scholars...</div>
+      </div>
     </div>
   </main>
 
@@ -407,10 +497,11 @@
       course: null,
       semester: null,
       subject: null,
-      step: 1
+      step: 1,
+      inAccountTab: false
     };
 
-    // 3. STUDENT ENROLLMENT & LIVE COUNTER
+    // 3. STUDENT ENROLLMENT & STORAGE
     function enrollStudent(e) {
       e.preventDefault();
       const name = document.getElementById('studentNameInput').value.trim();
@@ -421,22 +512,22 @@
       btn.innerText = "Connecting...";
       btn.disabled = true;
 
-      // Unique key using phone number
       const studentId = "student_" + phone;
       const userRef = database.ref('registered_students/' + studentId);
 
-      userRef.set({
+      const record = {
         name: name,
         phone: phone,
+        college: "Verified Scholar",
         joinedAt: new Date().toISOString()
-      }).then(() => {
-        // Local state save
-        localStorage.setItem('csh_student', JSON.stringify({ name, phone }));
-        applyLoggedInState({ name, phone });
-      }).catch((err) => {
-        // Fallback: Agar offline/database rule block kare toh bhi user allow ho jaye
-        localStorage.setItem('csh_student', JSON.stringify({ name, phone }));
-        applyLoggedInState({ name, phone });
+      };
+
+      userRef.set(record).then(() => {
+        localStorage.setItem('csh_student', JSON.stringify(record));
+        applyLoggedInState(record);
+      }).catch(() => {
+        localStorage.setItem('csh_student', JSON.stringify(record));
+        applyLoggedInState(record);
       });
     }
 
@@ -452,32 +543,110 @@
       parseHash();
     }
 
-    function logoutStudent() {
-      localStorage.removeItem('csh_student');
-      window.location.hash = '';
-      window.location.reload();
+    // 4. DEDICATED ACCOUNT SETTINGS TAB
+    function openAccountTab() {
+      state.inAccountTab = true;
+      document.getElementById('studyContent').classList.add('hidden');
+      document.getElementById('accountSection').classList.remove('hidden');
+
+      const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
+      document.getElementById('accNameInput').value = current.name || '';
+      document.getElementById('accPhoneInput').value = current.phone || '';
+      document.getElementById('accCollegeInput').value = current.college || '';
+
+      window.location.hash = '#/account';
     }
 
-    // Auto check if already enrolled
+    function closeAccountTab() {
+      state.inAccountTab = false;
+      document.getElementById('accountSection').classList.add('hidden');
+      document.getElementById('studyContent').classList.remove('hidden');
+      setHash();
+      updateView();
+    }
+
+    function saveAccountSettings(e) {
+      e.preventDefault();
+      const name = document.getElementById('accNameInput').value.trim();
+      const phone = document.getElementById('accPhoneInput').value.trim();
+      const college = document.getElementById('accCollegeInput').value.trim() || 'Verified Scholar';
+
+      const saveBtn = document.getElementById('saveAccBtn');
+      saveBtn.innerText = "Saving Changes...";
+      saveBtn.disabled = true;
+
+      const updatedRecord = {
+        name: name,
+        phone: phone,
+        college: college,
+        updatedAt: new Date().toISOString()
+      };
+
+      const studentId = "student_" + phone;
+      database.ref('registered_students/' + studentId).update(updatedRecord).finally(() => {
+        localStorage.setItem('csh_student', JSON.stringify(updatedRecord));
+        applyLoggedInState(updatedRecord);
+        saveBtn.innerText = "Saved Successfully!";
+        setTimeout(() => {
+          saveBtn.innerText = "Save Details";
+          saveBtn.disabled = false;
+          closeAccountTab();
+        }, 800);
+      });
+    }
+
+    // 5. LIVE RECENT USERS DIRECTORY
+    function listenToUsersDirectory() {
+      const listEl = document.getElementById('recentStudentsList');
+      database.ref('registered_students').on('value', (snapshot) => {
+        const count = snapshot.numChildren() || 0;
+        document.getElementById('totalUsersCount').innerText = count;
+
+        const data = snapshot.val();
+        if (!data) {
+          listEl.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); text-align:center;">No enrolled users yet. Be the first!</div>`;
+          return;
+        }
+
+        listEl.innerHTML = '';
+        const allStudents = Object.values(data);
+        // Show recent users first (up to last 10)
+        allStudents.reverse().slice(0, 10).forEach(student => {
+          const item = document.createElement('div');
+          item.className = 'student-item';
+          const maskedPhone = student.phone ? student.phone.slice(0, 3) + '****' + student.phone.slice(-3) : '';
+          item.innerHTML = `
+            <div class="student-name-box">
+              <span>👤 ${student.name}</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">${student.college || maskedPhone}</span>
+            </div>
+            <span class="badge-member">✓ Enrolled</span>
+          `;
+          listEl.appendChild(item);
+        });
+      });
+    }
+
+    // Auto-detect session on start
     document.addEventListener('DOMContentLoaded', () => {
       const savedStudent = localStorage.getItem('csh_student');
       if (savedStudent) {
         applyLoggedInState(JSON.parse(savedStudent));
       }
-
-      // Realtime listener for total students count
-      database.ref('registered_students').on('value', (snapshot) => {
-        const count = snapshot.numChildren() || 0;
-        document.getElementById('totalUsersCount').innerText = count;
-      });
+      listenToUsersDirectory();
     });
 
-    // 4. ROUTER & REFRESH MANAGER
+    // 6. ROUTER & REFRESH MANAGER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
 
       const hash = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''));
+      if (hash === 'account') {
+        openAccountTab();
+        return;
+      }
+
       if (!hash) {
         state.course = null;
         state.semester = null;
@@ -504,6 +673,8 @@
     }
 
     function updateView() {
+      if (state.inAccountTab) return;
+
       document.getElementById('step-course').classList.add('hidden');
       document.getElementById('step-semester').classList.add('hidden');
       document.getElementById('step-subject').classList.add('hidden');
@@ -612,6 +783,10 @@
     }
 
     function goBack() {
+      if (state.inAccountTab) {
+        closeAccountTab();
+        return;
+      }
       window.history.back();
     }
 
