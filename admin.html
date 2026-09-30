@@ -920,7 +920,6 @@
     const REQUIRED_USER = "Alex";
     const REQUIRED_PIN = "4560";
 
-    // Encode/Decode helpers to safely support '/' inside subject names without cutting off
     function encodeSubKey(str) {
       return encodeURIComponent(str).replace(/\./g, '%2E');
     }
@@ -1093,7 +1092,7 @@
 
     window.addEventListener('hashchange', parseHash);
 
-    // ADD / UPDATE SUBJECT (Full Name Saved via Safe Key & Original Name Field)
+    // ADD / UPDATE SUBJECT - PRESERVES CREATION TIMESTAMP FOR SEQUENTIAL ORDER
     function handleSubjectSubmit(e) {
       e.preventDefault();
       const course = document.getElementById('courseSelect').value;
@@ -1113,32 +1112,39 @@
 
       const safeKey = encodeSubKey(subject);
       const path = `study_data/${course}/${semester}/${safeKey}`;
-      
-      database.ref(path).set({
-        subjectName: subject, // Original complete name preserved!
-        notes: notes,
-        questions: questions,
-        papers: papers,
-        exam: exam,
-        updatedAt: new Date().toISOString()
-      }).then(() => {
-        alert(`Subject '${subject}' successfully published to ${course} (${semester})!`);
-        document.getElementById('subjectNameInput').value = '';
-        document.getElementById('notesLinkInput').value = '';
-        document.getElementById('questionsLinkInput').value = '';
-        document.getElementById('papersLinkInput').value = '';
-        document.getElementById('examLinkInput').value = '';
-        btn.innerText = "Save & Publish to Live Site →";
-        btn.disabled = false;
-        navigateToTab('existingSubjectsTab');
-      }).catch(err => {
-        alert("Error publishing subject: " + err.message);
-        btn.innerText = "Save & Publish to Live Site →";
-        btn.disabled = false;
+
+      database.ref(path).once('value').then((snap) => {
+        const existing = snap.val() || {};
+        // Pehle se add hua time ya naya current timestamp
+        const createdAt = existing.createdAt || Date.now();
+
+        database.ref(path).set({
+          subjectName: subject,
+          notes: notes,
+          questions: questions,
+          papers: papers,
+          exam: exam,
+          createdAt: createdAt,
+          updatedAt: new Date().toISOString()
+        }).then(() => {
+          alert(`Subject '${subject}' successfully published to ${course} (${semester})!`);
+          document.getElementById('subjectNameInput').value = '';
+          document.getElementById('notesLinkInput').value = '';
+          document.getElementById('questionsLinkInput').value = '';
+          document.getElementById('papersLinkInput').value = '';
+          document.getElementById('examLinkInput').value = '';
+          btn.innerText = "Save & Publish to Live Site →";
+          btn.disabled = false;
+          navigateToTab('existingSubjectsTab');
+        }).catch(err => {
+          alert("Error publishing subject: " + err.message);
+          btn.innerText = "Save & Publish to Live Site →";
+          btn.disabled = false;
+        });
       });
     }
 
-    // RENDER SUBJECTS WITH FULL NAME DISPLAY
+    // RENDER SUBJECTS IN STRICT CREATION ORDER (PEHLE ADD HUA TOP PAR, BAAD WALA NEECHE)
     function listenToSubjects() {
       const container = document.getElementById('existingSubjectsContainer');
       database.ref('study_data').on('value', (snapshot) => {
@@ -1150,34 +1156,54 @@
         }
 
         container.innerHTML = '';
+        const allSubjectsList = [];
+
         Object.keys(data).forEach(course => {
           Object.keys(data[course]).forEach(semester => {
             Object.keys(data[course][semester]).forEach(subKeyRaw => {
               const item = data[course][semester][subKeyRaw];
-              // Support both legacy unencoded & new encoded keys
               const realSubjectName = item.subjectName || decodeSubKey(subKeyRaw);
               const compositeKey = `${course}___${semester}___${subKeyRaw}`;
 
-              cachedSubjects[compositeKey] = {
+              const subjectObj = {
                 course,
                 semester,
                 subKeyRaw,
                 subject: realSubjectName,
+                createdAt: item.createdAt || 0,
+                updatedAt: item.updatedAt || '',
+                compositeKey: compositeKey,
                 ...item
               };
 
-              const row = document.createElement('div');
-              row.className = 'clean-item-row';
-              row.innerHTML = `
-                <div class="clickable-name-area" onclick="showSubjectDetail('${compositeKey}', true)" title="Click to view & edit links">
-                  <span style="font-size:1.15rem;">📘</span>
-                  <span class="subject-title-text">${realSubjectName}</span>
-                </div>
-                <button class="btn-delete-item" onclick="deleteSubject('${course}', '${semester}', '${subKeyRaw}', '${realSubjectName.replace(/'/g, "\\'")}')">Delete Subject</button>
-              `;
-              container.appendChild(row);
+              cachedSubjects[compositeKey] = subjectObj;
+              allSubjectsList.push(subjectObj);
             });
           });
+        });
+
+        // SORTING: Oldest first at top, newer subjects below it (NO ABCD sorting)
+        allSubjectsList.sort((a, b) => {
+          if (a.createdAt && b.createdAt) {
+            return a.createdAt - b.createdAt;
+          }
+          if (a.updatedAt && b.updatedAt) {
+            return new Date(a.updatedAt) - new Date(b.updatedAt);
+          }
+          return 0;
+        });
+
+        allSubjectsList.forEach(s => {
+          const row = document.createElement('div');
+          row.className = 'clean-item-row';
+          row.innerHTML = `
+            <div class="clickable-name-area" onclick="showSubjectDetail('${s.compositeKey}', true)" title="Click to view & edit links">
+              <span style="font-size:1.15rem;">📘</span>
+              <span class="subject-title-text">${s.subject}</span>
+            </div>
+            <button class="btn-delete-item" onclick="deleteSubject('${s.course}', '${s.semester}', '${s.subKeyRaw}', '${s.subject.replace(/'/g, "\\'")}')">Delete Subject</button>
+          `;
+          container.appendChild(row);
         });
       });
     }
@@ -1229,7 +1255,7 @@
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">🎯 Exam Preparation Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editExamInput')">✏️ Edit</button>
+            <button type="button" class="btn-inline-pencil" onclick="focusField('editExamInput')">✏️️ Edit</button>
           </div>
           <input type="text" id="editExamInput" class="detail-input-edit" value="${s.exam && s.exam !== '#' ? s.exam : ''}" placeholder="Enter Drive link for exam prep" />
         </div>
