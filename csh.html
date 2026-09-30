@@ -41,7 +41,7 @@
     .top-bar {
       background: #0f172a;
       color: #fff;
-      padding: 0.6rem 12px;
+      padding: 0.6rem 1.25rem;
       display: flex;
       justify-content: flex-end;
       align-items: center;
@@ -105,6 +105,7 @@
       padding: 1.5rem;
       box-shadow: var(--shadow);
       margin-bottom: 1.5rem;
+      position: relative;
     }
 
     .step-title {
@@ -265,6 +266,31 @@
       background: #fff;
     }
 
+    /* Password Input with Eye Icon Wrapper */
+    .pin-input-wrap {
+      position: relative;
+      width: 100%;
+      margin-bottom: 0.85rem;
+    }
+
+    .pin-input-wrap input {
+      margin-bottom: 0;
+      padding-right: 2.8rem;
+    }
+
+    .pin-toggle-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      padding: 0.25rem;
+    }
+
     .btn-primary-action {
       width: 100%;
       background: var(--primary);
@@ -314,6 +340,42 @@
       border-radius: 9999px;
       font-size: 0.95rem;
       font-weight: 800;
+    }
+
+    /* Card Top-Right Close Button */
+    .card-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      color: #64748b;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .card-close-btn:hover {
+      background: #fee2e2;
+      color: #ef4444;
+      border-color: #fca5a5;
+    }
+
+    /* Mobile Number Update Drawer inside settings */
+    .sub-section-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
     }
 
     /* POPUP MODAL FOR EMPTY / NOT FOUND DATA */
@@ -460,7 +522,10 @@
           <input type="tel" id="regPhoneInput" class="input-box" placeholder="WhatsApp / Mobile Number" pattern="[0-9]{10}" title="Enter valid 10-digit mobile number" required />
 
           <label class="form-label">CREATE 4-DIGIT SECURITY PIN</label>
-          <input type="password" id="regPinInput" class="input-box" placeholder="e.g. 1234" pattern="[0-9]{4}" maxlength="4" title="Enter exactly 4-digit numeric PIN" required />
+          <div class="pin-input-wrap">
+            <input type="password" id="regPinInput" class="input-box" placeholder="e.g. 1234" pattern="[0-9]{4}" maxlength="4" title="Enter exactly 4-digit numeric PIN" required />
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)" title="Show/Hide PIN">👁️</button>
+          </div>
 
           <button type="submit" id="regSubmitBtn" class="btn-primary-action">Create Account & Enter →</button>
         </form>
@@ -471,7 +536,10 @@
           <input type="tel" id="loginPhoneInput" class="input-box" placeholder="Enter your 10-digit registered number" pattern="[0-9]{10}" title="Enter valid 10-digit mobile number" required />
 
           <label class="form-label">ENTER 4-DIGIT SECURITY PIN</label>
-          <input type="password" id="loginPinInput" class="input-box" placeholder="Enter your 4-digit PIN" pattern="[0-9]{4}" maxlength="4" required />
+          <div class="pin-input-wrap">
+            <input type="password" id="loginPinInput" class="input-box" placeholder="Enter your 4-digit PIN" pattern="[0-9]{4}" maxlength="4" required />
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('loginPinInput', this)" title="Show/Hide PIN">👁️</button>
+          </div>
 
           <button type="submit" id="loginSubmitBtn" class="btn-primary-action">Login to Study Hub →</button>
         </form>
@@ -527,20 +595,19 @@
         </section>
       </div>
 
-      <!-- GATEWAY 3: ACCOUNT DETAILS TAB -->
+      <!-- GATEWAY 3: ACCOUNT DETAILS TAB WITH CROSS (X) IN TOP RIGHT CORNER -->
       <section id="accountSection" class="hidden">
-        <button class="back-btn" onclick="closeAccountTab()">← Back to Study Hub</button>
+        <button class="card-close-btn" onclick="closeAccountTab()" title="Close and return">✕</button>
+        
         <h2 class="step-title">⚙️ Student Account Details</h2>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-          Your verified credentials. You can update your Name, College Year, or PIN.
+          Your verified credentials. You can update your Profile, Mobile Number, or 4-digit PIN.
         </p>
 
+        <!-- FORM 1: GENERAL PROFILE SETTINGS -->
         <form onsubmit="saveAccountSettings(event)">
           <label class="form-label">FULL NAME</label>
           <input type="text" id="accNameInput" class="input-box" required />
-
-          <label class="form-label">REGISTERED MOBILE NUMBER</label>
-          <input type="tel" id="accPhoneInput" class="input-box" disabled style="opacity:0.6; cursor:not-allowed;" />
 
           <label class="form-label">YEAR OF COLLEGE</label>
           <select id="accCollegeYearSelect" class="select-box" required>
@@ -558,12 +625,51 @@
             <option value="2028">2028</option>
           </select>
 
-          <label class="form-label">UPDATE 4-DIGIT PIN</label>
-          <input type="password" id="accPinInput" class="input-box" pattern="[0-9]{4}" maxlength="4" placeholder="Keep 4 digits" required />
-
-          <button type="submit" id="saveAccBtn" class="btn-primary-action" style="margin-top: 0.5rem;">Save Changes</button>
-          <button type="button" class="btn-primary-action" style="background:#ef4444; margin-top: 0.5rem;" onclick="logoutStudent()">Logout Session</button>
+          <button type="submit" id="saveAccBtn" class="btn-primary-action" style="margin-bottom: 1.25rem;">Save Profile Changes</button>
         </form>
+
+        <!-- FORM 2: UPDATE MOBILE NUMBER WITH SECURITY PIN -->
+        <div class="sub-section-box">
+          <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">📱 Update Mobile Number</h3>
+          <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            Naya number set karne ke liye apna current 4-digit security PIN verify karein.
+          </p>
+
+          <label class="form-label">CURRENT REGISTERED NUMBER</label>
+          <input type="tel" id="accCurrentPhone" class="input-box" disabled style="opacity: 0.65; cursor: not-allowed;" />
+
+          <label class="form-label">NEW MOBILE NUMBER (10 DIGITS)</label>
+          <input type="tel" id="accNewPhoneInput" class="input-box" placeholder="Enter new 10-digit number" pattern="[0-9]{10}" />
+
+          <label class="form-label">CURRENT 4-DIGIT SECURITY PIN</label>
+          <div class="pin-input-wrap">
+            <input type="password" id="accVerifyPinForPhone" class="input-box" placeholder="Enter current 4-digit PIN" pattern="[0-9]{4}" maxlength="4" />
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accVerifyPinForPhone', this)">👁️</button>
+          </div>
+
+          <button type="button" id="btnUpdatePhone" class="btn-primary-action" style="background:#0f172a;" onclick="updateMobileNumberWithPin()">Verify PIN & Change Number</button>
+        </div>
+
+        <!-- FORM 3: UPDATE 4-DIGIT PIN -->
+        <div class="sub-section-box">
+          <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">🔐 Change Security PIN</h3>
+          
+          <label class="form-label">CURRENT 4-DIGIT PIN</label>
+          <div class="pin-input-wrap">
+            <input type="password" id="accOldPinInput" class="input-box" placeholder="Enter existing PIN" pattern="[0-9]{4}" maxlength="4" />
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accOldPinInput', this)">👁️</button>
+          </div>
+
+          <label class="form-label">NEW 4-DIGIT PIN</label>
+          <div class="pin-input-wrap">
+            <input type="password" id="accNewPinInput" class="input-box" placeholder="Enter new 4-digit PIN" pattern="[0-9]{4}" maxlength="4" />
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accNewPinInput', this)">👁️</button>
+          </div>
+
+          <button type="button" id="btnUpdatePin" class="btn-primary-action" style="background:#0f172a;" onclick="updateSecurityPin()">Update Security PIN</button>
+        </div>
+
+        <button type="button" class="btn-primary-action" style="background:#ef4444; margin-top: 0.5rem;" onclick="logoutStudent()">Logout Session</button>
       </section>
 
     </div>
@@ -625,8 +731,22 @@
       semester: null,
       subject: null,
       step: 1,
-      inAccountTab: false
+      inAccountTab: false,
+      previousHash: '' // Remembers exact previous screen
     };
+
+    // PIN Show/Hide Toggle Helper
+    function togglePinVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerText = '🙈';
+      } else {
+        input.type = 'password';
+        btn.innerText = '👁️';
+      }
+    }
 
     // 2. LIVE SYNC: STRICTLY ADMIN-ADDED SUBJECTS
     database.ref('study_data').on('value', (snapshot) => {
@@ -656,7 +776,7 @@
       document.getElementById('totalUsersCount').innerText = count;
     });
 
-    // 4. REALTIME SESSION GUARD (AUTO-LOGOUT IF REMOVED BY ADMIN)
+    // 4. REALTIME SESSION GUARD
     function verifyStudentActive(phone) {
       const studentId = "student_" + phone;
       database.ref('registered_students/' + studentId).on('value', (snapshot) => {
@@ -805,7 +925,7 @@
       }
     }
 
-    // 8. POPUP MODAL HANDLER FOR EMPTY / NOT FOUND DATA
+    // 8. POPUP MODAL HANDLER FOR EMPTY DATA
     function showEmptyModal(title, message) {
       document.getElementById('emptyModalTitle').innerText = title || "Data Not Found";
       document.getElementById('emptyModalDesc').innerText = message || "Is subject ke liye study material abhi upload nahi hua hai.";
@@ -816,11 +936,9 @@
       document.getElementById('emptyDataModal').classList.add('hidden');
     }
 
-    // 9. DYNAMIC RESOURCE OPENER (SAME WINDOW / SAME TAB NAVIGATION)
     function openResource(type) {
       if (type === 'assignments') {
         const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subject})`);
-        // Opens in the same tab/window instead of opening a new tab
         window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
         return;
       }
@@ -831,7 +949,6 @@
 
       let targetUrl = links[type];
 
-      // Agar link invalid, '#' ya empty hai toh popup show karein
       if (!targetUrl || targetUrl.trim() === '' || targetUrl.trim() === '#' || !targetUrl.startsWith('http')) {
         let labelName = "Notes";
         if (type === 'questions') labelName = "Important Questions";
@@ -840,23 +957,29 @@
 
         showEmptyModal("Data is Empty", `Abhi ${state.subject} ke liye '${labelName}' upload nahi hua hai.`);
       } else {
-        // Same tab me Google Drive link khulegi (No new tab)
         window.location.href = targetUrl.trim();
       }
     }
 
-    // 10. ACCOUNT SETTINGS TAB
+    // 9. ACCOUNT SETTINGS TAB WITH EXACT SCREEN RESTORE ON (X)
     function openAccountTab() {
+      state.previousHash = window.location.hash || ''; // Store exact previous state
       state.inAccountTab = true;
+
       document.getElementById('studyContent').classList.add('hidden');
       document.getElementById('accountSection').classList.remove('hidden');
 
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
       document.getElementById('accNameInput').value = current.name || '';
-      document.getElementById('accPhoneInput').value = current.phone || '';
-      document.getElementById('accPinInput').value = current.pin || '';
+      document.getElementById('accCurrentPhone').value = current.phone || '';
       document.getElementById('accCollegeYearSelect').value = current.collegeYear || 'FYBA';
       document.getElementById('accAcademicYearSelect').value = current.academicYear || '2026';
+
+      // Reset update fields
+      document.getElementById('accNewPhoneInput').value = '';
+      document.getElementById('accVerifyPinForPhone').value = '';
+      document.getElementById('accOldPinInput').value = '';
+      document.getElementById('accNewPinInput').value = '';
 
       window.location.hash = '#/account';
     }
@@ -865,31 +988,31 @@
       state.inAccountTab = false;
       document.getElementById('accountSection').classList.add('hidden');
       document.getElementById('studyContent').classList.remove('hidden');
-      setHash();
+
+      // Restore exact previous hash/page
+      if (state.previousHash && state.previousHash !== '#/account') {
+        window.location.hash = state.previousHash;
+      } else {
+        setHash();
+      }
       updateView();
     }
 
+    // Profile (Name + Year) Save
     function saveAccountSettings(e) {
       e.preventDefault();
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
       const name = document.getElementById('accNameInput').value.trim();
       const collegeYear = document.getElementById('accCollegeYearSelect').value;
       const academicYear = document.getElementById('accAcademicYearSelect').value;
-      const pin = document.getElementById('accPinInput').value.trim();
-
-      if (pin.length !== 4) {
-        alert("PIN must be exactly 4 digits.");
-        return;
-      }
 
       const saveBtn = document.getElementById('saveAccBtn');
-      saveBtn.innerText = "Saving Changes...";
+      saveBtn.innerText = "Saving Profile...";
       saveBtn.disabled = true;
 
       const updatedRecord = {
         ...current,
         name: name,
-        pin: pin,
         collegeYear: collegeYear,
         academicYear: academicYear,
         updatedAt: new Date().toISOString()
@@ -898,12 +1021,115 @@
       const studentId = "student_" + current.phone;
       database.ref('registered_students/' + studentId).update(updatedRecord).finally(() => {
         localStorage.setItem('csh_student', JSON.stringify(updatedRecord));
-        saveBtn.innerText = "Saved Successfully!";
+        saveBtn.innerText = "Profile Saved Successfully!";
         setTimeout(() => {
-          saveBtn.innerText = "Save Changes";
+          saveBtn.innerText = "Save Profile Changes";
           saveBtn.disabled = false;
-          closeAccountTab();
-        }, 600);
+        }, 800);
+      });
+    }
+
+    // Feature: Change Mobile Number with PIN Verification
+    function updateMobileNumberWithPin() {
+      const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
+      const newPhone = document.getElementById('accNewPhoneInput').value.trim();
+      const enteredPin = document.getElementById('accVerifyPinForPhone').value.trim();
+      const btn = document.getElementById('btnUpdatePhone');
+
+      if (newPhone.length !== 10) {
+        alert("Kripya sahi 10-digit naya mobile number daalein.");
+        return;
+      }
+
+      if (newPhone === current.phone) {
+        alert("Naya number purane number se alag hona chahiye.");
+        return;
+      }
+
+      if (enteredPin !== current.pin) {
+        alert("Galat PIN! Apna sahi 4-digit current security PIN daalein.");
+        return;
+      }
+
+      btn.innerText = "Verifying...";
+      btn.disabled = true;
+
+      const oldStudentId = "student_" + current.phone;
+      const newStudentId = "student_" + newPhone;
+
+      // Check if new number already registered
+      database.ref('registered_students/' + newStudentId).once('value').then((snapshot) => {
+        if (snapshot.exists()) {
+          alert("Yeh naya number pehle se kisi aur account me registered hai!");
+          btn.innerText = "Verify PIN & Change Number";
+          btn.disabled = false;
+          return;
+        }
+
+        const updatedRecord = {
+          ...current,
+          phone: newPhone,
+          updatedAt: new Date().toISOString()
+        };
+
+        // Save new record & delete old record
+        database.ref('registered_students/' + newStudentId).set(updatedRecord).then(() => {
+          database.ref('registered_students/' + oldStudentId).remove();
+          localStorage.setItem('csh_student', JSON.stringify(updatedRecord));
+
+          document.getElementById('accCurrentPhone').value = newPhone;
+          document.getElementById('accNewPhoneInput').value = '';
+          document.getElementById('accVerifyPinForPhone').value = '';
+
+          alert("Mobile number successfully update ho gaya!");
+          btn.innerText = "Verify PIN & Change Number";
+          btn.disabled = false;
+        }).catch(err => {
+          alert("Error: " + err.message);
+          btn.innerText = "Verify PIN & Change Number";
+          btn.disabled = false;
+        });
+      });
+    }
+
+    // Feature: Update 4-Digit Security PIN
+    function updateSecurityPin() {
+      const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
+      const oldPin = document.getElementById('accOldPinInput').value.trim();
+      const newPin = document.getElementById('accNewPinInput').value.trim();
+      const btn = document.getElementById('btnUpdatePin');
+
+      if (oldPin !== current.pin) {
+        alert("Purana PIN galat hai!");
+        return;
+      }
+
+      if (newPin.length !== 4) {
+        alert("Naya PIN bilkul 4 digits ka hona chahiye.");
+        return;
+      }
+
+      btn.innerText = "Updating PIN...";
+      btn.disabled = true;
+
+      const studentId = "student_" + current.phone;
+      database.ref('registered_students/' + studentId).update({
+        pin: newPin,
+        pinUpdatedAt: new Date().toISOString()
+      }).then(() => {
+        current.pin = newPin;
+        localStorage.setItem('csh_student', JSON.stringify(current));
+
+        document.getElementById('accOldPinInput').value = '';
+        document.getElementById('accNewPinInput').value = '';
+
+        alert("Aapka 4-Digit Security PIN successfully change ho gaya!");
+        btn.innerText = "Update Security PIN";
+        btn.disabled = false;
+      }).catch(err => {
+        alert("Error: " + err.message);
+        btn.innerText = "Update Security PIN";
+        btn.disabled = false;
       });
     }
 
@@ -914,7 +1140,7 @@
       }
     });
 
-    // 11. ROUTER & REFRESH MANAGER
+    // 10. ROUTER & REFRESH MANAGER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
