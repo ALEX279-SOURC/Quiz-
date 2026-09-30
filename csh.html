@@ -91,6 +91,11 @@
       font-weight: 600;
     }
 
+    .btn-logout:hover {
+      background: #334155;
+      color: #fff;
+    }
+
     header {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
@@ -180,10 +185,18 @@
       font-weight: 600;
     }
 
+    .resource-card:hover {
+      background: #f1f5f9;
+    }
+
     .btn-order {
       background: #f59e0b;
       color: #fff !important;
       border-color: #d97706;
+    }
+
+    .btn-order:hover {
+      background: #d97706 !important;
     }
 
     .back-btn {
@@ -250,10 +263,11 @@
 </head>
 <body>
 
+  <!-- Top Bar: Live Counter & User Account -->
   <div class="top-bar">
     <div class="user-counter">
       👥 <span>Enrolled Scholars:</span>
-      <span class="badge" id="totalUsersCount">...</span>
+      <span class="badge" id="totalUsersCount">0</span>
     </div>
     <div id="authProfileBar" class="auth-profile hidden">
       <img id="userAvatar" src="" alt="Avatar" />
@@ -290,6 +304,7 @@
         <div id="breadcrumb" class="breadcrumb hidden">Home</div>
         <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
 
+        <!-- STEP 1: SELECT COURSE -->
         <section id="step-course">
           <h2 class="step-title">Select your course</h2>
           <div class="grid" id="course-list">
@@ -300,16 +315,19 @@
           </div>
         </section>
 
+        <!-- STEP 2: SELECT SEMESTER -->
         <section id="step-semester" class="hidden">
           <h2 class="step-title">Select Semester</h2>
           <div class="grid" id="semester-list"></div>
         </section>
 
+        <!-- STEP 3: SELECT SUBJECT -->
         <section id="step-subject" class="hidden">
           <h2 class="step-title">Select Subject</h2>
           <div class="grid" id="subject-list"></div>
         </section>
 
+        <!-- STEP 4: RESOURCE HUB -->
         <section id="step-resources" class="hidden">
           <h2 class="step-title" id="subject-title">Resources</h2>
           <div class="grid">
@@ -340,6 +358,7 @@
   </footer>
 
   <script>
+    // 1. FIREBASE CONFIGURATION
     const firebaseConfig = {
       apiKey: "AIzaSyBzjHop1OV6agKwLsXxTj7x9xd9GQ9ZKsY",
       authDomain: "campus-study-hub-6b8ab.firebaseapp.com",
@@ -351,7 +370,6 @@
       measurementId: "G-YE7EE087CY"
     };
 
-    // Initialize Firebase
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
@@ -359,6 +377,7 @@
     const database = firebase.database();
     const provider = new firebase.auth.GoogleAuthProvider();
 
+    // 2. DATA REPOSITORY
     const WHATSAPP_NUMBER = "916359217206";
 
     const studyData = {
@@ -390,28 +409,20 @@
       step: 1
     };
 
-    // Fail-safe Google Login Handler
+    // 3. AUTHENTICATION (POP-UP FIRST)
     function loginWithGoogle() {
       const btnText = document.getElementById('btnText');
-      if (btnText) btnText.innerText = "Connecting...";
+      if (btnText) btnText.innerText = "Opening Google...";
 
-      // Pehle Popup try karega, agar phone block kare toh Redirect use karega
-      auth.signInWithPopup(provider).catch((error) => {
-        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
-          auth.signInWithRedirect(provider);
-        } else {
-          alert("Login note: " + error.message);
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          console.log("Logged in:", result.user);
+        })
+        .catch((error) => {
+          alert("Login error: " + error.message);
           if (btnText) btnText.innerText = "Continue with Google";
-        }
-      });
+        });
     }
-
-    // Check Redirect Return
-    auth.getRedirectResult().catch((error) => {
-      if (error && error.code) {
-        alert("Redirect Error: " + error.message);
-      }
-    });
 
     function logoutStudent() {
       auth.signOut().then(() => {
@@ -420,7 +431,6 @@
       });
     }
 
-    // Auth State Monitor
     auth.onAuthStateChanged((user) => {
       const loginSection = document.getElementById('loginSection');
       const studyContent = document.getElementById('studyContent');
@@ -458,7 +468,6 @@
       } catch (e) {}
     }
 
-    // Live Registered Count
     try {
       database.ref('registered_students').on('value', (snapshot) => {
         const count = snapshot.numChildren() || 0;
@@ -468,6 +477,7 @@
       document.getElementById('totalUsersCount').innerText = "0";
     }
 
+    // 4. ROUTER & REFRESH MANAGER
     function parseHash() {
       if (!auth.currentUser) return;
 
