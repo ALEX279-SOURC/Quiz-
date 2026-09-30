@@ -365,7 +365,7 @@
 
   <script>
     // ==========================================
-    // 1. FIREBASE CONFIGURATION (PRE-CONFIGURED)
+    // 1. FIREBASE CONFIGURATION
     // ==========================================
     const firebaseConfig = {
       apiKey: "AIzaSyBzjHop1OV6agKwLsXxTj7x9xd9GQ9ZKsY",
@@ -382,6 +382,7 @@
     const auth = firebase.auth();
     const database = firebase.database();
     const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
 
     // ==========================================
     // 2. WHATSAPP & STUDY DATA
@@ -418,13 +419,17 @@
     };
 
     // ==========================================
-    // 3. AUTH & USER TRACKING ENGINE
+    // 3. AUTH & USER TRACKING ENGINE (MOBILE-SAFE)
     // ==========================================
     function loginWithGoogle() {
-      auth.signInWithPopup(provider).catch((error) => {
-        alert("Login failed: " + error.message);
-      });
+      auth.signInWithRedirect(provider);
     }
+
+    auth.getRedirectResult().catch((error) => {
+      if (error && error.code !== "auth/null-user") {
+        console.error("Auth Error:", error);
+      }
+    });
 
     function logoutStudent() {
       auth.signOut().then(() => {
