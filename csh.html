@@ -189,10 +189,38 @@
       font-size: 0.9rem;
     }
 
-    /* Auth & Enrollment Forms */
+    /* Auth Switching Tabs */
+    .auth-tab-switch {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 1.5rem;
+      background: #f1f5f9;
+    }
+
+    .auth-tab-btn {
+      flex: 1;
+      padding: 0.6rem;
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-tab-btn.active {
+      background: #fff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
     .login-gate {
       text-align: center;
-      padding: 1rem 0.25rem;
+      padding: 0.5rem 0.25rem;
     }
 
     .login-gate h2 {
@@ -299,7 +327,7 @@
 </head>
 <body>
 
-  <!-- Top Strip: Only Profile Icon -->
+  <!-- Top Strip: Only Profile Icon (Visible when logged in) -->
   <div class="top-bar">
     <div id="authProfileBar" class="hidden">
       <button class="profile-btn" onclick="openAccountTab()" title="Account Settings">
@@ -316,25 +344,32 @@
   <main>
     <div class="card">
       
-      <!-- GATEWAY 1: STUDENT ENROLLMENT (NAME + COLLEGE YEAR + ACADEMIC YEAR + PHONE OTP) -->
+      <!-- GATEWAY 1: DUAL AUTH (REGISTRATION & RETURNING LOGIN VIA OTP) -->
       <section id="loginSection" class="login-gate">
-        <h2>Student Registration</h2>
-        <p>Register with your details & phone verification to access verified notes and papers.</p>
         
-        <!-- Step 1: Student Details & Mobile -->
-        <form id="enrollForm" onsubmit="requestOtp(event)">
+        <!-- Tab Switch Buttons -->
+        <div class="auth-tab-switch">
+          <button type="button" id="tabRegisterBtn" class="auth-tab-btn active" onclick="switchAuthMode('register')">New Registration</button>
+          <button type="button" id="tabLoginBtn" class="auth-tab-btn" onclick="switchAuthMode('login')">Already Registered (Login)</button>
+        </div>
+
+        <h2 id="authHeading">Student Registration</h2>
+        <p id="authSubheading">Register with your details & phone verification to access verified notes and papers.</p>
+        
+        <!-- FORM A: NEW REGISTRATION -->
+        <form id="enrollForm" onsubmit="handleRegistrationOtp(event)">
           <label class="form-label">FULL NAME</label>
-          <input type="text" id="studentNameInput" class="input-box" placeholder="e.g. Amish Patel" required />
+          <input type="text" id="regNameInput" class="input-box" placeholder="e.g. Amish Patel" required />
 
           <label class="form-label">YEAR OF COLLEGE</label>
-          <select id="collegeYearSelect" class="select-box" required>
+          <select id="regCollegeYearSelect" class="select-box" required>
             <option value="FYBA">FYBA</option>
             <option value="SYBA">SYBA</option>
             <option value="TYBA">TYBA</option>
           </select>
 
           <label class="form-label">ACADEMIC YEAR</label>
-          <select id="academicYearSelect" class="select-box" required>
+          <select id="regAcademicYearSelect" class="select-box" required>
             <option value="2026">2026</option>
             <option value="2025">2025</option>
             <option value="2024">2024</option>
@@ -343,23 +378,31 @@
           </select>
 
           <label class="form-label">MOBILE NUMBER (10 DIGITS)</label>
-          <input type="tel" id="studentPhoneInput" class="input-box" placeholder="WhatsApp / Mobile Number" pattern="[0-9]{10}" title="Enter valid 10-digit mobile number" required />
+          <input type="tel" id="regPhoneInput" class="input-box" placeholder="WhatsApp / Mobile Number" pattern="[0-9]{10}" title="Enter valid 10-digit mobile number" required />
 
-          <!-- Invisible reCAPTCHA container -->
-          <div id="recaptcha-container"></div>
-
-          <button type="submit" id="sendOtpBtn" class="btn-primary-action">Send Verification OTP →</button>
+          <button type="submit" id="sendRegOtpBtn" class="btn-primary-action">Send Verification OTP →</button>
         </form>
 
-        <!-- Step 2: OTP Verification Box -->
+        <!-- FORM B: RETURNING LOGIN (ONLY MOBILE NUMBER) -->
+        <form id="returningLoginForm" class="hidden" onsubmit="handleLoginOtp(event)">
+          <label class="form-label">REGISTERED MOBILE NUMBER</label>
+          <input type="tel" id="loginPhoneInput" class="input-box" placeholder="Enter your 10-digit registered number" pattern="[0-9]{10}" title="Enter valid 10-digit mobile number" required />
+          <button type="submit" id="sendLoginOtpBtn" class="btn-primary-action">Send Login OTP →</button>
+        </form>
+
+        <!-- Invisible reCAPTCHA container -->
+        <div id="recaptcha-container"></div>
+
+        <!-- FORM C: COMMON OTP VERIFICATION BOX -->
         <div id="otpSection" class="hidden" style="margin-top: 1rem;">
           <label class="form-label">ENTER 6-DIGIT OTP</label>
           <input type="number" id="otpInput" class="input-box" placeholder="Enter 6-digit OTP sent to phone" style="text-align: center; letter-spacing: 0.25rem; font-size: 1.15rem;" />
-          <button type="button" id="verifyOtpBtn" class="btn-primary-action" onclick="verifyOtp()">Verify & Complete Registration ✓</button>
+          <button type="button" id="verifyOtpBtn" class="btn-primary-action" onclick="verifyOtp()">Verify & Enter Study Hub ✓</button>
+          <button type="button" class="back-btn" style="margin-top: 0.75rem;" onclick="resetAuthView()">← Change Mobile Number</button>
         </div>
       </section>
 
-      <!-- GATEWAY 2: STUDY EXPLORER (SHOWN AFTER REGISTRATION) -->
+      <!-- GATEWAY 2: STUDY EXPLORER (ONLY ADMIN-ADDED CONTENT) -->
       <div id="studyContent" class="hidden">
         <div id="breadcrumb" class="breadcrumb hidden">Home</div>
         <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
@@ -409,12 +452,12 @@
         </section>
       </div>
 
-      <!-- GATEWAY 3: ACCOUNT SETTINGS TAB -->
+      <!-- GATEWAY 3: ACCOUNT DETAILS TAB -->
       <section id="accountSection" class="hidden">
         <button class="back-btn" onclick="closeAccountTab()">← Back to Study Hub</button>
         <h2 class="step-title">⚙️ Student Account Details</h2>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-          Your verified student credentials. Name and College details can be updated.
+          Your verified credentials. Name and College details can be updated.
         </p>
 
         <form onsubmit="saveAccountSettings(event)">
@@ -441,12 +484,13 @@
           </select>
 
           <button type="submit" id="saveAccBtn" class="btn-primary-action" style="margin-top: 0.5rem;">Save Changes</button>
+          <button type="button" class="btn-primary-action" style="background:#ef4444; margin-top: 0.5rem;" onclick="logoutStudent()">Logout Session</button>
         </form>
       </section>
 
     </div>
 
-    <!-- MINIMALIST BOTTOM ACTIVE USERS BOX (ONLY NUMBERS) -->
+    <!-- MINIMALIST BOTTOM ACTIVE USERS BOX -->
     <div class="active-users-box">
       <div class="active-users-title">
         <span>⚡ Active Scholars Joined:</span>
@@ -462,14 +506,14 @@
   <script>
     // 1. FIREBASE CONFIGURATION
     const firebaseConfig = {
-      apiKey: "AIzaSyBzjHop1OV6agKwLsXxTj7x9xd9GQ9ZKsY",
+      apiKey: "AIzaSyBzjHop10vEagKwLaXxTj7x9xd9GQ92KxE",
       authDomain: "campus-study-hub-6b8ab.firebaseapp.com",
       databaseURL: "https://campus-study-hub-6b8ab-default-rtdb.firebaseio.com",
       projectId: "campus-study-hub-6b8ab",
       storageBucket: "campus-study-hub-6b8ab.firebasestorage.app",
-      messagingSenderId: "655468124613",
-      appId: "1:655468124613:web:6156466ab93f18541e5bac",
-      measurementId: "G-YE7EE087CY"
+      messagingSenderId: "555468124613",
+      appId: "1:555468124613:web:5156466ab53f18541e5bac",
+      measurementId: "G-YE7B0G87CY"
     };
 
     if (!firebase.apps.length) {
@@ -495,8 +539,9 @@
       inAccountTab: false
     };
 
+    let authMode = 'register'; // 'register' or 'login'
     let confirmationResult = null;
-    let tempStudentData = null;
+    let pendingAuthData = null;
 
     // 2. LIVE SYNC: STRICTLY ADMIN-ADDED SUBJECTS
     database.ref('study_data').on('value', (snapshot) => {
@@ -538,7 +583,35 @@
       });
     }
 
-    // 5. PHONE AUTH & OTP FLOW (NO DUPLICATE NUMBERS ALLOWED)
+    // 5. AUTH MODE SWITCHER
+    function switchAuthMode(mode) {
+      authMode = mode;
+      document.getElementById('otpSection').classList.add('hidden');
+      
+      const tabReg = document.getElementById('tabRegisterBtn');
+      const tabLog = document.getElementById('tabLoginBtn');
+      const regForm = document.getElementById('enrollForm');
+      const logForm = document.getElementById('returningLoginForm');
+      const heading = document.getElementById('authHeading');
+      const subheading = document.getElementById('authSubheading');
+
+      if (mode === 'register') {
+        tabReg.classList.add('active');
+        tabLog.classList.remove('active');
+        regForm.classList.remove('hidden');
+        logForm.classList.add('hidden');
+        heading.innerText = "Student Registration";
+        subheading.innerText = "Register with your details & phone verification to access verified notes and papers.";
+      } else {
+        tabLog.classList.add('active');
+        tabReg.classList.remove('active');
+        logForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+        heading.innerText = "Welcome Back";
+        subheading.innerText = "Enter your registered mobile number to receive a verification OTP.";
+      }
+    }
+
     function initRecaptcha() {
       if (!window.recaptchaVerifier) {
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
@@ -547,56 +620,97 @@
       }
     }
 
-    function requestOtp(e) {
+    // 6. OTP FLOW FOR NEW REGISTRATION
+    function handleRegistrationOtp(e) {
       e.preventDefault();
-      const name = document.getElementById('studentNameInput').value.trim();
-      const collegeYear = document.getElementById('collegeYearSelect').value;
-      const academicYear = document.getElementById('academicYearSelect').value;
-      const phone = document.getElementById('studentPhoneInput').value.trim();
+      const name = document.getElementById('regNameInput').value.trim();
+      const collegeYear = document.getElementById('regCollegeYearSelect').value;
+      const academicYear = document.getElementById('regAcademicYearSelect').value;
+      const phone = document.getElementById('regPhoneInput').value.trim();
 
       if (!name || !phone || phone.length !== 10) {
         alert("Please enter a valid 10-digit mobile number.");
         return;
       }
 
-      const sendOtpBtn = document.getElementById('sendOtpBtn');
-      sendOtpBtn.innerText = "Checking Mobile Number...";
-      sendOtpBtn.disabled = true;
+      const btn = document.getElementById('sendRegOtpBtn');
+      btn.innerText = "Checking Mobile Number...";
+      btn.disabled = true;
 
       const studentId = "student_" + phone;
 
-      // Duplicate Check in Database
+      // Duplicate Check
       database.ref('registered_students/' + studentId).once('value').then((snapshot) => {
         if (snapshot.exists()) {
-          alert("This mobile number is already registered! One number can only be used once.");
-          sendOtpBtn.innerText = "Send Verification OTP →";
-          sendOtpBtn.disabled = false;
+          alert("Yeh number pehle se registered hai! Direct Login tab use karein.");
+          btn.innerText = "Send Verification OTP →";
+          btn.disabled = false;
+          switchAuthMode('login');
+          document.getElementById('loginPhoneInput').value = phone;
           return;
         }
 
-        // Proceed to send OTP
-        sendOtpBtn.innerText = "Sending SMS OTP...";
-        initRecaptcha();
-        const phoneNumber = "+91" + phone;
-
-        auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
-          .then((res) => {
-            confirmationResult = res;
-            tempStudentData = { name, collegeYear, academicYear, phone };
-            document.getElementById('enrollForm').classList.add('hidden');
-            document.getElementById('otpSection').classList.remove('hidden');
-          })
-          .catch((error) => {
-            alert("OTP Error: " + error.message);
-            sendOtpBtn.innerText = "Send Verification OTP →";
-            sendOtpBtn.disabled = false;
-            if (window.recaptchaVerifier) {
-              window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
-            }
-          });
+        sendSmsOtp(phone, { type: 'register', name, collegeYear, academicYear, phone }, btn);
       });
     }
 
+    // 7. OTP FLOW FOR RETURNING LOGIN
+    function handleLoginOtp(e) {
+      e.preventDefault();
+      const phone = document.getElementById('loginPhoneInput').value.trim();
+
+      if (!phone || phone.length !== 10) {
+        alert("Please enter your 10-digit registered number.");
+        return;
+      }
+
+      const btn = document.getElementById('sendLoginOtpBtn');
+      btn.innerText = "Verifying Mobile Number...";
+      btn.disabled = true;
+
+      const studentId = "student_" + phone;
+
+      // Check if user exists in database
+      database.ref('registered_students/' + studentId).once('value').then((snapshot) => {
+        if (!snapshot.exists()) {
+          alert("Yeh number registered nahi hai! Pehle 'New Registration' karein.");
+          btn.innerText = "Send Login OTP →";
+          btn.disabled = false;
+          switchAuthMode('register');
+          document.getElementById('regPhoneInput').value = phone;
+          return;
+        }
+
+        const existingData = snapshot.val();
+        sendSmsOtp(phone, { type: 'login', ...existingData }, btn);
+      });
+    }
+
+    // Helper: Trigger Firebase Phone Auth
+    function sendSmsOtp(phone, authData, btnElement) {
+      initRecaptcha();
+      const phoneNumber = "+91" + phone;
+
+      auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+        .then((res) => {
+          confirmationResult = res;
+          pendingAuthData = authData;
+
+          document.getElementById('enrollForm').classList.add('hidden');
+          document.getElementById('returningLoginForm').classList.add('hidden');
+          document.getElementById('otpSection').classList.remove('hidden');
+        })
+        .catch((error) => {
+          alert("OTP Error: " + error.message);
+          btnElement.innerText = authData.type === 'register' ? "Send Verification OTP →" : "Send Login OTP →";
+          btnElement.disabled = false;
+          if (window.recaptchaVerifier) {
+            window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
+          }
+        });
+    }
+
+    // 8. VERIFY OTP & COMPLETE LOGIN / REGISTRATION
     function verifyOtp() {
       const code = document.getElementById('otpInput').value.trim();
       if (code.length !== 6) {
@@ -609,24 +723,44 @@
       verifyBtn.disabled = true;
 
       confirmationResult.confirm(code).then(() => {
-        const studentId = "student_" + tempStudentData.phone;
-        const record = {
-          name: tempStudentData.name,
-          phone: tempStudentData.phone,
-          collegeYear: tempStudentData.collegeYear,
-          academicYear: tempStudentData.academicYear,
-          joinedAt: new Date().toISOString()
-        };
+        const studentId = "student_" + pendingAuthData.phone;
 
-        database.ref('registered_students/' + studentId).set(record).then(() => {
+        if (pendingAuthData.type === 'register') {
+          const record = {
+            name: pendingAuthData.name,
+            phone: pendingAuthData.phone,
+            collegeYear: pendingAuthData.collegeYear,
+            academicYear: pendingAuthData.academicYear,
+            joinedAt: new Date().toISOString()
+          };
+
+          database.ref('registered_students/' + studentId).set(record).then(() => {
+            localStorage.setItem('csh_student', JSON.stringify(record));
+            applyLoggedInState(record);
+          });
+        } else {
+          // Returning login: load original database record
+          const record = {
+            name: pendingAuthData.name,
+            phone: pendingAuthData.phone,
+            collegeYear: pendingAuthData.collegeYear,
+            academicYear: pendingAuthData.academicYear,
+            joinedAt: pendingAuthData.joinedAt || new Date().toISOString()
+          };
           localStorage.setItem('csh_student', JSON.stringify(record));
           applyLoggedInState(record);
-        });
+        }
       }).catch((error) => {
         alert("Invalid or expired OTP: " + error.message);
-        verifyBtn.innerText = "Verify & Complete Registration ✓";
+        verifyBtn.innerText = "Verify & Enter Study Hub ✓";
         verifyBtn.disabled = false;
       });
+    }
+
+    function resetAuthView() {
+      document.getElementById('otpSection').classList.add('hidden');
+      document.getElementById('otpInput').value = '';
+      switchAuthMode(authMode);
     }
 
     function applyLoggedInState(student) {
@@ -638,7 +772,15 @@
       parseHash();
     }
 
-    // 6. ACCOUNT SETTINGS TAB
+    function logoutStudent() {
+      if (confirm("Are you sure you want to log out?")) {
+        localStorage.removeItem('csh_student');
+        window.location.hash = '';
+        window.location.reload();
+      }
+    }
+
+    // 9. ACCOUNT SETTINGS TAB
     function openAccountTab() {
       state.inAccountTab = true;
       document.getElementById('studyContent').classList.add('hidden');
@@ -700,7 +842,7 @@
       }
     });
 
-    // 7. ROUTER & REFRESH MANAGER
+    // 10. ROUTER & REFRESH MANAGER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
