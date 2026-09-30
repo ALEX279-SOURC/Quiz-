@@ -803,7 +803,6 @@
 
     const WHATSAPP_NUMBER = "916359217206";
 
-    // Clean decode helper
     function safeDecode(str) {
       if (!str) return '';
       try {
@@ -851,7 +850,6 @@
       el.classList.toggle('hidden');
     }
 
-    // 2. LIVE SYNC WITH FLEXIBLE COMPATIBILITY
     database.ref('study_data').on('value', (snapshot) => {
       const liveData = snapshot.val();
       studyData = {
@@ -864,7 +862,6 @@
         Object.keys(liveData).forEach(course => {
           if (!studyData[course]) studyData[course] = {};
           Object.keys(liveData[course]).forEach(sem => {
-            // Normalize semester key (handles 'Semester 1' or any variant)
             const cleanSem = safeDecode(sem);
             studyData[course][cleanSem] = liveData[course][sem];
           });
@@ -1273,12 +1270,11 @@
       }
     });
 
-    // 11. BULLETPROOF ROUTER (CLEANS %20 AND SPECIAL CHARACTERS)
+    // 11. BULLETPROOF ROUTER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
 
-      // Crucial: safely decode hash so "Semester%201" becomes "Semester 1"
       const raw = safeDecode(window.location.hash.replace(/^#\/?/, ''));
       if (raw === 'account') {
         openAccountTab();
@@ -1295,7 +1291,6 @@
         return;
       }
 
-      // Supports both slash (/) and delimiter (___) separators
       let parts = raw.includes('___') ? raw.split('___') : raw.split('/');
       parts = parts.map(p => safeDecode(p.trim()));
 
@@ -1306,7 +1301,6 @@
         const courseData = studyData[state.course] || {};
         const semData = courseData[state.semester] || {};
         
-        // Find subject object by direct key or normalized name
         let subObj = semData[state.subjectKey];
         if (!subObj) {
           const matchKey = Object.keys(semData).find(k => (semData[k].subjectName || safeDecode(k)) === state.subjectKey);
@@ -1388,6 +1382,7 @@
       });
     }
 
+    // STRICT CREATION-ORDER RENDERING (PEHLE ADD HUA TOP PAR, BAAD WALA NEECHE)
     function renderSubjects() {
       const container = document.getElementById('subject-list');
       container.innerHTML = '';
@@ -1400,14 +1395,33 @@
         return;
       }
 
-      subjectKeys.forEach(key => {
-        const item = semObj[key];
-        const displayName = (item && item.subjectName) ? item.subjectName : safeDecode(key);
+      // Convert into an array to sort by creation timestamp
+      const subjectsArray = subjectKeys.map(key => {
+        const item = semObj[key] || {};
+        return {
+          key: key,
+          displayName: item.subjectName || safeDecode(key),
+          createdAt: item.createdAt || 0,
+          updatedAt: item.updatedAt || ''
+        };
+      });
 
+      // Oldest first at top, newer subjects below it (NO ABCD sorting)
+      subjectsArray.sort((a, b) => {
+        if (a.createdAt && b.createdAt) {
+          return a.createdAt - b.createdAt;
+        }
+        if (a.updatedAt && b.updatedAt) {
+          return new Date(a.updatedAt) - new Date(b.updatedAt);
+        }
+        return 0;
+      });
+
+      subjectsArray.forEach(sub => {
         const btn = document.createElement('button');
         btn.className = 'btn-select';
-        btn.innerHTML = `<span class="btn-label">${displayName}</span> <span>→</span>`;
-        btn.onclick = () => selectSubject(key, displayName);
+        btn.innerHTML = `<span class="btn-label">${sub.displayName}</span> <span>→</span>`;
+        btn.onclick = () => selectSubject(sub.key, sub.displayName);
         container.appendChild(btn);
       });
     }
