@@ -41,7 +41,6 @@
       flex-direction: column;
     }
 
-    /* TOP HEADER */
     header {
       background: #0f172a;
       border-bottom: 1px solid var(--card-border);
@@ -95,7 +94,6 @@
       border-color: var(--primary);
     }
 
-    /* SLIDE-OUT SIDE DRAWER */
     .drawer-overlay {
       position: fixed;
       top: 0;
@@ -242,7 +240,6 @@
       border-radius: 9999px;
     }
 
-    /* MAIN VIEW CONTAINER */
     main {
       flex: 1;
       max-width: 760px;
@@ -251,7 +248,6 @@
       padding: 0 1rem;
     }
 
-    /* AUTH LOGIN CARD */
     .admin-login-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -308,7 +304,6 @@
       color: var(--text-muted);
     }
 
-    /* TAB CONTAINER & HEADERS */
     .tab-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -372,7 +367,6 @@
       border-color: #ef4444;
     }
 
-    /* FORMS & INPUTS */
     .form-group {
       margin-bottom: 1rem;
     }
@@ -442,7 +436,6 @@
       background: var(--primary-hover);
     }
 
-    /* CLEAN ROWS & DETAILS */
     .item-list {
       display: flex;
       flex-direction: column;
@@ -477,10 +470,17 @@
       cursor: pointer;
       flex: 1;
       padding: 0.2rem 0;
+      overflow: hidden;
     }
 
     .clickable-name-area:hover {
       color: #38bdf8;
+    }
+
+    .subject-title-text {
+      white-space: normal;
+      word-break: break-word;
+      line-height: 1.35;
     }
 
     .btn-delete-item {
@@ -561,7 +561,9 @@
       font-size: 0.95rem;
       font-weight: 600;
       color: #ffffff;
-      word-break: break-all;
+      word-break: break-word;
+      white-space: normal;
+      line-height: 1.4;
     }
 
     .detail-input-edit {
@@ -628,7 +630,6 @@
 </head>
 <body>
 
-  <!-- TOP HEADER -->
   <header>
     <div class="brand-box">
       <span class="brand-title">Control Centre</span>
@@ -640,7 +641,6 @@
     </button>
   </header>
 
-  <!-- SLIDE-OUT SIDE DRAWER -->
   <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawer()"></div>
   <aside id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
@@ -713,7 +713,6 @@
     </div>
   </aside>
 
-  <!-- MAIN VIEW CONTAINER -->
   <main>
     
     <!-- 0. ADMIN AUTHENTICATION GATEWAY -->
@@ -802,7 +801,7 @@
 
         <div class="form-group">
           <label class="form-label">SUBJECT NAME</label>
-          <input type="text" id="subjectNameInput" class="input-box" placeholder="e.g. Sanskrit M1, Gujarati, History" required />
+          <input type="text" id="subjectNameInput" class="input-box" placeholder="e.g. Sanskrit M1, VAC ( IKS / BKS )" required />
         </div>
 
         <div class="form-group">
@@ -902,7 +901,6 @@
   </footer>
 
   <script>
-    // 1. FIREBASE CONFIGURATION
     const firebaseConfig = {
       apiKey: "AIzaSyBzjHop10vEagKwLaXxTj7x9xd9GQ92KxE",
       authDomain: "campus-study-hub-6b8ab.firebaseapp.com",
@@ -922,6 +920,18 @@
     const REQUIRED_USER = "Alex";
     const REQUIRED_PIN = "4560";
 
+    // Encode/Decode helpers to safely support '/' inside subject names without cutting off
+    function encodeSubKey(str) {
+      return encodeURIComponent(str).replace(/\./g, '%2E');
+    }
+    function decodeSubKey(str) {
+      try {
+        return decodeURIComponent(str);
+      } catch(e) {
+        return str;
+      }
+    }
+
     let cachedStudents = {};
     let cachedSubjects = {};
     let cachedComments = {};
@@ -939,7 +949,6 @@
       }
     }
 
-    // 2. ADMIN AUTHENTICATION
     function handleAdminLogin(e) {
       e.preventDefault();
       const u = document.getElementById('adminUserField').value.trim();
@@ -966,7 +975,6 @@
       window.location.reload();
     }
 
-    // 3. SEMESTER DROPDOWN
     const semesterMap = {
       "FYBA": ["Semester 1", "Semester 2"],
       "SYBA": ["Semester 3", "Semester 4"],
@@ -986,7 +994,6 @@
       });
     }
 
-    // 4. DRAWER
     function openDrawer() {
       document.getElementById('sideDrawer').classList.add('active');
       document.getElementById('drawerOverlay').classList.add('active');
@@ -997,7 +1004,6 @@
       document.getElementById('drawerOverlay').classList.remove('active');
     }
 
-    // 5. URL HASH ROUTER (SOLVES REFRESH ISSUE)
     const tabMapToHash = {
       'addSubjectTab': 'add-subject',
       'existingSubjectsTab': 'subjects',
@@ -1033,7 +1039,7 @@
     function parseHash() {
       if (sessionStorage.getItem('csh_admin_auth') !== 'true') return;
 
-      const rawHash = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''));
+      const rawHash = window.location.hash.replace(/^#\/?/, '');
       hideAllTabs();
 
       if (!rawHash) {
@@ -1041,14 +1047,12 @@
         return;
       }
 
-      // Check detail sub-routes
       if (rawHash.startsWith('subject-detail/')) {
         const subKey = rawHash.replace('subject-detail/', '');
         document.getElementById('existingSubjectsTab').classList.remove('hidden');
         if (cachedSubjects[subKey]) {
           showSubjectDetail(subKey, false);
         } else {
-          // Wait for data load
           setTimeout(() => showSubjectDetail(subKey, false), 500);
         }
         return;
@@ -1076,7 +1080,6 @@
         return;
       }
 
-      // Main tab routes
       const tabId = hashToTabMap[rawHash];
       if (tabId) {
         document.getElementById(tabId).classList.remove('hidden');
@@ -1090,7 +1093,7 @@
 
     window.addEventListener('hashchange', parseHash);
 
-    // 6. ADD / PUBLISH SUBJECT
+    // ADD / UPDATE SUBJECT (Full Name Saved via Safe Key & Original Name Field)
     function handleSubjectSubmit(e) {
       e.preventDefault();
       const course = document.getElementById('courseSelect').value;
@@ -1108,8 +1111,11 @@
       btn.innerText = "Publishing to Website...";
       btn.disabled = true;
 
-      const path = `study_data/${course}/${semester}/${subject}`;
+      const safeKey = encodeSubKey(subject);
+      const path = `study_data/${course}/${semester}/${safeKey}`;
+      
       database.ref(path).set({
+        subjectName: subject, // Original complete name preserved!
         notes: notes,
         questions: questions,
         papers: papers,
@@ -1132,7 +1138,7 @@
       });
     }
 
-    // 7. RENDER SUBJECTS + EDIT
+    // RENDER SUBJECTS WITH FULL NAME DISPLAY
     function listenToSubjects() {
       const container = document.getElementById('existingSubjectsContainer');
       database.ref('study_data').on('value', (snapshot) => {
@@ -1146,23 +1152,28 @@
         container.innerHTML = '';
         Object.keys(data).forEach(course => {
           Object.keys(data[course]).forEach(semester => {
-            Object.keys(data[course][semester]).forEach(subName => {
-              const subKey = `${course}___${semester}___${subName}`;
-              cachedSubjects[subKey] = {
+            Object.keys(data[course][semester]).forEach(subKeyRaw => {
+              const item = data[course][semester][subKeyRaw];
+              // Support both legacy unencoded & new encoded keys
+              const realSubjectName = item.subjectName || decodeSubKey(subKeyRaw);
+              const compositeKey = `${course}___${semester}___${subKeyRaw}`;
+
+              cachedSubjects[compositeKey] = {
                 course,
                 semester,
-                subject: subName,
-                ...data[course][semester][subName]
+                subKeyRaw,
+                subject: realSubjectName,
+                ...item
               };
 
               const row = document.createElement('div');
               row.className = 'clean-item-row';
               row.innerHTML = `
-                <div class="clickable-name-area" onclick="showSubjectDetail('${subKey}', true)" title="Click to view & edit links">
-                  <span class="icon-badge">📘</span>
-                  <span>${subName}</span>
+                <div class="clickable-name-area" onclick="showSubjectDetail('${compositeKey}', true)" title="Click to view & edit links">
+                  <span style="font-size:1.15rem;">📘</span>
+                  <span class="subject-title-text">${realSubjectName}</span>
                 </div>
-                <button class="btn-delete-item" onclick="deleteSubject('${course}', '${semester}', '${subName}')">Delete Subject</button>
+                <button class="btn-delete-item" onclick="deleteSubject('${course}', '${semester}', '${subKeyRaw}', '${realSubjectName.replace(/'/g, "\\'")}')">Delete Subject</button>
               `;
               container.appendChild(row);
             });
@@ -1257,7 +1268,7 @@
       saveBtn.innerText = "Saving Changes...";
       saveBtn.disabled = true;
 
-      const path = `study_data/${s.course}/${s.semester}/${s.subject}`;
+      const path = `study_data/${s.course}/${s.semester}/${s.subKeyRaw}`;
       database.ref(path).update({
         notes: notes,
         questions: questions,
@@ -1283,10 +1294,10 @@
       document.getElementById('subjectListView').classList.remove('hidden');
     }
 
-    function deleteSubject(course, sem, subject) {
-      if (confirm(`Are you sure you want to remove '${subject}' from ${course} (${sem})?`)) {
-        database.ref(`study_data/${course}/${sem}/${subject}`).remove().then(() => {
-          alert(`Subject '${subject}' removed from live site.`);
+    function deleteSubject(course, sem, subKeyRaw, subjectName) {
+      if (confirm(`Are you sure you want to remove '${subjectName}' from ${course} (${sem})?`)) {
+        database.ref(`study_data/${course}/${sem}/${subKeyRaw}`).remove().then(() => {
+          alert(`Subject '${subjectName}' removed from live site.`);
           backToSubjectList(true);
         });
       }
@@ -1316,10 +1327,10 @@
           row.className = 'clean-item-row';
           row.innerHTML = `
             <div class="clickable-name-area" onclick="showStudentDetail('${key}', true)" title="Click to view full registration details">
-              <span class="icon-badge">👤</span>
-              <span>${student.name}</span>
+              <span style="font-size:1.15rem;">👤</span>
+              <span class="subject-title-text">${student.name}</span>
             </div>
-            <button class="btn-delete-item" onclick="removeStudent('${key}', '${student.name}')">Remove Student</button>
+            <button class="btn-delete-item" onclick="removeStudent('${key}', '${student.name.replace(/'/g, "\\'")}')">Remove Student</button>
           `;
           container.appendChild(row);
         });
@@ -1361,7 +1372,7 @@
           <div class="detail-value" style="font-size:0.85rem; color:var(--text-muted);">${s.joinedAt ? new Date(s.joinedAt).toLocaleString('en-IN') : 'N/A'}</div>
         </div>
         <div style="margin-top:1.25rem;">
-          <button class="btn-delete-item" style="width:100%; padding:0.75rem;" onclick="removeStudent('${studentKey}', '${s.name}')">Remove & Logout Scholar</button>
+          <button class="btn-delete-item" style="width:100%; padding:0.75rem;" onclick="removeStudent('${studentKey}', '${s.name.replace(/'/g, "\\'")}')">Remove & Logout Scholar</button>
         </div>
       `;
 
@@ -1407,8 +1418,8 @@
           row.className = 'clean-item-row';
           row.innerHTML = `
             <div class="clickable-name-area" onclick="showCommentDetail('${key}', true)" title="Click to view full comment details">
-              <span class="icon-badge">💬</span>
-              <span>${item.userName || 'Scholar'}</span>
+              <span style="font-size:1.15rem;">💬</span>
+              <span class="subject-title-text">${item.userName || 'Scholar'}</span>
             </div>
             <button class="btn-delete-item" onclick="deleteComment('${key}')">Delete</button>
           `;
@@ -1441,6 +1452,10 @@
           <div class="detail-value">${c.userPhone ? '+91 ' + c.userPhone : 'Not Provided'}</div>
         </div>
         <div class="detail-row-item">
+          <div class="detail-label">🎓 Year of College</div>
+          <div class="detail-value">${c.collegeYear || 'FYBA'} (${c.academicYear || '2026'})</div>
+        </div>
+        <div class="detail-row-item">
           <div class="detail-label">🕒 Date & Time</div>
           <div class="detail-value">${timeFormatted}</div>
         </div>
@@ -1471,7 +1486,6 @@
       }
     }
 
-    // Initialize listeners & dropdown on load
     document.addEventListener('DOMContentLoaded', () => {
       updateSemesterDropdown();
       listenToSubjects();
