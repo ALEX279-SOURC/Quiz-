@@ -9,6 +9,12 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
+  <!-- PDF.js library for direct browser PDF parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+  </script>
+
   <style>
     :root {
       --bg: #0b1329;
@@ -380,7 +386,7 @@
       letter-spacing: 0.02em;
     }
 
-    .input-box, .select-box {
+    .input-box, .select-box, .textarea-box {
       width: 100%;
       padding: 0.85rem 1rem;
       border: 1px solid var(--card-border);
@@ -392,7 +398,13 @@
       transition: border-color 0.2s;
     }
 
-    .input-box:focus, .select-box:focus {
+    .textarea-box {
+      min-height: 120px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .input-box:focus, .select-box:focus, .textarea-box:focus {
       border-color: var(--primary);
     }
 
@@ -481,38 +493,6 @@
       white-space: normal;
       word-break: break-word;
       line-height: 1.35;
-    }
-
-    .row-actions-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .btn-order-arrow {
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #94a3b8;
-      width: 30px;
-      height: 30px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s;
-    }
-
-    .btn-order-arrow:hover:not(:disabled) {
-      background: #3b82f6;
-      color: #fff;
-      border-color: #3b82f6;
-    }
-
-    .btn-order-arrow:disabled {
-      opacity: 0.25;
-      cursor: not-allowed;
     }
 
     .btn-delete-item {
@@ -645,6 +625,54 @@
 
     .btn-save-changes:hover {
       background: #059669;
+    }
+
+    /* EXAM CONFIGURATION SECTION */
+    .btn-open-exam-config {
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid #38bdf8;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .btn-open-exam-config:hover {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    .file-drop-box {
+      border: 2px dashed #334155;
+      padding: 1.5rem;
+      border-radius: 10px;
+      text-align: center;
+      background: #0b1329;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: all 0.2s;
+    }
+
+    .file-drop-box:hover {
+      border-color: var(--primary);
+    }
+
+    .q-preview-card {
+      background: #131f3f;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.85rem;
+      margin-bottom: 0.6rem;
+      font-size: 0.85rem;
     }
 
     .hidden {
@@ -789,7 +817,7 @@
         <div class="quick-card" onclick="navigateToTab('existingSubjectsTab')">
           <div class="quick-icon">🗂</div>
           <div class="quick-title">Existing Subjects</div>
-          <div class="quick-desc">Inspect, edit links, or delete live semester courses.</div>
+          <div class="quick-desc">Inspect, edit links, or upload MCQ PDF test papers.</div>
         </div>
 
         <div class="quick-card" onclick="navigateToTab('studentsDirectoryTab')">
@@ -851,16 +879,11 @@
           <input type="url" id="papersLinkInput" class="input-box" placeholder="https://drive.google.com/..." />
         </div>
 
-        <div class="form-group">
-          <label class="form-label">EXAM PREPARATION LINK</label>
-          <input type="url" id="examLinkInput" class="input-box" placeholder="https://drive.google.com/..." />
-        </div>
-
-        <button type="submit" id="saveSubjectBtn" class="btn-action-primary">Save & Publish to Live Site →</button>
+        <button type="submit" id="saveSubjectBtn" class="btn-action-primary">Save & Publish Subject →</button>
       </form>
     </section>
 
-    <!-- TAB 2: EXISTING MANAGED SUBJECTS (SEMESTER 1 TO 6 VIEW) -->
+    <!-- TAB 2: EXISTING MANAGED SUBJECTS -->
     <section id="existingSubjectsTab" class="tab-card hidden">
       <div class="card-top-header">
         <div class="card-title-group">
@@ -888,6 +911,70 @@
       <div id="subjectDetailView" class="hidden">
         <button class="btn-detail-back" onclick="backToSubjectList()">← Back to Subjects List</button>
         <div class="detail-view-box" id="subjectDetailContent"></div>
+      </div>
+
+      <!-- VIEW 4: DEDICATED MCQ TEST & PDF PARSER TAB -->
+      <div id="examConfigTab" class="hidden">
+        <button class="btn-detail-back" onclick="backToSubjectDetailFromExam()">← Back to Subject</button>
+        
+        <div class="detail-view-box">
+          <div style="font-size:1.15rem; font-weight:800; color:#38bdf8; margin-bottom:0.25rem;">
+            🎯 MCQ Test Configuration & PDF Auto-Set
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1.25rem;" id="examConfigSubjectHeader">
+            Configure test questions, timer and quantity for this subject.
+          </p>
+
+          <!-- 1. PDF UPLOAD / AUTO EXTRACT -->
+          <div class="form-group">
+            <label class="form-label">UPLOAD QUESTIONS PDF (AUTO-PARSE)</label>
+            <div class="file-drop-box" onclick="document.getElementById('pdfFileInput').click()">
+              <div style="font-size:2rem; margin-bottom:0.25rem;">📄</div>
+              <div style="font-weight:700; color:#fff;" id="pdfFileLabel">Click to select PDF with MCQ questions</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">System will automatically parse questions & options</div>
+              <input type="file" id="pdfFileInput" accept="application/pdf" style="display:none;" onchange="handlePDFUpload(event)" />
+            </div>
+          </div>
+
+          <!-- OPTIONAL DIRECT TEXT PASTE FOR ACCURACY -->
+          <div class="form-group">
+            <label class="form-label">OR PASTE QUESTIONS TEXT DIRECTLY</label>
+            <textarea id="rawQuestionTextInput" class="textarea-box" placeholder="1. What is Sanskrit?
+A) Language
+B) Country
+C) River
+D) Mountain
+Ans: A"></textarea>
+            <button type="button" class="btn-action-primary" style="background:#1e293b; border:1px solid #334155; margin-top:0.4rem; padding:0.6rem;" onclick="parseRawTextQuestions()">⚡ Parse Pasted Text</button>
+          </div>
+
+          <!-- 2. TIMER & QUANTITY SETTINGS -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-top:1rem;">
+            <div class="form-group">
+              <label class="form-label">TIMER (MINUTES)</label>
+              <input type="number" id="testDurationInput" class="input-box" value="15" min="1" max="180" placeholder="e.g. 15" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">QUESTION QUANTITY (COUNT)</label>
+              <input type="number" id="testQuantityInput" class="input-box" value="10" min="1" max="200" placeholder="e.g. 10" required />
+            </div>
+          </div>
+
+          <!-- 3. PARSED QUESTIONS PREVIEW -->
+          <div class="form-group" style="margin-top:0.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+              <span class="form-label" style="margin-bottom:0;">PARSED QUESTIONS PREVIEW</span>
+              <span class="counter-pill" id="parsedCountBadge">0 MCQs Ready</span>
+            </div>
+            <div id="parsedQuestionsPreviewContainer" style="max-height:220px; overflow-y:auto; border:1px solid var(--card-border); border-radius:8px; padding:0.5rem;">
+              <div style="text-align:center; color:var(--text-muted); font-size:0.8rem; padding:1rem;">Upload a PDF or paste text above to preview MCQs.</div>
+            </div>
+          </div>
+
+          <!-- 4. SAVE EXAM CONFIG BUTTON -->
+          <button type="button" class="btn-save-changes" id="btnSaveExamConfig" onclick="saveExamConfiguration()">💾 Save Test & Publish to Live Site</button>
+        </div>
       </div>
     </section>
 
@@ -981,7 +1068,6 @@
       { name: "Semester 6", course: "TYBA" }
     ];
 
-    // Priority map ensuring Sanskrit M1 and M2 stay on top as originally intended
     function getDefaultPriority(subName) {
       const clean = subName.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (clean.includes('sanskritm1') || clean === 'sanskrit1') return 10;
@@ -1005,6 +1091,9 @@
     let isSubjectsLoaded = false;
     let isStudentsLoaded = false;
     let isCommentsLoaded = false;
+
+    // Parsed MCQs ready to save
+    let activeParsedQuestions = [];
 
     function togglePinVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
@@ -1212,7 +1301,6 @@
       const notes = document.getElementById('notesLinkInput').value.trim() || '#';
       const questions = document.getElementById('questionsLinkInput').value.trim() || '#';
       const papers = document.getElementById('papersLinkInput').value.trim() || '#';
-      const exam = document.getElementById('examLinkInput').value.trim() || '#';
 
       if (!subject) return;
 
@@ -1240,7 +1328,6 @@
           notes: notes,
           questions: questions,
           papers: papers,
-          exam: exam,
           orderIndex: permanentIndex,
           createdAt: createdAt,
           updatedAt: new Date().toISOString()
@@ -1250,13 +1337,12 @@
           document.getElementById('notesLinkInput').value = '';
           document.getElementById('questionsLinkInput').value = '';
           document.getElementById('papersLinkInput').value = '';
-          document.getElementById('examLinkInput').value = '';
-          btn.innerText = "Save & Publish to Live Site →";
+          btn.innerText = "Save & Publish Subject →";
           btn.disabled = false;
           openSemesterSubjects(semester, course, true);
         }).catch(err => {
           alert("Error publishing subject: " + err.message);
-          btn.innerText = "Save & Publish to Live Site →";
+          btn.innerText = "Save & Publish Subject →";
           btn.disabled = false;
         });
       });
@@ -1338,6 +1424,7 @@
 
       document.getElementById('semesterSelectView').classList.add('hidden');
       document.getElementById('subjectDetailView').classList.add('hidden');
+      document.getElementById('examConfigTab').classList.add('hidden');
       document.getElementById('subjectListView').classList.remove('hidden');
 
       document.getElementById('currentSemesterTitle').innerText = `📘 ${semName} (${courseName}) - Added Subjects`;
@@ -1346,7 +1433,6 @@
       renderSubjectsForCurrentSemester();
     }
 
-    // RENDER SUBJECTS WITH ⬆ / ⬇ POSITION CONTROL BUTTONS
     function renderSubjectsForCurrentSemester() {
       const container = document.getElementById('existingSubjectsContainer');
       container.innerHTML = '';
@@ -1368,13 +1454,9 @@
         }
       });
 
-      // Strict Sorting: Sanskrit M1 (10) -> Sanskrit M2 (20) -> Others
       list.sort((a, b) => a.orderIndex - b.orderIndex);
 
-      list.forEach((s, idx) => {
-        const isFirst = idx === 0;
-        const isLast = idx === list.length - 1;
-
+      list.forEach((s) => {
         const row = document.createElement('div');
         row.className = 'clean-item-row';
         row.innerHTML = `
@@ -1382,54 +1464,9 @@
             <span style="font-size:1.15rem;">📘</span>
             <span class="subject-title-text">${s.subject}</span>
           </div>
-
-          <div class="row-actions-wrap">
-            <button class="btn-order-arrow" title="Move Up" ${isFirst ? 'disabled' : ''} onclick="moveSubjectPosition('${s.compositeKey}', -1)">▲</button>
-            <button class="btn-order-arrow" title="Move Down" ${isLast ? 'disabled' : ''} onclick="moveSubjectPosition('${s.compositeKey}', 1)">▼</button>
-            <button class="btn-delete-item" onclick="deleteSubject('${s.course}', '${s.semester}', '${s.subKeyRaw}', '${s.subject.replace(/'/g, "\\'")}')">Delete</button>
-          </div>
+          <button class="btn-delete-item" onclick="deleteSubject('${s.course}', '${s.semester}', '${s.subKeyRaw}', '${s.subject.replace(/'/g, "\\'")}')">Delete</button>
         `;
         container.appendChild(row);
-      });
-    }
-
-    // SWAP POSITION FUNCTION
-    function moveSubjectPosition(compositeKey, direction) {
-      const courseData = (globalStudyData && globalStudyData[currentSelectedCourse]) ? globalStudyData[currentSelectedCourse] : {};
-      const semData = courseData[currentSelectedSemester] || {};
-      const subKeys = Object.keys(semData);
-
-      const list = [];
-      subKeys.forEach(subKeyRaw => {
-        const compKey = `${currentSelectedCourse}___${currentSelectedSemester}___${subKeyRaw}`;
-        if (cachedSubjects[compKey]) {
-          list.push(cachedSubjects[compKey]);
-        }
-      });
-
-      list.sort((a, b) => a.orderIndex - b.orderIndex);
-
-      const currentIndex = list.findIndex(item => item.compositeKey === compositeKey);
-      if (currentIndex === -1) return;
-
-      const targetIndex = currentIndex + direction;
-      if (targetIndex < 0 || targetIndex >= list.length) return;
-
-      // Swap items in list
-      const temp = list[currentIndex];
-      list[currentIndex] = list[targetIndex];
-      list[targetIndex] = temp;
-
-      // Re-assign orderIndex sequentially
-      const updates = {};
-      list.forEach((item, index) => {
-        const newOrder = (index + 1) * 10;
-        item.orderIndex = newOrder;
-        updates[`study_data/${item.course}/${item.semester}/${item.subKeyRaw}/orderIndex`] = newOrder;
-      });
-
-      database.ref().update(updates).then(() => {
-        renderSubjectsForCurrentSemester();
       });
     }
 
@@ -1440,6 +1477,7 @@
 
       document.getElementById('subjectListView').classList.add('hidden');
       document.getElementById('subjectDetailView').classList.add('hidden');
+      document.getElementById('examConfigTab').classList.add('hidden');
       document.getElementById('semesterSelectView').classList.remove('hidden');
 
       document.getElementById('subjectTabSubtitle').innerText = "Select a semester to manage its subjects.";
@@ -1493,12 +1531,12 @@
           <input type="text" id="editPapersInput" class="detail-input-edit" value="${s.papers && s.papers !== '#' ? s.papers : ''}" placeholder="Enter Drive link for papers" />
         </div>
 
+        <!-- DEDICATED BUTTON IN PLACE OF LINK -->
         <div class="detail-row-item">
-          <div class="detail-label-bar">
-            <span class="detail-label">🎯 Exam Preparation Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editExamInput')">✏️ Edit</button>
-          </div>
-          <input type="text" id="editExamInput" class="detail-input-edit" value="${s.exam && s.exam !== '#' ? s.exam : ''}" placeholder="Enter Drive link for exam prep" />
+          <div class="detail-label">🎯 Exam Preparation & MCQ Mock Test</div>
+          <button type="button" class="btn-open-exam-config" onclick="openExamConfigTab('${subKey}')">
+            <span>⚙️ Configure MCQ Test & Upload PDF →</span>
+          </button>
         </div>
 
         <div class="detail-row-item">
@@ -1506,11 +1544,12 @@
           <div class="detail-value" style="font-size:0.85rem; color:var(--text-muted);">${s.updatedAt ? new Date(s.updatedAt).toLocaleString('en-IN') : 'N/A'}</div>
         </div>
 
-        <button type="button" class="btn-save-changes" id="btnSaveSubjectLinks" onclick="saveSubjectLinksChanges()">💾 Save Changes & Update Website</button>
+        <button type="button" class="btn-save-changes" id="btnSaveSubjectLinks" onclick="saveSubjectLinksChanges()">💾 Save Resource Links</button>
       `;
 
       document.getElementById('semesterSelectView').classList.add('hidden');
       document.getElementById('subjectListView').classList.add('hidden');
+      document.getElementById('examConfigTab').classList.add('hidden');
       document.getElementById('subjectDetailView').classList.remove('hidden');
     }
 
@@ -1530,7 +1569,6 @@
       const notes = document.getElementById('editNotesInput').value.trim() || '#';
       const questions = document.getElementById('editQuestionsInput').value.trim() || '#';
       const papers = document.getElementById('editPapersInput').value.trim() || '#';
-      const exam = document.getElementById('editExamInput').value.trim() || '#';
 
       const saveBtn = document.getElementById('btnSaveSubjectLinks');
       saveBtn.innerText = "Saving Changes...";
@@ -1542,22 +1580,20 @@
         notes: notes,
         questions: questions,
         papers: papers,
-        exam: exam,
         updatedAt: new Date().toISOString()
       }).then(() => {
         s.notes = notes;
         s.questions = questions;
         s.papers = papers;
-        s.exam = exam;
 
-        alert(`Links for '${s.subject}' updated successfully!`);
+        alert(`Resource Links for '${s.subject}' updated successfully!`);
         saveBtn.innerText = "Saved Successfully ✓";
         setTimeout(() => {
           backToSubjectList(true);
         }, 400);
       }).catch(err => {
         alert("Error saving links: " + err.message);
-        saveBtn.innerText = "💾 Save Changes & Update Website";
+        saveBtn.innerText = "💾 Save Resource Links";
         saveBtn.disabled = false;
       });
     }
@@ -1566,6 +1602,7 @@
       if (currentSelectedSemester) {
         if (updateHash) window.location.hash = `subjects/${encodeURIComponent(currentSelectedSemester)}`;
         document.getElementById('subjectDetailView').classList.add('hidden');
+        document.getElementById('examConfigTab').classList.add('hidden');
         document.getElementById('subjectListView').classList.remove('hidden');
       } else {
         backToSemesterGrid(updateHash);
@@ -1581,6 +1618,198 @@
       }
     }
 
+    // ==========================================
+    // EXAM CONFIGURATION & PDF PARSER LOGIC
+    // ==========================================
+    function openExamConfigTab(subKey) {
+      const s = cachedSubjects[subKey];
+      if (!s) return;
+
+      document.getElementById('subjectDetailView').classList.add('hidden');
+      document.getElementById('examConfigTab').classList.remove('hidden');
+
+      document.getElementById('examConfigSubjectHeader').innerText = 
+        `Subject: ${s.subject} (${s.course} • ${s.semester})`;
+
+      document.getElementById('pdfFileInput').value = '';
+      document.getElementById('pdfFileLabel').innerText = 'Click to select PDF with MCQ questions';
+      document.getElementById('rawQuestionTextInput').value = '';
+
+      // Load existing config from Firebase
+      const safeKey = encodeSubKey(s.subject);
+      const configRef = database.ref(`exam_configs/${s.course}/${s.semester}/${safeKey}`);
+
+      configRef.once('value').then((snap) => {
+        const conf = snap.val() || {};
+        document.getElementById('testDurationInput').value = conf.durationMinutes || 15;
+        document.getElementById('testQuantityInput').value = conf.questionQuantity || 10;
+        
+        if (conf.questions && Array.isArray(conf.questions)) {
+          activeParsedQuestions = conf.questions;
+        } else {
+          activeParsedQuestions = [];
+        }
+        renderParsedPreview();
+      });
+    }
+
+    function backToSubjectDetailFromExam() {
+      document.getElementById('examConfigTab').classList.add('hidden');
+      document.getElementById('subjectDetailView').classList.remove('hidden');
+    }
+
+    // PDF EXTRACTOR FUNCTION
+    async function handlePDFUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      document.getElementById('pdfFileLabel').innerText = `Reading: ${file.name}...`;
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageStr = textContent.items.map(item => item.str).join(' ');
+          fullText += '\n' + pageStr;
+        }
+
+        document.getElementById('pdfFileLabel').innerText = `✓ Loaded: ${file.name}`;
+        document.getElementById('rawQuestionTextInput').value = fullText.trim();
+        parseRawTextQuestions();
+      } catch (err) {
+        alert("Error reading PDF: " + err.message);
+        document.getElementById('pdfFileLabel').innerText = 'Failed to load PDF. Try pasting text.';
+      }
+    }
+
+    // REGEX MCQ PARSER (Extracts Q, A, B, C, D & Answer)
+    function parseRawTextQuestions() {
+      const text = document.getElementById('rawQuestionTextInput').value;
+      if (!text.trim()) {
+        alert("Pehle PDF upload karein ya text paste karein!");
+        return;
+      }
+
+      const questions = [];
+      // Split by question indicators like "1.", "Q1", "1)", "પ્રશ્ન"
+      const rawBlocks = text.split(/(?:^|\n|\s+)(?:\d+[\.\)]|Q\d+[\.\:]|પ્રશ્ન\s*\d+[\.\:])/i);
+
+      rawBlocks.forEach((block) => {
+        const clean = block.trim();
+        if (!clean || clean.length < 15) return;
+
+        // Try extracting options A), B), C), D) or (A), (B), (C), (D)
+        const optMatches = clean.split(/(?:[A-Da-d]\)|\([A-Da-d]\)|[A-Da-d]\.|\(૧\)|\(૨\)|\(૩\)|\(૪\))/);
+
+        if (optMatches && optMatches.length >= 5) {
+          const qText = optMatches[0].trim();
+          const optA = optMatches[1].trim();
+          const optB = optMatches[2].trim();
+          const optC = optMatches[3].trim();
+          let optD = optMatches[4].trim();
+
+          // Check for Ans: indicator in optD
+          let correctIndex = 0;
+          const ansMatch = clean.match(/(?:Ans|Answer|ઉત્તર)[\s\:\-]+([A-D])/i);
+          if (ansMatch) {
+            const letter = ansMatch[1].toUpperCase();
+            correctIndex = letter.charCodeAt(0) - 65; // A->0, B->1, C->2, D->3
+            optD = optD.replace(/(?:Ans|Answer|ઉત્તર)[\s\:\-]+[A-D].*$/i, '').trim();
+          }
+
+          if (qText && optA && optB && optC && optD) {
+            questions.push({
+              question: qText,
+              options: [optA, optB, optC, optD],
+              correct: (correctIndex >= 0 && correctIndex <= 3) ? correctIndex : 0
+            });
+          }
+        }
+      });
+
+      if (questions.length === 0) {
+        alert("Automatic format match nahi hua! Kripya check karein ki questions me 1., A), B), C), D) format ho.");
+      } else {
+        activeParsedQuestions = questions;
+        renderParsedPreview();
+      }
+    }
+
+    function renderParsedPreview() {
+      const container = document.getElementById('parsedQuestionsPreviewContainer');
+      const badge = document.getElementById('parsedCountBadge');
+      badge.innerText = `${activeParsedQuestions.length} MCQs Ready`;
+
+      if (activeParsedQuestions.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:0.8rem; padding:1rem;">Upload a PDF or paste text above to preview MCQs.</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      activeParsedQuestions.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = 'q-preview-card';
+        card.innerHTML = `
+          <div style="font-weight:700; color:#fff; margin-bottom:0.25rem;">Q${idx + 1}: ${q.question}</div>
+          <div style="color:var(--text-muted); font-size:0.8rem;">
+            A) ${q.options[0]} | B) ${q.options[1]}<br>
+            C) ${q.options[2]} | D) ${q.options[3]}
+          </div>
+          <div style="color:#10b981; font-weight:700; margin-top:0.2rem; font-size:0.75rem;">
+            Correct: Option ${String.fromCharCode(65 + q.correct)}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // SAVE EXAM CONFIG TO FIREBASE
+    function saveExamConfiguration() {
+      if (!activeEditSubjectKey) return;
+      const s = cachedSubjects[activeEditSubjectKey];
+      if (!s) return;
+
+      const duration = parseInt(document.getElementById('testDurationInput').value) || 15;
+      const quantity = parseInt(document.getElementById('testQuantityInput').value) || 10;
+
+      if (activeParsedQuestions.length === 0) {
+        alert("Kripya pehle PDF upload karke questions parse karein!");
+        return;
+      }
+
+      const saveBtn = document.getElementById('btnSaveExamConfig');
+      saveBtn.innerText = "Publishing MCQs to Test...";
+      saveBtn.disabled = true;
+
+      const safeKey = encodeSubKey(s.subject);
+      const configPath = `exam_configs/${s.course}/${s.semester}/${safeKey}`;
+
+      database.ref(configPath).set({
+        subjectName: s.subject,
+        durationMinutes: duration,
+        questionQuantity: quantity,
+        questions: activeParsedQuestions,
+        updatedAt: new Date().toISOString()
+      }).then(() => {
+        alert(`MCQ Test for '${s.subject}' set successfully with ${activeParsedQuestions.length} questions & ${duration} mins timer!`);
+        saveBtn.innerText = "Saved Successfully ✓";
+        setTimeout(() => {
+          saveBtn.innerText = "💾 Save Test & Publish to Live Site";
+          saveBtn.disabled = false;
+          backToSubjectDetailFromExam();
+        }, 500);
+      }).catch(err => {
+        alert("Error saving test config: " + err.message);
+        saveBtn.innerText = "💾 Save Test & Publish to Live Site";
+        saveBtn.disabled = false;
+      });
+    }
+
+    // STUDENTS LIST
     function listenToStudents() {
       const container = document.getElementById('studentsListContainer');
       database.ref('registered_students').on('value', (snapshot) => {
@@ -1631,10 +1860,6 @@
           <div class="detail-value">${s.name}</div>
         </div>
         <div class="detail-row-item">
-          <div class="detail-label">📞 Registered Mobile Number</div>
-          <div class="detail-value">+91 ${s.phone}</div>
-        </div>
-        <div class="detail-row-item">
           <div class="detail-label">🎓 Year of College</div>
           <div class="detail-value">${s.collegeYear || 'FYBA'}</div>
         </div>
@@ -1674,6 +1899,7 @@
       }
     }
 
+    // COMMENTS LIST
     function listenToComments() {
       const container = document.getElementById('commentsContainer');
       database.ref('student_comments').on('value', (snapshot) => {
@@ -1726,10 +1952,6 @@
         <div class="detail-row-item">
           <div class="detail-label">👤 Student Name</div>
           <div class="detail-value">${c.userName || 'Anonymous Scholar'}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">📞 Mobile Number</div>
-          <div class="detail-value">${c.userPhone ? '+91 ' + c.userPhone : 'Not Provided'}</div>
         </div>
         <div class="detail-row-item">
           <div class="detail-label">🎓 Year of College</div>
