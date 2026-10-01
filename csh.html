@@ -536,8 +536,9 @@
         </div>
 
         <h2 id="authHeading">Student Registration</h2>
-        <p id="authSubheading">Register with your details & 4-digit PIN to access study materials.</p>
+        <p id="authSubheading">Register with your name & create a 4-digit PIN to access study materials.</p>
         
+        <!-- REGISTRATION FORM (MOBILE NUMBER REMOVED) -->
         <form id="enrollForm" onsubmit="handleRegistration(event)">
           <label class="form-label">
             <span class="label-text-nowrap">FULL NAME</span>
@@ -565,26 +566,22 @@
           </select>
 
           <label class="form-label">
-            <span class="label-text-nowrap">MOBILE NUMBER (10 DIGITS)</span>
-          </label>
-          <input type="tel" id="regPhoneInput" class="input-box" placeholder="WhatsApp / Mobile Number" pattern="[0-9]{10}" title="Enter valid 10-digit mobile number" required />
-
-          <label class="form-label">
             <span class="label-text-nowrap">CREATE 4-DIGIT SECURITY PIN</span>
           </label>
           <div class="pin-input-wrap">
             <input type="password" id="regPinInput" class="input-box" placeholder="e.g. 1234" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️</button>
           </div>
 
           <button type="submit" id="regSubmitBtn" class="btn-primary-action">Create Account & Enter →</button>
         </form>
 
+        <!-- RETURNING LOGIN FORM -->
         <form id="returningLoginForm" class="hidden" onsubmit="handleLogin(event)">
           <label class="form-label">
-            <span class="label-text-nowrap">REGISTERED MOBILE NUMBER</span>
+            <span class="label-text-nowrap">REGISTERED FULL NAME</span>
           </label>
-          <input type="tel" id="loginPhoneInput" class="input-box" placeholder="Enter your 10-digit registered number" pattern="[0-9]{10}" required />
+          <input type="text" id="loginNameInput" class="input-box" placeholder="Enter your full name" required />
 
           <label class="form-label">
             <span class="label-text-nowrap">ENTER 4-DIGIT SECURITY PIN</span>
@@ -650,7 +647,7 @@
         
         <h2 class="step-title">⚙️ Student Account Details</h2>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-          Your current registered credentials. Tap update below if you wish to change mobile or PIN.
+          Your current registered credentials. You can update your Name, College Year, or PIN.
         </p>
 
         <form onsubmit="saveAccountSettings(event)">
@@ -658,31 +655,6 @@
             <span class="label-text-nowrap">FULL NAME</span>
           </label>
           <input type="text" id="accNameInput" class="input-box" required />
-
-          <div class="form-label">
-            <span class="label-text-nowrap">REGISTERED MOBILE NUMBER</span>
-            <button type="button" class="btn-badge-action" onclick="toggleMobileBox()">
-              ✏️️ Update Number
-            </button>
-          </div>
-          <input type="tel" id="accCurrentPhone" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed; margin-bottom: 0.4rem;" />
-
-          <div id="mobileUpdateDrawer" class="inline-update-box hidden">
-            <label class="form-label">
-              <span class="label-text-nowrap">NEW 10-DIGIT MOBILE NUMBER</span>
-            </label>
-            <input type="tel" id="accNewPhoneInput" class="input-box" placeholder="Enter new 10 digits" pattern="[0-9]{10}" />
-
-            <label class="form-label">
-              <span class="label-text-nowrap">CURRENT 4-DIGIT PIN TO VERIFY</span>
-            </label>
-            <div class="pin-input-wrap">
-              <input type="password" id="accVerifyPinForPhone" class="input-box" placeholder="Current PIN" pattern="[0-9]{4}" maxlength="4" />
-              <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accVerifyPinForPhone', this)">👁️</button>
-            </div>
-
-            <button type="button" id="btnUpdatePhone" class="btn-primary-action" style="background:#0f172a;" onclick="updateMobileNumberWithPin()">Verify & Save New Number</button>
-          </div>
 
           <label class="form-label" style="margin-top:0.4rem;">
             <span class="label-text-nowrap">YEAR OF COLLEGE</span>
@@ -840,18 +812,15 @@
       previousHash: ''
     };
 
-    // BULLETPROOF SUBJECT RESOLVER: Finds subject and links under any key, space or encoding
     function getActiveSubjectData() {
       const courseData = studyData[state.course] || {};
       const semData = courseData[state.semester] || {};
       if (!semData) return {};
 
-      // 1. Direct match by current key
       if (state.subjectKey && semData[state.subjectKey]) {
         return semData[state.subjectKey];
       }
 
-      // 2. Encoded key match
       if (state.subjectKey) {
         const encodedKey = encodeURIComponent(state.subjectKey).replace(/\./g, '%2E');
         if (semData[encodedKey]) {
@@ -860,7 +829,6 @@
         }
       }
 
-      // 3. Name or fuzzy key match
       const targetQuery = (state.subjectName || state.subjectKey || '').toLowerCase().trim();
       const keys = Object.keys(semData);
       const matchedKey = keys.find(k => {
@@ -887,11 +855,6 @@
         input.type = 'password';
         btn.innerText = '👁️';
       }
-    }
-
-    function toggleMobileBox() {
-      const el = document.getElementById('mobileUpdateDrawer');
-      el.classList.toggle('hidden');
     }
 
     function togglePinBox() {
@@ -926,8 +889,8 @@
       document.getElementById('totalUsersCount').innerText = count;
     });
 
-    function verifyStudentActive(phone) {
-      const studentId = "student_" + phone;
+    function verifyStudentActive(studentId) {
+      if (!studentId) return;
       database.ref('registered_students/' + studentId).on('value', (snapshot) => {
         if (!snapshot.exists()) {
           localStorage.removeItem('csh_student');
@@ -951,27 +914,27 @@
         regForm.classList.remove('hidden');
         logForm.classList.add('hidden');
         heading.innerText = "Student Registration";
-        subheading.innerText = "Register with your details & 4-digit PIN to access study materials.";
+        subheading.innerText = "Register with your name & create a 4-digit PIN to access study materials.";
       } else {
         tabLog.classList.add('active');
         tabReg.classList.remove('active');
         logForm.classList.remove('hidden');
         regForm.classList.add('hidden');
         heading.innerText = "Welcome Back";
-        subheading.innerText = "Enter your registered mobile number and 4-digit PIN.";
+        subheading.innerText = "Enter your registered name and 4-digit PIN.";
       }
     }
 
+    // REGISTRATION WITHOUT MOBILE NUMBER
     function handleRegistration(e) {
       e.preventDefault();
       const name = document.getElementById('regNameInput').value.trim();
       const collegeYear = document.getElementById('regCollegeYearSelect').value;
       const academicYear = document.getElementById('regAcademicYearSelect').value;
-      const phone = document.getElementById('regPhoneInput').value.trim();
       const pin = document.getElementById('regPinInput').value.trim();
 
-      if (!name || phone.length !== 10 || pin.length !== 4) {
-        alert("Please enter a valid 10-digit mobile number and 4-digit PIN.");
+      if (!name || pin.length !== 4) {
+        alert("Please enter your name and a valid 4-digit PIN.");
         return;
       }
 
@@ -979,45 +942,37 @@
       btn.innerText = "Creating Account...";
       btn.disabled = true;
 
-      const studentId = "student_" + phone;
+      // Unique student id generated using name + timestamp
+      const safeNameKey = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const studentId = "student_" + safeNameKey + "_" + Date.now().toString().slice(-4);
 
-      database.ref('registered_students/' + studentId).once('value').then((snapshot) => {
-        if (snapshot.exists()) {
-          alert("Yeh number pehle se registered hai! Direct Login tab me jaakar apna PIN dalein.");
-          btn.innerText = "Create Account & Enter →";
-          btn.disabled = false;
-          switchAuthMode('login');
-          document.getElementById('loginPhoneInput').value = phone;
-          return;
-        }
+      const record = {
+        studentId: studentId,
+        name: name,
+        pin: pin,
+        collegeYear: collegeYear,
+        academicYear: academicYear,
+        joinedAt: new Date().toISOString()
+      };
 
-        const record = {
-          name: name,
-          phone: phone,
-          pin: pin,
-          collegeYear: collegeYear,
-          academicYear: academicYear,
-          joinedAt: new Date().toISOString()
-        };
-
-        database.ref('registered_students/' + studentId).set(record).then(() => {
-          localStorage.setItem('csh_student', JSON.stringify(record));
-          applyLoggedInState(record);
-        }).catch((err) => {
-          alert("Registration Error: " + err.message);
-          btn.innerText = "Create Account & Enter →";
-          btn.disabled = false;
-        });
+      database.ref('registered_students/' + studentId).set(record).then(() => {
+        localStorage.setItem('csh_student', JSON.stringify(record));
+        applyLoggedInState(record);
+      }).catch((err) => {
+        alert("Registration Error: " + err.message);
+        btn.innerText = "Create Account & Enter →";
+        btn.disabled = false;
       });
     }
 
+    // LOGIN VIA NAME & PIN
     function handleLogin(e) {
       e.preventDefault();
-      const phone = document.getElementById('loginPhoneInput').value.trim();
+      const enteredName = document.getElementById('loginNameInput').value.trim().toLowerCase();
       const pin = document.getElementById('loginPinInput').value.trim();
 
-      if (phone.length !== 10 || pin.length !== 4) {
-        alert("Please enter a valid 10-digit number and 4-digit PIN.");
+      if (!enteredName || pin.length !== 4) {
+        alert("Please enter your registered name and 4-digit PIN.");
         return;
       }
 
@@ -1025,28 +980,34 @@
       btn.innerText = "Verifying...";
       btn.disabled = true;
 
-      const studentId = "student_" + phone;
+      database.ref('registered_students').once('value').then((snapshot) => {
+        const allStudents = snapshot.val() || {};
+        let matchedStudent = null;
 
-      database.ref('registered_students/' + studentId).once('value').then((snapshot) => {
-        if (!snapshot.exists()) {
-          alert("Yeh number registered nahi hai! Pehle New Registration karein.");
+        Object.keys(allStudents).forEach(k => {
+          const s = allStudents[k];
+          if (s.name && s.name.trim().toLowerCase() === enteredName) {
+            matchedStudent = s;
+          }
+        });
+
+        if (!matchedStudent) {
+          alert("Yeh naam registered nahi mila! Kripya New Registration karein.");
           btn.innerText = "Login to Study Hub →";
           btn.disabled = false;
           switchAuthMode('register');
-          document.getElementById('regPhoneInput').value = phone;
           return;
         }
 
-        const data = snapshot.val();
-        if (data.pin !== pin) {
+        if (matchedStudent.pin !== pin) {
           alert("Incorrect PIN! Kripya sahi 4-digit PIN enter karein.");
           btn.innerText = "Login to Study Hub →";
           btn.disabled = false;
           return;
         }
 
-        localStorage.setItem('csh_student', JSON.stringify(data));
-        applyLoggedInState(data);
+        localStorage.setItem('csh_student', JSON.stringify(matchedStudent));
+        applyLoggedInState(matchedStudent);
       }).catch((err) => {
         alert("Login Error: " + err.message);
         btn.innerText = "Login to Study Hub →";
@@ -1059,7 +1020,7 @@
       document.getElementById('studyContent').classList.remove('hidden');
       document.getElementById('authProfileBar').classList.remove('hidden');
 
-      verifyStudentActive(student.phone);
+      verifyStudentActive(student.studentId);
       parseHash();
     }
 
@@ -1084,7 +1045,6 @@
 
       const commentData = {
         userName: student.name || 'Anonymous Scholar',
-        userPhone: student.phone || 'N/A',
         collegeYear: student.collegeYear || 'FYBA',
         academicYear: student.academicYear || '2026',
         message: msg,
@@ -1116,7 +1076,6 @@
       document.getElementById('emptyDataModal').classList.add('hidden');
     }
 
-    // FIXED: Resolves active subject data reliably even after Android intent cancel
     function openResource(type) {
       if (type === 'assignments') {
         const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subjectName})`);
@@ -1124,7 +1083,6 @@
         return;
       }
 
-      // Always resolve from live memory
       const subObj = getActiveSubjectData();
       let targetUrl = subObj[type];
 
@@ -1150,16 +1108,11 @@
 
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
       document.getElementById('accNameInput').value = current.name || '';
-      document.getElementById('accCurrentPhone').value = current.phone || '';
       document.getElementById('accDisplayPin').value = current.pin || '••••';
       document.getElementById('accCollegeYearSelect').value = current.collegeYear || 'FYBA';
       document.getElementById('accAcademicYearSelect').value = current.academicYear || '2026';
 
-      document.getElementById('mobileUpdateDrawer').classList.add('hidden');
       document.getElementById('pinUpdateDrawer').classList.add('hidden');
-
-      document.getElementById('accNewPhoneInput').value = '';
-      document.getElementById('accVerifyPinForPhone').value = '';
       document.getElementById('accOldPinInput').value = '';
       document.getElementById('accNewPinInput').value = '';
 
@@ -1198,7 +1151,7 @@
         updatedAt: new Date().toISOString()
       };
 
-      const studentId = "student_" + current.phone;
+      const studentId = current.studentId;
       database.ref('registered_students/' + studentId).update(updatedRecord).finally(() => {
         localStorage.setItem('csh_student', JSON.stringify(updatedRecord));
         saveBtn.innerText = "Details Saved Successfully!";
@@ -1206,67 +1159,6 @@
           saveBtn.innerText = "Save Details";
           saveBtn.disabled = false;
         }, 800);
-      });
-    }
-
-    function updateMobileNumberWithPin() {
-      const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
-      const newPhone = document.getElementById('accNewPhoneInput').value.trim();
-      const enteredPin = document.getElementById('accVerifyPinForPhone').value.trim();
-      const btn = document.getElementById('btnUpdatePhone');
-
-      if (newPhone.length !== 10) {
-        alert("Kripya sahi 10-digit naya mobile number daalein.");
-        return;
-      }
-
-      if (newPhone === current.phone) {
-        alert("Naya number purane number se alag hona chahiye.");
-        return;
-      }
-
-      if (enteredPin !== current.pin) {
-        alert("Galat PIN! Apna sahi 4-digit current security PIN daalein.");
-        return;
-      }
-
-      btn.innerText = "Verifying...";
-      btn.disabled = true;
-
-      const oldStudentId = "student_" + current.phone;
-      const newStudentId = "student_" + newPhone;
-
-      database.ref('registered_students/' + newStudentId).once('value').then((snapshot) => {
-        if (snapshot.exists()) {
-          alert("Yeh naya number pehle se kisi aur account me registered hai!");
-          btn.innerText = "Verify & Save New Number";
-          btn.disabled = false;
-          return;
-        }
-
-        const updatedRecord = {
-          ...current,
-          phone: newPhone,
-          updatedAt: new Date().toISOString()
-        };
-
-        database.ref('registered_students/' + newStudentId).set(updatedRecord).then(() => {
-          database.ref('registered_students/' + oldStudentId).remove();
-          localStorage.setItem('csh_student', JSON.stringify(updatedRecord));
-
-          document.getElementById('accCurrentPhone').value = newPhone;
-          document.getElementById('accNewPhoneInput').value = '';
-          document.getElementById('accVerifyPinForPhone').value = '';
-          document.getElementById('mobileUpdateDrawer').classList.add('hidden');
-
-          alert("Mobile number successfully update ho gaya!");
-          btn.innerText = "Verify & Save New Number";
-          btn.disabled = false;
-        }).catch(err => {
-          alert("Error: " + err.message);
-          btn.innerText = "Verify & Save New Number";
-          btn.disabled = false;
-        });
       });
     }
 
@@ -1289,7 +1181,7 @@
       btn.innerText = "Updating...";
       btn.disabled = true;
 
-      const studentId = "student_" + current.phone;
+      const studentId = current.studentId;
       database.ref('registered_students/' + studentId).update({
         pin: newPin,
         pinUpdatedAt: new Date().toISOString()
@@ -1349,7 +1241,6 @@
         state.subjectName = parts[2];
         state.step = 4;
         
-        // Dynamically resolve exact subject object
         const subObj = getActiveSubjectData();
         if (subObj && subObj.subjectName) {
           state.subjectName = subObj.subjectName;
@@ -1423,7 +1314,6 @@
       });
     }
 
-    // STRICT ASCENDING ORDER
     function renderSubjects() {
       const container = document.getElementById('subject-list');
       container.innerHTML = '';
@@ -1452,7 +1342,7 @@
         };
       });
 
-      // Strict Sorting: Sanskrit M1 (10) -> Sanskrit M2 (20) -> Gujrati minor (30) ...
+      // Strict Sorting
       subjectsArray.sort((a, b) => {
         if (a.priority !== b.priority) {
           return a.priority - b.priority;
