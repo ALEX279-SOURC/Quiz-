@@ -538,7 +538,7 @@
         <h2 id="authHeading">Student Registration</h2>
         <p id="authSubheading">Register with your name & create a 4-digit PIN to access study materials.</p>
         
-        <!-- REGISTRATION FORM (MOBILE NUMBER REMOVED) -->
+        <!-- REGISTRATION FORM -->
         <form id="enrollForm" onsubmit="handleRegistration(event)">
           <label class="form-label">
             <span class="label-text-nowrap">FULL NAME</span>
@@ -631,8 +631,9 @@
             <button class="resource-card" onclick="openResource('papers')">
               <span>📄 Previous Papers</span> <span>Download ↗</span>
             </button>
-            <button class="resource-card" onclick="openResource('exam')">
-              <span>🎯 Exam Preparation</span> <span>View ↗</span>
+            <!-- DIRECT EXAM PREPARATION MCQ LINK -->
+            <button class="resource-card" style="border-color: #3b82f6; background: #eff6ff;" onclick="openResource('exam')">
+              <span style="color: #1d4ed8; font-weight: 700;">🎯 Exam Preparation (MCQ Practice & Mock Test)</span> <span style="color: #1d4ed8;">Start Test ↗</span>
             </button>
             <button class="resource-card btn-order" onclick="openResource('assignments')">
               <span>📝 Order Assignments</span> <span>Order ↗</span>
@@ -925,7 +926,6 @@
       }
     }
 
-    // REGISTRATION WITHOUT MOBILE NUMBER
     function handleRegistration(e) {
       e.preventDefault();
       const name = document.getElementById('regNameInput').value.trim();
@@ -942,7 +942,6 @@
       btn.innerText = "Creating Account...";
       btn.disabled = true;
 
-      // Unique student id generated using name + timestamp
       const safeNameKey = name.toLowerCase().replace(/[^a-z0-9]/g, '');
       const studentId = "student_" + safeNameKey + "_" + Date.now().toString().slice(-4);
 
@@ -965,7 +964,6 @@
       });
     }
 
-    // LOGIN VIA NAME & PIN
     function handleLogin(e) {
       e.preventDefault();
       const enteredName = document.getElementById('loginNameInput').value.trim().toLowerCase();
@@ -1076,13 +1074,23 @@
       document.getElementById('emptyDataModal').classList.add('hidden');
     }
 
+    // OPEN RESOURCE (REDIRECTS EXAM PREPARATION TO examprepar.html)
     function openResource(type) {
+      // 1. WhatsApp Assignment Order
       if (type === 'assignments') {
         const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subjectName})`);
         window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
         return;
       }
 
+      // 2. EXAM PREPARATION DIRECT REDIRECT TO examprepar.html
+      if (type === 'exam') {
+        const subjectTarget = state.subjectName || state.subjectKey || 'Sanskrit M1';
+        window.location.href = `examprepar.html#${state.course}/${state.semester}/${encodeURIComponent(subjectTarget)}`;
+        return;
+      }
+
+      // 3. Drive Links (Notes, Questions, Papers)
       const subObj = getActiveSubjectData();
       let targetUrl = subObj[type];
 
@@ -1090,7 +1098,6 @@
         let labelName = "Notes";
         if (type === 'questions') labelName = "Important Questions";
         if (type === 'papers') labelName = "Previous Papers";
-        if (type === 'exam') labelName = "Exam Preparation Material";
 
         const displayName = subObj.subjectName || state.subjectName || "Subject";
         showEmptyModal("Data is Empty", `Abhi ${displayName} ke liye '${labelName}' upload nahi hua hai.`);
@@ -1342,7 +1349,7 @@
         };
       });
 
-      // Strict Sorting
+      // Strict Sorting: Sanskrit M1 -> Sanskrit M2 -> Gujrati minor ...
       subjectsArray.sort((a, b) => {
         if (a.priority !== b.priority) {
           return a.priority - b.priority;
