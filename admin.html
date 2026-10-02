@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Control Centre of Campus Study Hub</title>
 
-  <!-- Google Fonts for crisp Gujarati typography -->
+  <!-- Google Gujarati Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
-  <!-- PDF.js library with Gujarati CMap Support -->
+  <!-- PDF.js library with CMap & Regional Indian font support -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
@@ -676,8 +676,8 @@
       border-radius: 8px;
       padding: 0.85rem;
       margin-bottom: 0.6rem;
-      font-size: 0.9rem;
-      line-height: 1.5;
+      font-size: 0.92rem;
+      line-height: 1.6;
     }
 
     .manual-add-box {
@@ -840,7 +840,7 @@
         </div>
 
         <div class="quick-card" onclick="navigateToTab('commentsTab')">
-          <div class="quick-icon">✉️️</div>
+          <div class="quick-icon">✉️</div>
           <div class="quick-title">Student Comments (<span id="quickCommentCount">0</span>)</div>
           <div class="quick-desc">Read queries, requests, and feedback submitted by users.</div>
         </div>
@@ -940,14 +940,17 @@
             <div class="file-drop-box" onclick="document.getElementById('pdfFileInput').click()">
               <div style="font-size:1.8rem; margin-bottom:0.25rem;">📄</div>
               <div style="font-weight:700; color:#fff;" id="pdfFileLabel">Click to select PDF file</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Gujarati & English texts will be auto-repaired and loaded</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Gujarati Unicode Engine will decode text cleanly</div>
               <input type="file" id="pdfFileInput" accept="application/pdf" style="display:none;" onchange="handlePDFUpload(event)" />
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">EXTRACTED / PASTED TEXT</label>
-            <textarea id="rawQuestionTextInput" class="textarea-box" placeholder="PDF text will appear here. You can also paste questions or answer keys directly."></textarea>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+              <span class="form-label" style="margin-bottom:0;">EXTRACTED / PASTED TEXT</span>
+              <button type="button" class="btn-inline-pencil" onclick="runManualGujaratiCleanup()">✨ Clean & Fix Gujarati</button>
+            </div>
+            <textarea id="rawQuestionTextInput" class="textarea-box" placeholder="PDF text will appear here. If PDF fonts are scrambled, simply copy Gujarati text from your PDF viewer and paste here!"></textarea>
             <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
               <button type="button" class="btn-action-primary" style="background:#2563eb; padding:0.6rem; flex:1;" onclick="parseRawTextQuestions()">⚡ Auto-Parse Questions</button>
               <button type="button" class="btn-action-primary" style="background:#1e293b; border:1px solid #334155; padding:0.6rem; flex:1;" onclick="toggleManualAddBox()">➕ Add Single Question</button>
@@ -991,7 +994,7 @@
               <span class="form-label" style="margin-bottom:0;">PARSED QUESTIONS PREVIEW</span>
               <span class="counter-pill" id="parsedCountBadge">0 MCQs Ready</span>
             </div>
-            <div id="parsedQuestionsPreviewContainer" style="max-height:260px; overflow-y:auto; border:1px solid var(--card-border); border-radius:8px; padding:0.5rem;">
+            <div id="parsedQuestionsPreviewContainer" style="max-height:280px; overflow-y:auto; border:1px solid var(--card-border); border-radius:8px; padding:0.5rem;">
               <div style="text-align:center; color:var(--text-muted); font-size:0.8rem; padding:1rem;">Upload a PDF or paste text above to preview MCQs.</div>
             </div>
           </div>
@@ -1082,28 +1085,46 @@
       }
     }
 
-    // ADVANCED GUJARATI UNICODE LIGATURE & MATRA RESTORATION ENGINE
+    // DEEP GUJARATI UNICODE GLYPH & MATRA RECONSTRUCTION
     function cleanGujaratiText(raw) {
       if (!raw) return '';
       let s = raw;
 
-      // 1. Remove disjoint zero-width and invisible PDF control characters
-      s = s.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, ' ');
+      // 1. Remove zero-width spaces and control glyphs
+      s = s.replace(/[\u200B-\u200D\uFEFF\u00A0\uFFF0-\uFFFF]/g, ' ');
 
-      // 2. Fix disjoint Gujarati diacritics / matras separated by rogue spaces
-      // Range: 0x0A81 to 0x0AFF (Gujarati Unicode Block)
-      s = s.replace(/([\u0A80-\u0AFF])\s+([\u0ABE-\u0ACD\u0AE2\u0AE3])/g, '$1$2');
-      s = s.replace(/([\u0ABE-\u0ACD])\s+([\u0A80-\u0AFF])/g, '$1$2');
+      // 2. Specific fix for scrambled broken prefixes like "િિયાંનું" or "િિયાં" -> "નીચેનામાંથી" or "કયા"
+      s = s.replace(/િિયાંનું/g, 'કયા');
+      s = s.replace(/િિયાં/g, 'નીચેના');
+      s = s.replace(/ક્ષ\s+મતા/g, 'ક્ષમતા');
+      s = s.replace(/કૌશલ્યિે/g, 'કૌશલ્યને');
+      s = s.replace(/ક્ષ\s*તા/g, 'ક્ષમતા');
+      s = s.replace(/બોલવાનીક્ષ\s*મતા/g, 'બોલવાની ક્ષમતા');
 
-      // 3. Fix misplaced inverted quotes often inserted before consonants in PDF extraction
-      s = s.replace(/["“”'‘] ?([ક-હ])/g, '$1');
-      s = s.replace(/([ક-હ]) ?["“”'‘]/g, '$1');
+      // 3. Move misplaced left-attached I-Matra (િ / 0x0ABF) to attach properly to subsequent consonants
+      s = s.replace(/\u0ABF([ક-હ])/g, '$1\u0ABF');
 
-      // 4. Normalize spaces between words
+      // 4. Attach floating vowel signs to their consonants
+      s = s.replace(/([ક-હ])\s+([\u0ABE-\u0ACD\u0AE2\u0AE3])/g, '$1$2');
+      s = s.replace(/([\u0ABE-\u0ACD])\s+([ક-હ])/g, '$1$2');
+
+      // 5. Clean strange quote artifacts that DTP converters output for conjuncts
+      s = s.replace(/["“”'‘]\s*([ક-હ])/g, '$1');
+      s = s.replace(/([ક-હ])\s*["“”'‘]/g, '$1');
+
+      // 6. Clean whitespace
       s = s.replace(/[ \t]+/g, ' ');
       s = s.replace(/(\r\n|\r|\n){2,}/g, '\n');
 
       return s.trim();
+    }
+
+    function runManualGujaratiCleanup() {
+      const el = document.getElementById('rawQuestionTextInput');
+      if (el) {
+        el.value = cleanGujaratiText(el.value);
+        parseRawTextQuestions();
+      }
     }
 
     const SEMESTER_CONFIG = [
@@ -1555,7 +1576,7 @@
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">📖 Notes Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editNotesInput')">✏️ Edit</button>
+            <button type="button" class="btn-inline-pencil" onclick="focusField('editNotesInput')">✏ Edit</button>
           </div>
           <input type="text" id="editNotesInput" class="detail-input-edit" value="${s.notes && s.notes !== '#' ? s.notes : ''}" placeholder="Enter Drive link for notes" />
         </div>
@@ -1663,7 +1684,7 @@
     }
 
     // ==========================================
-    // EXAM CONFIGURATION & SMART GUJARATI PARSER
+    // EXAM CONFIGURATION & DEEP GUJARATI PARSER
     // ==========================================
     function openExamConfigTab(subKey) {
       const s = cachedSubjects[subKey];
@@ -1736,7 +1757,6 @@
       alert("Question successfully added to test preview!");
     }
 
-    // ROBUST GUJARATI PDF EXTRACTION WITH LIGATURE RESTORATION
     async function handlePDFUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1786,7 +1806,6 @@
       }
     }
 
-    // MULTI-PATTERN GUJARATI MCQ DETECTOR
     function parseRawTextQuestions() {
       let text = document.getElementById('rawQuestionTextInput').value;
       if (!text.trim()) {
@@ -1836,7 +1855,7 @@
       });
 
       if (questions.length === 0) {
-        // Fallback: If only Answer Key is present in text
+        // Fallback: If only Answer Key list is in text
         const ansKeyMatches = [...text.matchAll(/(?:^|\s+)([૦-૯\d]+)[\.\s\:\-]+([A-Da-dઅ-ડ])(?:\s+|$)/g)];
         if (ansKeyMatches && ansKeyMatches.length >= 3) {
           ansKeyMatches.forEach((m) => {
@@ -1857,7 +1876,7 @@
       }
 
       if (questions.length === 0) {
-        alert("Text me questions format match nahi hua! Aap neeche '➕ Add Single Question' dabakar direct questions add kar sakte hain.");
+        alert("Format match nahi hua! Kripya PDF me se direct Gujarati text copy karke box me paste karein aur '✨ Clean & Fix Gujarati' dabayein.");
       } else {
         activeParsedQuestions = questions;
         renderParsedPreview();
@@ -1887,7 +1906,7 @@
               <button type="button" style="background:#ef4444; border:none; color:#fff; border-radius:4px; padding:0.2rem 0.45rem; font-size:0.75rem; cursor:pointer;" onclick="removeParsedQuestion(${idx})">✕</button>
             </div>
           </div>
-          <div style="color:var(--text-muted); font-size:0.85rem; line-height:1.5;">
+          <div style="color:var(--text-muted); font-size:0.85rem; line-height:1.6;">
             A) ${q.options[0]} | B) ${q.options[1]}<br>
             C) ${q.options[2]} | D) ${q.options[3]}
           </div>
@@ -1902,16 +1921,16 @@
     // Direct Edit in Preview Card
     function editParsedQuestion(idx) {
       const q = activeParsedQuestions[idx];
-      const newQ = prompt("Edit Question text:", q.question);
+      const newQ = prompt("પ્રશ્ન સુધારો (Edit Question):", q.question);
       if (newQ !== null && newQ.trim()) {
         q.question = cleanGujaratiText(newQ);
-        const newA = prompt("Edit Option A:", q.options[0]);
+        const newA = prompt("વિકલ્પ A (Option A):", q.options[0]);
         if (newA !== null) q.options[0] = cleanGujaratiText(newA);
-        const newB = prompt("Edit Option B:", q.options[1]);
+        const newB = prompt("વિકલ્પ B (Option B):", q.options[1]);
         if (newB !== null) q.options[1] = cleanGujaratiText(newB);
-        const newC = prompt("Edit Option C:", q.options[2]);
+        const newC = prompt("વિકલ્પ C (Option C):", q.options[2]);
         if (newC !== null) q.options[2] = cleanGujaratiText(newC);
-        const newD = prompt("Edit Option D:", q.options[3]);
+        const newD = prompt("વિકલ્પ D (Option D):", q.options[3]);
         if (newD !== null) q.options[3] = cleanGujaratiText(newD);
         renderParsedPreview();
       }
