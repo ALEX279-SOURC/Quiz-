@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Control Centre of Campus Study Hub</title>
 
-  <!-- Google Gujarati Font for crisp rendering -->
+  <!-- Google Fonts for crisp Gujarati typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
 
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
-  <!-- PDF.js library with CMap support for Indian regional fonts -->
+  <!-- PDF.js library with Gujarati CMap Support -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
@@ -40,7 +40,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Noto Sans Gujarati', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Noto Sans Gujarati', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
@@ -840,7 +840,7 @@
         </div>
 
         <div class="quick-card" onclick="navigateToTab('commentsTab')">
-          <div class="quick-icon">✉️</div>
+          <div class="quick-icon">✉️️</div>
           <div class="quick-title">Student Comments (<span id="quickCommentCount">0</span>)</div>
           <div class="quick-desc">Read queries, requests, and feedback submitted by users.</div>
         </div>
@@ -1082,26 +1082,25 @@
       }
     }
 
-    // GUJARATI UNICODE REPAIR & LIGATURE NORMALIZER FUNCTION
+    // ADVANCED GUJARATI UNICODE LIGATURE & MATRA RESTORATION ENGINE
     function cleanGujaratiText(raw) {
       if (!raw) return '';
       let s = raw;
 
-      // 1. Remove disjoint zero-width and control characters
-      s = s.replace(/[\u200B-\u200D\uFEFF]/g, '');
+      // 1. Remove disjoint zero-width and invisible PDF control characters
+      s = s.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, ' ');
 
-      // 2. Fix broken Gujarati matras separated by rogue spaces
+      // 2. Fix disjoint Gujarati diacritics / matras separated by rogue spaces
       // Range: 0x0A81 to 0x0AFF (Gujarati Unicode Block)
       s = s.replace(/([\u0A80-\u0AFF])\s+([\u0ABE-\u0ACD\u0AE2\u0AE3])/g, '$1$2');
       s = s.replace(/([\u0ABE-\u0ACD])\s+([\u0A80-\u0AFF])/g, '$1$2');
 
-      // 3. Fix misplaced 'િ' (I-Matra 0x0ABF) which often gets placed after instead of before
-      s = s.replace(/([\u0A85-\u0AB9])([\u0ABC]?)\u0ABF/g, '\u0ABF$1$2');
+      // 3. Fix misplaced inverted quotes often inserted before consonants in PDF extraction
+      s = s.replace(/["“”'‘] ?([ક-હ])/g, '$1');
+      s = s.replace(/([ક-હ]) ?["“”'‘]/g, '$1');
 
-      // 4. Normalize multiple spaces into a single space
+      // 4. Normalize spaces between words
       s = s.replace(/[ \t]+/g, ' ');
-
-      // 5. Clean linebreaks
       s = s.replace(/(\r\n|\r|\n){2,}/g, '\n');
 
       return s.trim();
@@ -1564,7 +1563,7 @@
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">📝 Important Questions Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editQuestionsInput')">✏️️ Edit</button>
+            <button type="button" class="btn-inline-pencil" onclick="focusField('editQuestionsInput')">✏️ Edit</button>
           </div>
           <input type="text" id="editQuestionsInput" class="detail-input-edit" value="${s.questions && s.questions !== '#' ? s.questions : ''}" placeholder="Enter Drive link for questions" />
         </div>
@@ -1737,7 +1736,7 @@
       alert("Question successfully added to test preview!");
     }
 
-    // PDF EXTRACTOR WITH GUJARATI NORMALIZATION
+    // ROBUST GUJARATI PDF EXTRACTION WITH LIGATURE RESTORATION
     async function handlePDFUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1758,19 +1757,25 @@
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
           
-          let lastY, text = '';
+          let pageLines = [];
+          let currentLine = '';
+          let lastY = null;
+
           for (let item of textContent.items) {
-            if (lastY == item.transform[5] || !lastY) {
-              text += item.str;
+            let itemStr = item.str;
+            if (lastY === null || Math.abs(item.transform[5] - lastY) < 4) {
+              currentLine += itemStr;
             } else {
-              text += '\n' + item.str;
+              pageLines.push(currentLine);
+              currentLine = itemStr;
             }
             lastY = item.transform[5];
           }
-          fullText += '\n' + text;
+          if (currentLine) pageLines.push(currentLine);
+
+          fullText += '\n' + pageLines.join('\n');
         }
 
-        // Apply clean Gujarati Unicode filter
         const repairedText = cleanGujaratiText(fullText);
         document.getElementById('pdfFileLabel').innerText = `✓ Loaded: ${file.name}`;
         document.getElementById('rawQuestionTextInput').value = repairedText;
@@ -1781,7 +1786,7 @@
       }
     }
 
-    // SMART MULTI-FORMAT & GUJARATI MCQ PARSER
+    // MULTI-PATTERN GUJARATI MCQ DETECTOR
     function parseRawTextQuestions() {
       let text = document.getElementById('rawQuestionTextInput').value;
       if (!text.trim()) {
@@ -1792,14 +1797,14 @@
       text = cleanGujaratiText(text);
       const questions = [];
 
-      // 1. Regular Full MCQ Split (Supports 1., Q1, પ્રશ્ન, (૧), (૨)...)
-      const rawBlocks = text.split(/(?:^|\n|\s+)(?:\d+[\.\)]|Q\d+[\.\:]|પ્રશ્ન\s*[\:\-\.]?\s*\d+[\.\:]?|\([૦-૯\d]+\)|[૦-૯]+\.|\(Q\d+\))/i);
+      // Split questions by numbers e.g. (૧), (૨), 1., Q1, પ્રશ્ન
+      const rawBlocks = text.split(/(?:^|\n|\s+)(?:\([૦-૯\d]+\)|[૦-૯\d]+[\.\)]|Q[૦-૯\d]+[\.\:]|પ્રશ્ન\s*[\:\-\.]?\s*[૦-૯\d]+[\.\:]?)/i);
 
       rawBlocks.forEach((block) => {
         let clean = cleanGujaratiText(block);
         if (!clean || clean.length < 10) return;
 
-        // Split options: A), B), C), D) or (A), (B) or [A], [B] or અ, બ, ક, ડ
+        // Split options: A), B), C), D) or (A), (B) or [A], [B] or અ, બ, ક, ડ or (અ), (બ)
         const optMatches = clean.split(/(?:[A-Da-d]\)|\([A-Da-d]\)|[A-Da-d]\.|\([અબકડABKD]\)|[અબકડ]\)|\(૧\)|\(૨\)|\(૩\)|\(૪\)|\[[A-D]\])/i);
 
         if (optMatches && optMatches.length >= 5) {
@@ -1830,9 +1835,9 @@
         }
       });
 
-      // 2. Fallback: If only Answer Key / Summary List is present
       if (questions.length === 0) {
-        const ansKeyMatches = [...text.matchAll(/(?:^|\s+)(\d+)[\.\s\:\-]+([A-Da-dઅ-ડ])(?:\s+|$)/g)];
+        // Fallback: If only Answer Key is present in text
+        const ansKeyMatches = [...text.matchAll(/(?:^|\s+)([૦-૯\d]+)[\.\s\:\-]+([A-Da-dઅ-ડ])(?:\s+|$)/g)];
         if (ansKeyMatches && ansKeyMatches.length >= 3) {
           ansKeyMatches.forEach((m) => {
             const qNum = m[1];
@@ -1856,7 +1861,7 @@
       } else {
         activeParsedQuestions = questions;
         renderParsedPreview();
-        alert(`${questions.length} questions successfully ready ho gaye!`);
+        alert(`${questions.length} Gujarati MCQs successfully ready ho gaye!`);
       }
     }
 
@@ -1878,7 +1883,7 @@
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.35rem;">
             <div style="font-weight:700; color:#fff; font-size:0.95rem;">Q${idx + 1}: ${q.question}</div>
             <div style="display:flex; gap:0.35rem;">
-              <button type="button" class="btn-inline-pencil" onclick="editParsedQuestion(${idx})">✏ Edit</button>
+              <button type="button" class="btn-inline-pencil" onclick="editParsedQuestion(${idx})">✏️ Edit</button>
               <button type="button" style="background:#ef4444; border:none; color:#fff; border-radius:4px; padding:0.2rem 0.45rem; font-size:0.75rem; cursor:pointer;" onclick="removeParsedQuestion(${idx})">✕</button>
             </div>
           </div>
@@ -1894,7 +1899,7 @@
       });
     }
 
-    // Direct Edit in Preview
+    // Direct Edit in Preview Card
     function editParsedQuestion(idx) {
       const q = activeParsedQuestions[idx];
       const newQ = prompt("Edit Question text:", q.question);
@@ -2103,6 +2108,10 @@
         <div class="detail-row-item">
           <div class="detail-label">👤 Student Name</div>
           <div class="detail-value">${c.userName || 'Anonymous Scholar'}</div>
+        </div>
+        <div class="detail-row-item">
+          <div class="detail-label">📞 Mobile Number</div>
+          <div class="detail-value">+91 ${c.userPhone ? c.userPhone : 'Not Provided'}</div>
         </div>
         <div class="detail-row-item">
           <div class="detail-label">🎓 Year of College</div>
