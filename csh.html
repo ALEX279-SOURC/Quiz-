@@ -689,7 +689,6 @@
     <div class="light-flare"></div>
     <div class="splash-container">
       
-      <!-- 3D Vector Emblem -->
       <svg class="splash-logo-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M 82 25 A 25 25 0 0 1 118 25" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/>
         <path d="M 74 16 A 36 36 0 0 1 126 16" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/>
@@ -720,7 +719,6 @@
     </div>
   </div>
 
-  <!-- Top Strip Profile -->
   <div class="top-bar">
     <div id="authProfileBar" class="hidden">
       <button class="profile-btn" onclick="openAccountTab()" title="Account Settings">
@@ -758,7 +756,6 @@
         <h2 id="authHeading">Student Registration</h2>
         <p id="authSubheading">Register with your name & create a 4-digit PIN to access study materials.</p>
         
-        <!-- REGISTRATION FORM -->
         <form id="enrollForm" onsubmit="handleRegistration(event)">
           <label class="form-label">
             <span class="label-text-nowrap">FULL NAME</span>
@@ -796,7 +793,6 @@
           <button type="submit" id="regSubmitBtn" class="btn-primary-action">Create Account & Enter →</button>
         </form>
 
-        <!-- RETURNING LOGIN FORM -->
         <form id="returningLoginForm" class="hidden" onsubmit="handleLogin(event)">
           <label class="form-label">
             <span class="label-text-nowrap">REGISTERED FULL NAME</span>
@@ -851,7 +847,6 @@
             <button class="resource-card" onclick="openResource('papers')">
               <span>📄 Previous Papers</span> <span>Download ↗</span>
             </button>
-            <!-- DIRECT EXAM PREPARATION MCQ LINK -->
             <button class="resource-card" style="border-color: #3b82f6; background: #eff6ff;" onclick="openResource('exam')">
               <span style="color: #1d4ed8; font-weight: 700;">🎯 Exam Preparation (MCQ Practice & Mock Test)</span> <span style="color: #1d4ed8;">Start Test ↗</span>
             </button>
@@ -905,7 +900,7 @@
           </div>
           <div class="pin-input-wrap" style="margin-bottom: 0.4rem;">
             <input type="password" id="accDisplayPin" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed;" />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️</button>
           </div>
 
           <div id="pinUpdateDrawer" class="inline-update-box hidden">
@@ -935,12 +930,12 @@
 
     </div>
 
-    <!-- MINIMALIST ACTIVE USERS LIVE BOX -->
+    <!-- ACTIVE USERS LIVE BOX (STARTS AT 324 AND INCREMENTS UPON REGISTRATION) -->
     <div class="active-users-box">
       <div class="active-users-title">
         <span>⚡ Active Scholars Joined:</span>
       </div>
-      <span class="active-badge" id="totalUsersCount">0</span>
+      <span class="active-badge" id="totalUsersCount">324</span>
     </div>
 
     <!-- STUDENT QUERY / COMMENT TAB -->
@@ -978,7 +973,6 @@
   </footer>
 
   <script>
-    // 0. SPLASH INTRO ANIMATION TIMEOUT DISMISSAL
     window.addEventListener('load', () => {
       setTimeout(() => {
         const splash = document.getElementById('splashScreen');
@@ -991,7 +985,6 @@
       }, 2600);
     });
 
-    // 1. FIREBASE CONFIGURATION
     const firebaseConfig = {
       apiKey: "AIzaSyBzjHop10vEagKwLaXxTj7x9xd9GQ92KxE",
       authDomain: "campus-study-hub-6b8ab.firebaseapp.com",
@@ -1119,9 +1112,10 @@
       if (state.step === 4) updateView();
     });
 
+    // ACTIVE USERS COUNT: BASE 324 + REGISTRATIONS INCREMENT
     database.ref('registered_students').on('value', (snapshot) => {
       const count = snapshot.numChildren() || 0;
-      document.getElementById('totalUsersCount').innerText = count;
+      document.getElementById('totalUsersCount').innerText = 324 + count;
     });
 
     function verifyStudentActive(studentId) {
