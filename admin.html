@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Control Centre of Campus Study Hub</title>
 
-  <!-- Google Gujarati Font -->
+  <!-- Google Typography for clean Gujarati rendering -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
@@ -840,7 +840,7 @@
         </div>
 
         <div class="quick-card" onclick="navigateToTab('commentsTab')">
-          <div class="quick-icon">✉️</div>
+          <div class="quick-icon">✉️️</div>
           <div class="quick-title">Student Comments (<span id="quickCommentCount">0</span>)</div>
           <div class="quick-desc">Read queries, requests, and feedback submitted by users.</div>
         </div>
@@ -940,7 +940,7 @@
             <div class="file-drop-box" onclick="document.getElementById('pdfFileInput').click()">
               <div style="font-size:1.8rem; margin-bottom:0.25rem;">📄</div>
               <div style="font-weight:700; color:#fff;" id="pdfFileLabel">Click to select PDF file</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Gujarati Unicode Engine will decode text cleanly</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Old questions will be cleared & fresh Gujarati decoded</div>
               <input type="file" id="pdfFileInput" accept="application/pdf" style="display:none;" onchange="handlePDFUpload(event)" />
             </div>
           </div>
@@ -989,10 +989,14 @@
             </div>
           </div>
 
+          <!-- PREVIEW WITH RESET / CLEAR BUTTON -->
           <div class="form-group" style="margin-top:0.5rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
               <span class="form-label" style="margin-bottom:0;">PARSED QUESTIONS PREVIEW</span>
-              <span class="counter-pill" id="parsedCountBadge">0 MCQs Ready</span>
+              <div style="display:flex; gap:0.4rem; align-items:center;">
+                <span class="counter-pill" id="parsedCountBadge">0 MCQs Ready</span>
+                <button type="button" style="background:#7f1d1d; border:1px solid #ef4444; color:#fca5a5; border-radius:6px; padding:0.2rem 0.5rem; font-size:0.75rem; font-weight:700; cursor:pointer;" onclick="resetAllQuestions()">🗑️ Reset / Clear All</button>
+              </div>
             </div>
             <div id="parsedQuestionsPreviewContainer" style="max-height:280px; overflow-y:auto; border:1px solid var(--card-border); border-radius:8px; padding:0.5rem;">
               <div style="text-align:center; color:var(--text-muted); font-size:0.8rem; padding:1rem;">Upload a PDF or paste text above to preview MCQs.</div>
@@ -1085,34 +1089,50 @@
       }
     }
 
-    // DEEP GUJARATI UNICODE GLYPH & MATRA RECONSTRUCTION
-    function cleanGujaratiText(raw) {
+    // DEEP GUJARATI GLYPH DECODER (Corrects PDF.js mapping errors)
+    function deepFixGujaratiGlyphs(raw) {
       if (!raw) return '';
       let s = raw;
 
-      // 1. Remove zero-width spaces and control glyphs
+      // Clean invisible PDF markers
       s = s.replace(/[\u200B-\u200D\uFEFF\u00A0\uFFF0-\uFFFF]/g, ' ');
 
-      // 2. Specific fix for scrambled broken prefixes like "િિયાંનું" or "િિયાં" -> "નીચેનામાંથી" or "કયા"
-      s = s.replace(/િિયાંનું/g, 'કયા');
+      // Fix specific font mapping corruptions seen in screenshot
+      s = s.replace(/િિયાંનું\s*રીકયું/g, 'નીચેના પૈકી કયું');
+      s = s.replace(/િિયાંનું/g, 'નીચેનામાંથી');
       s = s.replace(/િિયાં/g, 'નીચેના');
-      s = s.replace(/ક્ષ\s+મતા/g, 'ક્ષમતા');
+      s = s.replace(/રીકયું/g, 'પૈકી કયું');
+      s = s.replace(/રી\s*\?/g, 'નથી?');
+      s = s.replace(/રી\?/g, 'નથી?');
+
+      // 'ન' corrupted to 'િ' in suffixes
       s = s.replace(/કૌશલ્યિે/g, 'કૌશલ્યને');
-      s = s.replace(/ક્ષ\s*તા/g, 'ક્ષમતા');
+      s = s.replace(/કૌશલ્ય્િ/g, 'કૌશલ્યનું');
+      s = s.replace(/([ક-હ])િે\b/g, '$1ને');
+      s = s.replace(/([ક-હ])િા\b/g, '$1ના');
+      s = s.replace(/([ક-હ])િી\b/g, '$1ની');
+      s = s.replace(/([ક-હ])િું\b/g, '$1નું');
+      s = s.replace(/([ક-હ])િો\b/g, '$1નો');
+
+      // 'િ' corrupted to 'બ' in common academic vocabulary
+      s = s.replace(/મૌખબક/g, 'મૌખિક');
+      s = s.replace(/અમૌખબક/g, 'અમૌખિક');
+      s = s.replace(/અસ્ખબલત/g, 'અસ્ખલિત');
+      s = s.replace(/ભબન/g, 'બિન');
+      s = s.replace(/ભ\s*બન/g, 'બિન');
+      s = s.replace(/કશળતા/g, 'કુશળતા');
+      s = s.replace(/ક્ષ\s*મતા/g, 'ક્ષમતા');
       s = s.replace(/બોલવાનીક્ષ\s*મતા/g, 'બોલવાની ક્ષમતા');
+      s = s.replace(/રીતેવ્યાખ્યાનયત/g, 'રીતે વ્યાખ્યાયિત');
+      s = s.replace(/વ્યાખ્યાનયત/g, 'વ્યાખ્યાયિત');
+      s = s.replace(/કરેછે/g, 'કરે છે');
 
-      // 3. Move misplaced left-attached I-Matra (િ / 0x0ABF) to attach properly to subsequent consonants
-      s = s.replace(/\u0ABF([ક-હ])/g, '$1\u0ABF');
-
-      // 4. Attach floating vowel signs to their consonants
-      s = s.replace(/([ક-હ])\s+([\u0ABE-\u0ACD\u0AE2\u0AE3])/g, '$1$2');
-      s = s.replace(/([\u0ABE-\u0ACD])\s+([ક-હ])/g, '$1$2');
-
-      // 5. Clean strange quote artifacts that DTP converters output for conjuncts
+      // Fix disjoint vowel signs and quotes
+      s = s.replace(/([\u0A80-\u0AFF])\s+([\u0ABE-\u0ACD\u0AE2\u0AE3])/g, '$1$2');
+      s = s.replace(/([\u0ABE-\u0ACD])\s+([\u0A80-\u0AFF])/g, '$1$2');
       s = s.replace(/["“”'‘]\s*([ક-હ])/g, '$1');
       s = s.replace(/([ક-હ])\s*["“”'‘]/g, '$1');
 
-      // 6. Clean whitespace
       s = s.replace(/[ \t]+/g, ' ');
       s = s.replace(/(\r\n|\r|\n){2,}/g, '\n');
 
@@ -1122,7 +1142,7 @@
     function runManualGujaratiCleanup() {
       const el = document.getElementById('rawQuestionTextInput');
       if (el) {
-        el.value = cleanGujaratiText(el.value);
+        el.value = deepFixGujaratiGlyphs(el.value);
         parseRawTextQuestions();
       }
     }
@@ -1576,7 +1596,7 @@
         <div class="detail-row-item">
           <div class="detail-label-bar">
             <span class="detail-label">📖 Notes Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editNotesInput')">✏ Edit</button>
+            <button type="button" class="btn-inline-pencil" onclick="focusField('editNotesInput')">✏️ Edit</button>
           </div>
           <input type="text" id="editNotesInput" class="detail-input-edit" value="${s.notes && s.notes !== '#' ? s.notes : ''}" placeholder="Enter Drive link for notes" />
         </div>
@@ -1684,7 +1704,7 @@
     }
 
     // ==========================================
-    // EXAM CONFIGURATION & DEEP GUJARATI PARSER
+    // EXAM CONFIGURATION & SMART GUJARATI PARSER
     // ==========================================
     function openExamConfigTab(subKey) {
       const s = cachedSubjects[subKey];
@@ -1728,12 +1748,32 @@
       el.classList.toggle('hidden');
     }
 
+    // RESET / CLEAR ALL QUESTIONS (SOLVES PROBLEM 1)
+    function resetAllQuestions() {
+      if (!activeEditSubjectKey) return;
+      const s = cachedSubjects[activeEditSubjectKey];
+      if (!s) return;
+
+      if (confirm(`Kya aap '${s.subject}' ke saare MCQs reset/clear karna chahte hain?`)) {
+        activeParsedQuestions = [];
+        document.getElementById('rawQuestionTextInput').value = '';
+        document.getElementById('pdfFileInput').value = '';
+        document.getElementById('pdfFileLabel').innerText = 'Click to select PDF file';
+        renderParsedPreview();
+
+        const safeKey = encodeSubKey(s.subject);
+        database.ref(`exam_configs/${s.course}/${s.semester}/${safeKey}/questions`).remove().then(() => {
+          alert("Saare purane questions clear ho gaye hain! Ab aap nayi PDF upload kar sakte hain.");
+        });
+      }
+    }
+
     function addManualQuestion() {
-      const q = cleanGujaratiText(document.getElementById('manualQText').value.trim());
-      const a = cleanGujaratiText(document.getElementById('manualOptA').value.trim());
-      const b = cleanGujaratiText(document.getElementById('manualOptB').value.trim());
-      const c = cleanGujaratiText(document.getElementById('manualOptC').value.trim());
-      const d = cleanGujaratiText(document.getElementById('manualOptD').value.trim());
+      const q = deepFixGujaratiGlyphs(document.getElementById('manualQText').value.trim());
+      const a = deepFixGujaratiGlyphs(document.getElementById('manualOptA').value.trim());
+      const b = deepFixGujaratiGlyphs(document.getElementById('manualOptB').value.trim());
+      const c = deepFixGujaratiGlyphs(document.getElementById('manualOptC').value.trim());
+      const d = deepFixGujaratiGlyphs(document.getElementById('manualOptD').value.trim());
       const cor = parseInt(document.getElementById('manualCorrectOpt').value) || 0;
 
       if (!q || !a || !b) {
@@ -1757,11 +1797,16 @@
       alert("Question successfully added to test preview!");
     }
 
+    // AUTO-CLEAR OLD QUESTIONS UPON SELECTING NEW PDF
     async function handlePDFUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
 
-      document.getElementById('pdfFileLabel').innerText = `Extracting: ${file.name}...`;
+      // Automatically reset previous questions list on fresh upload
+      activeParsedQuestions = [];
+      renderParsedPreview();
+
+      document.getElementById('pdfFileLabel').innerText = `Extracting & Repairing: ${file.name}...`;
 
       try {
         const arrayBuffer = await file.arrayBuffer();
@@ -1796,7 +1841,7 @@
           fullText += '\n' + pageLines.join('\n');
         }
 
-        const repairedText = cleanGujaratiText(fullText);
+        const repairedText = deepFixGujaratiGlyphs(fullText);
         document.getElementById('pdfFileLabel').innerText = `✓ Loaded: ${file.name}`;
         document.getElementById('rawQuestionTextInput').value = repairedText;
         parseRawTextQuestions();
@@ -1806,6 +1851,7 @@
       }
     }
 
+    // MULTI-PATTERN GUJARATI MCQ DETECTOR WITH AUTOMATIC CLEANUP
     function parseRawTextQuestions() {
       let text = document.getElementById('rawQuestionTextInput').value;
       if (!text.trim()) {
@@ -1813,25 +1859,25 @@
         return;
       }
 
-      text = cleanGujaratiText(text);
+      text = deepFixGujaratiGlyphs(text);
       const questions = [];
 
       // Split questions by numbers e.g. (૧), (૨), 1., Q1, પ્રશ્ન
       const rawBlocks = text.split(/(?:^|\n|\s+)(?:\([૦-૯\d]+\)|[૦-૯\d]+[\.\)]|Q[૦-૯\d]+[\.\:]|પ્રશ્ન\s*[\:\-\.]?\s*[૦-૯\d]+[\.\:]?)/i);
 
       rawBlocks.forEach((block) => {
-        let clean = cleanGujaratiText(block);
+        let clean = deepFixGujaratiGlyphs(block);
         if (!clean || clean.length < 10) return;
 
         // Split options: A), B), C), D) or (A), (B) or [A], [B] or અ, બ, ક, ડ or (અ), (બ)
         const optMatches = clean.split(/(?:[A-Da-d]\)|\([A-Da-d]\)|[A-Da-d]\.|\([અબકડABKD]\)|[અબકડ]\)|\(૧\)|\(૨\)|\(૩\)|\(૪\)|\[[A-D]\])/i);
 
         if (optMatches && optMatches.length >= 5) {
-          const qText = cleanGujaratiText(optMatches[0]);
-          const optA = cleanGujaratiText(optMatches[1]);
-          const optB = cleanGujaratiText(optMatches[2]);
-          const optC = cleanGujaratiText(optMatches[3]);
-          let optD = cleanGujaratiText(optMatches[4]);
+          const qText = deepFixGujaratiGlyphs(optMatches[0]);
+          const optA = deepFixGujaratiGlyphs(optMatches[1]);
+          const optB = deepFixGujaratiGlyphs(optMatches[2]);
+          const optC = deepFixGujaratiGlyphs(optMatches[3]);
+          let optD = deepFixGujaratiGlyphs(optMatches[4]);
 
           let correctIndex = 0;
           const ansMatch = clean.match(/(?:Ans|Answer|ઉત્તર|જવાબ)[\s\:\-]+([A-Dઅ-ડa-d])/i);
@@ -1923,15 +1969,15 @@
       const q = activeParsedQuestions[idx];
       const newQ = prompt("પ્રશ્ન સુધારો (Edit Question):", q.question);
       if (newQ !== null && newQ.trim()) {
-        q.question = cleanGujaratiText(newQ);
+        q.question = deepFixGujaratiGlyphs(newQ);
         const newA = prompt("વિકલ્પ A (Option A):", q.options[0]);
-        if (newA !== null) q.options[0] = cleanGujaratiText(newA);
+        if (newA !== null) q.options[0] = deepFixGujaratiGlyphs(newA);
         const newB = prompt("વિકલ્પ B (Option B):", q.options[1]);
-        if (newB !== null) q.options[1] = cleanGujaratiText(newB);
+        if (newB !== null) q.options[1] = deepFixGujaratiGlyphs(newB);
         const newC = prompt("વિકલ્પ C (Option C):", q.options[2]);
-        if (newC !== null) q.options[2] = cleanGujaratiText(newC);
+        if (newC !== null) q.options[2] = deepFixGujaratiGlyphs(newC);
         const newD = prompt("વિકલ્પ D (Option D):", q.options[3]);
-        if (newD !== null) q.options[3] = cleanGujaratiText(newD);
+        if (newD !== null) q.options[3] = deepFixGujaratiGlyphs(newD);
         renderParsedPreview();
       }
     }
