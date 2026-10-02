@@ -3,44 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Control Centre of Campus Study Hub</title>
+  <title>Campus Study Hub | College Notes</title>
 
-  <!-- Google Typography for clean Gujarati rendering -->
+  <!-- Google Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Cinzel:wght@700;800&display=swap" rel="stylesheet">
 
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
-  <!-- PDF.js library with CMap & Regional Indian font support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-  </script>
-
   <style>
     :root {
-      --bg: #0b1329;
-      --card-bg: #131f3f;
-      --card-border: #1e2e5c;
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --danger: #ef4444;
-      --danger-hover: #dc2626;
-      --success: #10b981;
-      --radius: 14px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Noto Sans Gujarati', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
@@ -50,375 +41,457 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
-    header {
-      background: #0f172a;
-      border-bottom: 1px solid var(--card-border);
-      padding: 1rem 1.25rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .brand-box {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .brand-title {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: #ffffff;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-    }
-
-    .brand-subtitle {
-      font-size: 0.78rem;
-      color: #38bdf8;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
-
-    .menu-trigger-btn {
-      background: #1e293b;
-      border: 1px solid var(--card-border);
-      color: #fff;
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 1.35rem;
-      transition: all 0.2s;
-    }
-
-    .menu-trigger-btn:hover {
-      background: #334155;
-      border-color: var(--primary);
-    }
-
-    .drawer-overlay {
+    /* 1. CINEMATIC 3D LOGO SPLASH SCREEN */
+    #splashScreen {
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(4px);
-      z-index: 998;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
-    }
-
-    .drawer-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .side-drawer {
-      position: fixed;
-      top: 0;
-      right: -320px;
-      width: 300px;
-      height: 100%;
-      background: #0f172a;
-      border-left: 1px solid var(--card-border);
-      z-index: 999;
+      width: 100vw;
+      height: 100vh;
+      background: #f8f9fa radial-gradient(circle at center, #ffffff 0%, #eceef2 100%);
       display: flex;
       flex-direction: column;
-      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      pointer-events: auto;
+      transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.65s;
     }
 
-    .side-drawer.active {
-      right: 0;
+    #splashScreen.hide-splash {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
-    .drawer-header {
-      padding: 1.25rem 1rem;
-      border-bottom: 1px solid var(--card-border);
+    .splash-container {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      padding: 1.5rem;
+    }
+
+    .light-flare {
+      position: absolute;
+      width: 250%;
+      height: 60px;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 245, 200, 0.5) 45%,
+        rgba(255, 255, 255, 0.95) 50%,
+        rgba(255, 245, 200, 0.5) 55%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: rotate(-35deg) translateY(-220px);
+      filter: blur(8px);
+      opacity: 0;
+      animation: flareSweep 2.2s ease-in-out forwards;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    @keyframes flareSweep {
+      0% {
+        opacity: 0;
+        transform: rotate(-35deg) translate(-280px, -200px);
+      }
+      25% {
+        opacity: 0.95;
+      }
+      80% {
+        opacity: 0.85;
+      }
+      100% {
+        opacity: 0;
+        transform: rotate(-35deg) translate(300px, 220px);
+      }
+    }
+
+    .splash-logo-svg {
+      width: 140px;
+      height: 140px;
+      filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.28)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.16));
+      animation: logoPop3D 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transform-origin: center center;
+    }
+
+    @keyframes logoPop3D {
+      0% {
+        opacity: 0;
+        transform: scale(0.65) rotateX(25deg) translateY(20px);
+      }
+      60% {
+        opacity: 1;
+        transform: scale(1.04) rotateX(-4deg) translateY(-4px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotateX(0deg) translateY(0);
+      }
+    }
+
+    .splash-brand-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #111827;
+      letter-spacing: 0.12em;
+      margin-top: 1.25rem;
+      text-transform: uppercase;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+      opacity: 0;
+      animation: textReveal 1.2s ease-out 0.4s forwards;
+    }
+
+    .splash-brand-sub {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #1f2937;
+      letter-spacing: 0.28em;
+      margin-top: 0.2rem;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: textReveal 1.2s ease-out 0.6s forwards;
+    }
+
+    .splash-divider {
+      width: 140px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(0,0,0,0) 0%, #1e293b 50%, rgba(0,0,0,0) 100%);
+      margin-top: 0.65rem;
+      margin-bottom: 0.65rem;
+      opacity: 0;
+      animation: textReveal 1s ease-out 0.75s forwards;
+    }
+
+    .splash-tagline {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #475569;
+      letter-spacing: 0.04em;
+      font-style: italic;
+      opacity: 0;
+      animation: textReveal 1s ease-out 0.9s forwards;
+    }
+
+    @keyframes textReveal {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 2. TOP BAR & MAIN WEBSITE LAYOUT */
+    .top-bar {
+      background: #0f172a;
+      color: #fff;
+      padding: 0.6rem 1.25rem;
+      display: flex;
+      justify-content: flex-end;
       align-items: center;
     }
 
-    .drawer-close-btn {
+    .profile-btn {
       background: #1e293b;
-      border: none;
-      color: #94a3b8;
-      width: 32px;
-      height: 32px;
+      border: 1px solid #334155;
+      color: #fff;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 1.15rem;
+      transition: background 0.2s, transform 0.1s;
     }
 
-    .drawer-close-btn:hover {
-      background: #ef4444;
-      color: #fff;
+    .profile-btn:hover {
+      background: #334155;
     }
 
-    .admin-info-card {
-      background: #1e293b;
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 0.9rem;
-      margin: 1rem;
+    .profile-btn:active {
+      transform: scale(0.95);
     }
 
-    .admin-info-header {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      color: #38bdf8;
-      font-weight: 700;
-      margin-bottom: 0.35rem;
-    }
-
-    .admin-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-      margin-bottom: 0.35rem;
-    }
-
-    .admin-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .drawer-menu-list {
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 1rem;
+      text-align: center;
       display: flex;
       flex-direction: column;
-      padding: 0 0.75rem;
-      gap: 0.5rem;
-      overflow-y: auto;
-      flex: 1;
+      align-items: center;
     }
 
-    .menu-item-btn {
+    .header-logo-wrap {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0.85rem 1rem;
-      background: #131f3f;
-      border: 1px solid var(--card-border);
-      color: var(--text);
+      gap: 0.6rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .header-mini-logo {
+      width: 38px;
+      height: 38px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.18));
+    }
+
+    header h1 {
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--primary);
+    }
+
+    header p {
+      color: var(--text-muted);
+      margin-top: 0.15rem;
       font-size: 0.88rem;
-      font-weight: 600;
-      border-radius: 10px;
-      cursor: pointer;
-      text-align: left;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: all 0.2s;
-      text-decoration: none;
-    }
-
-    .menu-item-btn:hover {
-      background: #1e2e5c;
-      border-color: var(--primary);
-      transform: translateX(-2px);
-    }
-
-    .menu-item-btn .item-content {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .counter-pill {
-      background: #2563eb;
-      color: #fff;
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 0.15rem 0.5rem;
-      border-radius: 9999px;
     }
 
     main {
       flex: 1;
-      max-width: 760px;
+      max-width: 650px;
       width: 100%;
       margin: 1.5rem auto 2.5rem;
       padding: 0 1rem;
     }
 
-    .admin-login-card {
+    .card {
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 2.25rem 1.75rem;
-      max-width: 420px;
-      margin: 3.5rem auto;
-      box-shadow: var(--shadow);
-      text-align: center;
-    }
-
-    .dashboard-home {
-      text-align: center;
-      padding: 2.5rem 1rem;
-    }
-
-    .home-quick-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-
-    .quick-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 1.5rem 1.25rem;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.25s;
-    }
-
-    .quick-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-3px);
-      box-shadow: var(--shadow);
-    }
-
-    .quick-icon {
-      font-size: 1.75rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .quick-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 0.25rem;
-    }
-
-    .quick-desc {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .tab-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1.5rem;
       box-shadow: var(--shadow);
-      animation: tabEnter 0.2s ease-out;
+      margin-bottom: 1rem;
+      position: relative;
     }
 
-    @keyframes tabEnter {
-      0% { opacity: 0; transform: translateY(8px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .step-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    .card-top-header {
+    .breadcrumb {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      word-break: break-word;
+    }
+
+    .grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .btn-select {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      align-items: center;
+      transition: all 0.2s ease;
+      gap: 0.75rem;
     }
 
-    .card-title-group {
+    .btn-select:hover {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .btn-select span.btn-label {
+      word-break: break-word;
+      line-height: 1.35;
       flex: 1;
     }
 
-    .section-title {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.3;
-    }
-
-    .section-desc {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      margin-top: 0.25rem;
-    }
-
-    .tab-close-btn {
-      background: #1e293b;
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      width: 34px;
-      height: 34px;
-      min-width: 34px;
-      border-radius: 50%;
+    .resource-card {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card-bg);
       cursor: pointer;
       font-size: 1rem;
+      color: var(--text);
+      font-weight: 600;
+      transition: all 0.2s ease;
+      width: 100%;
+      text-align: left;
+    }
+
+    .resource-card:hover {
+      background: #f1f5f9;
+      border-color: var(--primary);
+    }
+
+    .btn-order {
+      background: #f59e0b;
+      color: #fff !important;
+      border-color: #d97706;
+    }
+
+    .btn-order:hover {
+      background: #d97706 !important;
+    }
+
+    .back-btn {
+      background: transparent;
+      border: none;
+      color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    .auth-tab-switch {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 1.5rem;
+      background: #f1f5f9;
+    }
+
+    .auth-tab-btn {
+      flex: 1;
+      padding: 0.6rem;
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
       transition: all 0.2s;
     }
 
-    .tab-close-btn:hover {
-      background: #ef4444;
-      color: #fff;
-      border-color: #ef4444;
+    .auth-tab-btn.active {
+      background: #fff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
-    .form-group {
-      margin-bottom: 1rem;
+    .login-gate {
+      text-align: center;
+      padding: 0.5rem 0.25rem;
+    }
+
+    .login-gate h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+    }
+
+    .login-gate p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 1.25rem;
     }
 
     .form-label {
       font-size: 0.78rem;
       font-weight: 700;
       color: var(--text-muted);
-      display: block;
-      margin-bottom: 0.35rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+      gap: 0.5rem;
+    }
+
+    .label-text-nowrap {
+      white-space: nowrap;
       letter-spacing: 0.02em;
+    }
+
+    .btn-badge-action {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: var(--primary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
+      white-space: nowrap;
+    }
+
+    .btn-badge-action:hover {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+      transform: translateY(-1px);
     }
 
     .input-box, .select-box, .textarea-box {
       width: 100%;
       padding: 0.85rem 1rem;
-      border: 1px solid var(--card-border);
+      border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 0.95rem;
+      margin-bottom: 0.85rem;
       outline: none;
-      background: #0b1329;
+      background: #f8fafc;
       color: var(--text);
-      transition: border-color 0.2s;
     }
 
     .textarea-box {
-      min-height: 120px;
       resize: vertical;
-      line-height: 1.6;
+      min-height: 80px;
+      font-family: inherit;
+      line-height: 1.4;
     }
 
     .input-box:focus, .select-box:focus, .textarea-box:focus {
       border-color: var(--primary);
+      background: #fff;
     }
 
     .pin-input-wrap {
       position: relative;
       width: 100%;
+      margin-bottom: 0.85rem;
     }
 
     .pin-input-wrap input {
+      margin-bottom: 0;
       padding-right: 2.8rem;
     }
 
@@ -435,257 +508,165 @@
       padding: 0.25rem;
     }
 
-    .btn-action-primary {
+    .btn-primary-action {
       width: 100%;
       background: var(--primary);
       color: #fff;
       border: none;
-      padding: 0.9rem 1rem;
+      padding: 0.85rem 1rem;
       border-radius: 8px;
       font-size: 1rem;
       font-weight: 700;
       cursor: pointer;
       transition: background 0.2s;
-      margin-top: 0.5rem;
     }
 
-    .btn-action-primary:hover {
+    .btn-primary-action:hover {
       background: var(--primary-hover);
     }
 
-    .item-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      max-height: 480px;
-      overflow-y: auto;
-    }
-
-    .clean-item-row {
-      background: #0b1329;
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.75rem;
-      transition: border-color 0.2s;
-    }
-
-    .clean-item-row:hover {
-      border-color: rgba(59, 130, 246, 0.5);
-    }
-
-    .clickable-name-area {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #fff;
-      cursor: pointer;
-      flex: 1;
-      padding: 0.2rem 0;
-      overflow: hidden;
-    }
-
-    .clickable-name-area:hover {
-      color: #38bdf8;
-    }
-
-    .subject-title-text {
-      white-space: normal;
-      word-break: break-word;
-      line-height: 1.35;
-    }
-
-    .btn-delete-item {
-      background: #2d1520;
-      color: #f87171;
-      border: 1px solid #7f1d1d;
-      padding: 0.35rem 0.65rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .btn-delete-item:hover {
-      background: #ef4444;
-      color: #fff;
-    }
-
-    .detail-view-box {
-      background: #0b1329;
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin-top: 0.5rem;
-      animation: tabEnter 0.2s ease-out;
-    }
-
-    .detail-row-item {
-      display: flex;
-      flex-direction: column;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 0.75rem 0;
-    }
-
-    .detail-row-item:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .detail-label-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.35rem;
-    }
-
-    .detail-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #38bdf8;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .btn-inline-pencil {
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #94a3b8;
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      transition: all 0.2s;
-    }
-
-    .btn-inline-pencil:hover {
-      background: #3b82f6;
-      color: #fff;
-      border-color: #3b82f6;
-    }
-
-    .detail-value {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #ffffff;
-      word-break: break-word;
-      white-space: normal;
-      line-height: 1.4;
-    }
-
-    .detail-input-edit {
-      width: 100%;
-      background: #131f3f;
-      border: 1px solid #3b82f6;
-      border-radius: 6px;
-      padding: 0.55rem 0.75rem;
-      color: #fff;
-      font-size: 0.88rem;
-      outline: none;
-      margin-top: 0.25rem;
-    }
-
-    .btn-detail-back {
-      background: #1e293b;
-      border: 1px solid var(--card-border);
-      color: #fff;
-      padding: 0.5rem 0.9rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .btn-detail-back:hover {
-      background: #334155;
-    }
-
-    .btn-save-changes {
-      background: #10b981;
-      color: #fff;
-      border: none;
-      width: 100%;
-      padding: 0.85rem;
+    .inline-update-box {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
       border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 1.25rem;
-      transition: background 0.2s;
+      padding: 0.9rem;
+      margin: 0.2rem 0 1rem 0;
+      animation: expandBox 0.25s ease-out;
     }
 
-    .btn-save-changes:hover {
-      background: #059669;
+    @keyframes expandBox {
+      0% { opacity: 0; transform: translateY(-6px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
-    .btn-open-exam-config {
-      background: #1e293b;
-      color: #38bdf8;
-      border: 1px solid #38bdf8;
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
+    .card-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      color: #64748b;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-      transition: all 0.2s;
-    }
-
-    .btn-open-exam-config:hover {
-      background: #0284c7;
-      color: #fff;
-    }
-
-    .file-drop-box {
-      border: 2px dashed #334155;
-      padding: 1.25rem;
-      border-radius: 10px;
-      text-align: center;
-      background: #0b1329;
       cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .card-close-btn:hover {
+      background: #fee2e2;
+      color: #ef4444;
+      border-color: #fca5a5;
+    }
+
+    .active-users-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.5rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: 1rem;
-      transition: all 0.2s;
     }
 
-    .file-drop-box:hover {
-      border-color: var(--primary);
+    .active-users-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    .q-preview-card {
-      background: #131f3f;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 0.85rem;
-      margin-bottom: 0.6rem;
-      font-size: 0.92rem;
-      line-height: 1.6;
+    .active-badge {
+      background: #22c55e;
+      color: #0f172a;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.95rem;
+      font-weight: 800;
     }
 
-    .manual-add-box {
-      background: #0e1726;
-      border: 1px solid #1e293b;
-      border-radius: 8px;
-      padding: 0.85rem;
-      margin-top: 0.75rem;
+    .comment-section-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1rem;
+    }
+
+    .comment-box-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .comment-box-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+      margin-bottom: 0.85rem;
+      line-height: 1.35;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem 1.5rem;
+      max-width: 380px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      animation: modalPop 0.2s ease-out;
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #f1f5f9;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
     }
 
     .hidden {
@@ -696,369 +677,321 @@
       text-align: center;
       padding: 1.5rem;
       color: var(--text-muted);
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       margin-top: auto;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="brand-box">
-      <span class="brand-title">Control Centre</span>
-      <span class="brand-subtitle">of Campus study hub</span>
-    </div>
+  <!-- 1. CINEMATIC 3D LOGO SPLASH SCREEN -->
+  <div id="splashScreen">
+    <div class="light-flare"></div>
+    <div class="splash-container">
+      
+      <!-- 3D Vector Emblem -->
+      <svg class="splash-logo-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 82 25 A 25 25 0 0 1 118 25" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M 74 16 A 36 36 0 0 1 126 16" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M 66 7 A 48 48 0 0 1 134 7" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/>
 
-    <button id="menuTriggerBtn" class="menu-trigger-btn hidden" onclick="openDrawer()" title="Open Management Menu">
-      ☰
-    </button>
+        <path d="M 100 135 C 122 120 156 122 178 127 L 174 44 C 152 40 120 38 100 52 C 80 38 48 40 26 44 L 22 127 C 44 122 78 120 100 135 Z" fill="#111827"/>
+        <path d="M 98 128 C 78 116 52 117 34 121 L 37 53 C 54 50 78 49 96 61 Z" fill="#ffffff"/>
+        <path d="M 102 128 C 122 116 148 117 166 121 L 163 53 C 146 50 122 49 104 61 Z" fill="#ffffff"/>
+
+        <path d="M 98 124 C 80 114 58 115 44 118 L 46 62 C 58 60 78 59 95 69 Z" fill="#111827"/>
+        <path d="M 102 124 C 120 114 142 115 156 118 L 154 62 C 142 60 122 59 105 69 Z" fill="#111827"/>
+
+        <path d="M 98 120 C 82 112 65 113 54 115 L 55 70 C 64 69 80 67 95 76 Z" fill="#ffffff"/>
+        <path d="M 102 120 C 118 112 135 113 146 115 L 145 70 C 136 69 120 67 105 76 Z" fill="#ffffff"/>
+
+        <path d="M 86 80 L 98 78 L 98 94 L 114 94 L 114 78 L 126 80 L 122 126 L 110 125 L 110 104 L 98 104 L 98 125 L 86 126 Z" fill="#111827"/>
+
+        <polygon points="100,50 138,68 100,84 62,68" fill="#111827"/>
+        <polygon points="100,52 134,68 100,81 66,68" fill="#ffffff"/>
+        <polygon points="100,55 130,68 100,78 70,68" fill="#111827"/>
+        <path d="M 78 75 L 75 92 A 3 3 0 0 0 79 92 L 77 75" fill="#111827"/>
+      </svg>
+
+      <div class="splash-brand-title">CAMPUS</div>
+      <div class="splash-brand-sub">STUDY HUB</div>
+      <div class="splash-divider"></div>
+      <div class="splash-tagline">Empowering Students to Excel,</div>
+    </div>
+  </div>
+
+  <!-- Top Strip Profile -->
+  <div class="top-bar">
+    <div id="authProfileBar" class="hidden">
+      <button class="profile-btn" onclick="openAccountTab()" title="Account Settings">
+        👤
+      </button>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-logo-wrap">
+      <svg class="header-mini-logo" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 82 25 A 25 25 0 0 1 118 25" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 74 16 A 36 36 0 0 1 126 16" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 100 135 C 122 120 156 122 178 127 L 174 44 C 152 40 120 38 100 52 C 80 38 48 40 26 44 L 22 127 C 44 122 78 120 100 135 Z" fill="#1e293b"/>
+        <path d="M 98 128 C 78 116 52 117 34 121 L 37 53 C 54 50 78 49 96 61 Z" fill="#ffffff"/>
+        <path d="M 102 128 C 122 116 148 117 166 121 L 163 53 C 146 50 122 49 104 61 Z" fill="#ffffff"/>
+        <path d="M 86 80 L 98 78 L 98 94 L 114 94 L 114 78 L 126 80 L 122 126 L 110 125 L 110 104 L 98 104 L 98 125 L 86 126 Z" fill="#1e293b"/>
+        <polygon points="100,50 138,68 100,84 62,68" fill="#1e293b"/>
+      </svg>
+      <h1>CAMPUS STUDY HUB</h1>
+    </div>
+    <p>📚 Your College. Your Notes. One Place.</p>
   </header>
 
-  <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawer()"></div>
-  <aside id="sideDrawer" class="side-drawer">
-    <div class="drawer-header">
-      <span style="font-weight: 800; font-size: 1rem; color: #fff;">Navigation Menu</span>
-      <button class="drawer-close-btn" onclick="closeDrawer()" title="Close Menu">✕</button>
-    </div>
-
-    <div class="admin-info-card">
-      <div class="admin-info-header">Admin Profile</div>
-      <div class="admin-row">
-        <span style="color: var(--text-muted);">Name:</span>
-        <span style="font-weight: 700; color: #fff;">Alex</span>
-      </div>
-      <div class="admin-row">
-        <span style="color: var(--text-muted);">Master PIN:</span>
-        <div class="pin-display-wrap">
-          <span style="font-family: monospace; font-weight:700;">4560</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="drawer-menu-list">
-      <button class="menu-item-btn" onclick="navigateToTab('addSubjectTab')">
-        <div class="item-content">
-          <span>📚</span>
-          <span>Add or Update Subject Materials</span>
-        </div>
-        <span>→</span>
-      </button>
-
-      <button class="menu-item-btn" onclick="navigateToTab('existingSubjectsTab')">
-        <div class="item-content">
-          <span>🗂</span>
-          <span>Existing Managed Subjects</span>
-        </div>
-        <span>→</span>
-      </button>
-
-      <button class="menu-item-btn" onclick="navigateToTab('studentsDirectoryTab')">
-        <div class="item-content">
-          <span>👥</span>
-          <span>Enrolled Students Directory</span>
-        </div>
-        <span class="counter-pill" id="enrolledCountBadge">0</span>
-      </button>
-
-      <a class="menu-item-btn" href="https://alex279-sourc.github.io/Quiz-/csh.html#" target="_blank" rel="noopener noreferrer">
-        <div class="item-content">
-          <span>🌐</span>
-          <span>View live site</span>
-        </div>
-        <span>↗</span>
-      </a>
-
-      <button class="menu-item-btn" onclick="navigateToTab('commentsTab')">
-        <div class="item-content">
-          <span>✉️</span>
-          <span>Comments</span>
-        </div>
-        <span class="counter-pill" id="commentsCountBadge">0</span>
-      </button>
-
-      <button class="menu-item-btn" style="background:#2d1520; border-color:#7f1d1d; color:#f87171; margin-top:0.5rem;" onclick="adminLogout()">
-        <div class="item-content">
-          <span>🔒</span>
-          <span>Logout Control Centre</span>
-        </div>
-        <span>✕</span>
-      </button>
-    </div>
-  </aside>
-
   <main>
-    
-    <!-- 0. ADMIN AUTHENTICATION GATEWAY -->
-    <section id="adminLoginSection" class="admin-login-card">
-      <div style="font-size:2.8rem; margin-bottom:0.4rem;">🔐</div>
-      <h2 style="font-size:1.35rem; font-weight:800; color:#fff; margin-bottom:0.35rem;">Control Centre Login</h2>
-      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.5rem;">Enter Admin credentials to unlock dashboard.</p>
-
-      <form onsubmit="handleAdminLogin(event)">
-        <div class="form-group" style="text-align:left;">
-          <label class="form-label">USERNAME</label>
-          <input type="text" id="adminUserField" class="input-box" placeholder="Enter username" required />
+    <div class="card">
+      
+      <!-- GATEWAY 1: DUAL AUTH -->
+      <section id="loginSection" class="login-gate">
+        <div class="auth-tab-switch">
+          <button type="button" id="tabRegisterBtn" class="auth-tab-btn active" onclick="switchAuthMode('register')">New Registration</button>
+          <button type="button" id="tabLoginBtn" class="auth-tab-btn" onclick="switchAuthMode('login')">Already Registered (Login)</button>
         </div>
 
-        <div class="form-group" style="text-align:left;">
-          <label class="form-label">4-DIGIT PIN</label>
-          <div class="pin-input-wrap">
-            <input type="password" id="adminPinField" class="input-box" placeholder="Enter 4-digit PIN" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('adminPinField', this)">👁️</button>
-          </div>
-        </div>
+        <h2 id="authHeading">Student Registration</h2>
+        <p id="authSubheading">Register with your name & create a 4-digit PIN to access study materials.</p>
+        
+        <!-- REGISTRATION FORM -->
+        <form id="enrollForm" onsubmit="handleRegistration(event)">
+          <label class="form-label">
+            <span class="label-text-nowrap">FULL NAME</span>
+          </label>
+          <input type="text" id="regNameInput" class="input-box" placeholder="e.g. Amish Patel" required />
 
-        <button type="submit" id="adminLoginBtn" class="btn-action-primary" style="margin-top:1rem;">Unlock Control Centre →</button>
-      </form>
-    </section>
-
-    <!-- 1. HOME DASHBOARD -->
-    <section id="homeDashboard" class="dashboard-home hidden">
-      <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">⚡</div>
-      <h2 style="font-size: 1.5rem; font-weight: 800; color: #fff;">Campus Study Hub Control</h2>
-      <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 460px; margin: 0.35rem auto 0;">
-        Tap the ☰ menu icon at top right to manage subjects, review scholars, or monitor comments.
-      </p>
-
-      <div class="home-quick-grid">
-        <div class="quick-card" onclick="navigateToTab('addSubjectTab')">
-          <div class="quick-icon">📚</div>
-          <div class="quick-title">Add Subject Material</div>
-          <div class="quick-desc">Upload Google Drive links for notes and previous year papers.</div>
-        </div>
-
-        <div class="quick-card" onclick="navigateToTab('existingSubjectsTab')">
-          <div class="quick-icon">🗂</div>
-          <div class="quick-title">Existing Subjects</div>
-          <div class="quick-desc">Inspect, edit links, or upload MCQ PDF test papers.</div>
-        </div>
-
-        <div class="quick-card" onclick="navigateToTab('studentsDirectoryTab')">
-          <div class="quick-icon">👥</div>
-          <div class="quick-title">Students Directory (<span id="quickUserCount">0</span>)</div>
-          <div class="quick-desc">View registered student profiles and their complete credentials.</div>
-        </div>
-
-        <div class="quick-card" onclick="navigateToTab('commentsTab')">
-          <div class="quick-icon">✉️️</div>
-          <div class="quick-title">Student Comments (<span id="quickCommentCount">0</span>)</div>
-          <div class="quick-desc">Read queries, requests, and feedback submitted by users.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 1: ADD OR UPDATE SUBJECT MATERIALS -->
-    <section id="addSubjectTab" class="tab-card hidden">
-      <div class="card-top-header">
-        <div class="card-title-group">
-          <h2 class="section-title">📚 Add or Update Subject Materials</h2>
-          <p class="section-desc">Changes will instantly sync with the main Campus Study Hub website.</p>
-        </div>
-        <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
-      </div>
-
-      <form onsubmit="handleSubjectSubmit(event)">
-        <div class="form-group">
-          <label class="form-label">COURSE</label>
-          <select id="courseSelect" class="select-box" onchange="updateSemesterDropdown()" required>
+          <label class="form-label">
+            <span class="label-text-nowrap">YEAR OF COLLEGE</span>
+          </label>
+          <select id="regCollegeYearSelect" class="select-box" required>
             <option value="FYBA">FYBA</option>
             <option value="SYBA">SYBA</option>
             <option value="TYBA">TYBA</option>
           </select>
-        </div>
 
-        <div class="form-group">
-          <label class="form-label">SEMESTER</label>
-          <select id="semesterSelect" class="select-box" required></select>
-        </div>
+          <label class="form-label">
+            <span class="label-text-nowrap">ACADEMIC YEAR</span>
+          </label>
+          <select id="regAcademicYearSelect" class="select-box" required>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+          </select>
 
-        <div class="form-group">
-          <label class="form-label">SUBJECT NAME</label>
-          <input type="text" id="subjectNameInput" class="input-box" placeholder="e.g. Sanskrit M1, VAC ( IKS / BKS )" required />
-        </div>
+          <label class="form-label">
+            <span class="label-text-nowrap">CREATE 4-DIGIT SECURITY PIN</span>
+          </label>
+          <div class="pin-input-wrap">
+            <input type="password" id="regPinInput" class="input-box" placeholder="e.g. 1234" pattern="[0-9]{4}" maxlength="4" required />
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️</button>
+          </div>
 
-        <div class="form-group">
-          <label class="form-label">NOTES DRIVE LINK</label>
-          <input type="url" id="notesLinkInput" class="input-box" placeholder="https://drive.google.com/..." />
-        </div>
+          <button type="submit" id="regSubmitBtn" class="btn-primary-action">Create Account & Enter →</button>
+        </form>
 
-        <div class="form-group">
-          <label class="form-label">IMPORTANT QUESTIONS LINK</label>
-          <input type="url" id="questionsLinkInput" class="input-box" placeholder="https://drive.google.com/..." />
-        </div>
+        <!-- RETURNING LOGIN FORM -->
+        <form id="returningLoginForm" class="hidden" onsubmit="handleLogin(event)">
+          <label class="form-label">
+            <span class="label-text-nowrap">REGISTERED FULL NAME</span>
+          </label>
+          <input type="text" id="loginNameInput" class="input-box" placeholder="Enter your full name" required />
 
-        <div class="form-group">
-          <label class="form-label">PREVIOUS YEAR PAPERS LINK</label>
-          <input type="url" id="papersLinkInput" class="input-box" placeholder="https://drive.google.com/..." />
-        </div>
+          <label class="form-label">
+            <span class="label-text-nowrap">ENTER 4-DIGIT SECURITY PIN</span>
+          </label>
+          <div class="pin-input-wrap">
+            <input type="password" id="loginPinInput" class="input-box" placeholder="Enter your 4-digit PIN" pattern="[0-9]{4}" maxlength="4" required />
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('loginPinInput', this)">👁️</button>
+          </div>
 
-        <button type="submit" id="saveSubjectBtn" class="btn-action-primary">Save & Publish Subject →</button>
-      </form>
-    </section>
+          <button type="submit" id="loginSubmitBtn" class="btn-primary-action">Login to Study Hub →</button>
+        </form>
+      </section>
 
-    <!-- TAB 2: EXISTING MANAGED SUBJECTS -->
-    <section id="existingSubjectsTab" class="tab-card hidden">
-      <div class="card-top-header">
-        <div class="card-title-group">
-          <h2 class="section-title">🗂 Existing Managed Subjects</h2>
-          <p class="section-desc" id="subjectTabSubtitle">Select a semester to manage its subjects.</p>
-        </div>
-        <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+      <!-- GATEWAY 2: STUDY EXPLORER -->
+      <div id="studyContent" class="hidden">
+        <div id="breadcrumb" class="breadcrumb hidden">Home</div>
+        <button id="backBtn" class="back-btn hidden" onclick="goBack()">← Back</button>
+
+        <section id="step-course">
+          <h2 class="step-title">Select Course</h2>
+          <div class="grid" id="course-list">
+            <button class="btn-select" onclick="selectCourse('FYBA')"><span>FYBA</span> <span>→</span></button>
+            <button class="btn-select" onclick="selectCourse('SYBA')"><span>SYBA</span> <span>→</span></button>
+            <button class="btn-select" onclick="selectCourse('TYBA')"><span>TYBA</span> <span>→</span></button>
+          </div>
+        </section>
+
+        <section id="step-semester" class="hidden">
+          <h2 class="step-title">Select Semester</h2>
+          <div class="grid" id="semester-list"></div>
+        </section>
+
+        <section id="step-subject" class="hidden">
+          <h2 class="step-title">Select Subject</h2>
+          <div class="grid" id="subject-list"></div>
+        </section>
+
+        <section id="step-resources" class="hidden">
+          <h2 class="step-title" id="subject-title">Resources</h2>
+          <div class="grid">
+            <button class="resource-card" onclick="openResource('notes')">
+              <span>📖 Notes</span> <span>Download ↗</span>
+            </button>
+            <button class="resource-card" onclick="openResource('questions')">
+              <span>📝 Important Questions</span> <span>View ↗</span>
+            </button>
+            <button class="resource-card" onclick="openResource('papers')">
+              <span>📄 Previous Papers</span> <span>Download ↗</span>
+            </button>
+            <!-- DIRECT EXAM PREPARATION MCQ LINK -->
+            <button class="resource-card" style="border-color: #3b82f6; background: #eff6ff;" onclick="openResource('exam')">
+              <span style="color: #1d4ed8; font-weight: 700;">🎯 Exam Preparation (MCQ Practice & Mock Test)</span> <span style="color: #1d4ed8;">Start Test ↗</span>
+            </button>
+            <button class="resource-card btn-order" onclick="openResource('assignments')">
+              <span>📝 Order Assignments</span> <span>Order ↗</span>
+            </button>
+          </div>
+        </section>
       </div>
 
-      <div id="semesterSelectView">
-        <div class="item-list" id="semesterGridContainer"></div>
-      </div>
-
-      <div id="subjectListView" class="hidden">
-        <button class="btn-detail-back" onclick="backToSemesterGrid()">← Back to Semesters</button>
-        <h3 id="currentSemesterTitle" style="font-size:1.05rem; font-weight:800; margin-bottom:0.75rem; color:#38bdf8;"></h3>
-        <div class="item-list" id="existingSubjectsContainer">
-          <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading subjects...</div>
-        </div>
-      </div>
-
-      <div id="subjectDetailView" class="hidden">
-        <button class="btn-detail-back" onclick="backToSubjectList()">← Back to Subjects List</button>
-        <div class="detail-view-box" id="subjectDetailContent"></div>
-      </div>
-
-      <!-- VIEW 4: DEDICATED MCQ TEST & PDF PARSER TAB -->
-      <div id="examConfigTab" class="hidden">
-        <button class="btn-detail-back" onclick="backToSubjectDetailFromExam()">← Back to Subject</button>
+      <!-- GATEWAY 3: ACCOUNT DETAILS TAB -->
+      <section id="accountSection" class="hidden">
+        <button class="card-close-btn" onclick="closeAccountTab()" title="Close and return">✕</button>
         
-        <div class="detail-view-box">
-          <div style="font-size:1.15rem; font-weight:800; color:#38bdf8; margin-bottom:0.25rem;">
-            🎯 MCQ Test Configuration & PDF Auto-Set
-          </div>
-          <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1.25rem;" id="examConfigSubjectHeader">
-            Configure test questions, timer and quantity for this subject.
-          </p>
+        <h2 class="step-title">⚙️ Student Account Details</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Your registered credentials. You can update your Name, College Year, or PIN.
+        </p>
 
-          <div class="form-group">
-            <label class="form-label">UPLOAD QUESTIONS PDF (AUTO-PARSE)</label>
-            <div class="file-drop-box" onclick="document.getElementById('pdfFileInput').click()">
-              <div style="font-size:1.8rem; margin-bottom:0.25rem;">📄</div>
-              <div style="font-weight:700; color:#fff;" id="pdfFileLabel">Click to select PDF file</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Old questions will be cleared & fresh Gujarati decoded</div>
-              <input type="file" id="pdfFileInput" accept="application/pdf" style="display:none;" onchange="handlePDFUpload(event)" />
-            </div>
-          </div>
+        <form onsubmit="saveAccountSettings(event)">
+          <label class="form-label">
+            <span class="label-text-nowrap">FULL NAME</span>
+          </label>
+          <input type="text" id="accNameInput" class="input-box" required />
 
-          <div class="form-group">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-              <span class="form-label" style="margin-bottom:0;">EXTRACTED / PASTED TEXT</span>
-              <button type="button" class="btn-inline-pencil" onclick="runManualGujaratiCleanup()">✨ Clean & Fix Gujarati</button>
-            </div>
-            <textarea id="rawQuestionTextInput" class="textarea-box" placeholder="PDF text will appear here. If PDF fonts are scrambled, simply copy Gujarati text from your PDF viewer and paste here!"></textarea>
-            <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-              <button type="button" class="btn-action-primary" style="background:#2563eb; padding:0.6rem; flex:1;" onclick="parseRawTextQuestions()">⚡ Auto-Parse Questions</button>
-              <button type="button" class="btn-action-primary" style="background:#1e293b; border:1px solid #334155; padding:0.6rem; flex:1;" onclick="toggleManualAddBox()">➕ Add Single Question</button>
-            </div>
-          </div>
+          <label class="form-label" style="margin-top:0.4rem;">
+            <span class="label-text-nowrap">YEAR OF COLLEGE</span>
+          </label>
+          <select id="accCollegeYearSelect" class="select-box" required>
+            <option value="FYBA">FYBA</option>
+            <option value="SYBA">SYBA</option>
+            <option value="TYBA">TYBA</option>
+          </select>
 
-          <div id="manualAddBox" class="manual-add-box hidden">
-            <div style="font-size:0.85rem; font-weight:700; color:#38bdf8; margin-bottom:0.5rem;">Add MCQ Manually:</div>
-            <input type="text" id="manualQText" class="input-box" style="margin-bottom:0.4rem; padding:0.5rem;" placeholder="પ્રશ્ન લખો (Enter Question text)" />
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; margin-bottom:0.4rem;">
-              <input type="text" id="manualOptA" class="input-box" style="padding:0.5rem;" placeholder="વિકલ્પ A (Option A)" />
-              <input type="text" id="manualOptB" class="input-box" style="padding:0.5rem;" placeholder="વિકલ્પ B (Option B)" />
-              <input type="text" id="manualOptC" class="input-box" style="padding:0.5rem;" placeholder="વિકલ્પ C (Option C)" />
-              <input type="text" id="manualOptD" class="input-box" style="padding:0.5rem;" placeholder="વિકલ્પ D (Option D)" />
-            </div>
-            <div style="display:flex; gap:0.5rem; align-items:center;">
-              <select id="manualCorrectOpt" class="select-box" style="padding:0.5rem; flex:1;">
-                <option value="0">સાચો જવાબ: વિકલ્પ A</option>
-                <option value="1">સાચો જવાબ: વિકલ્પ B</option>
-                <option value="2">સાચો જવાબ: વિકલ્પ C</option>
-                <option value="3">સાચો જવાબ: વિકલ્પ D</option>
-              </select>
-              <button type="button" class="btn-action-primary" style="background:#10b981; padding:0.5rem 1rem; width:auto;" onclick="addManualQuestion()">Add to Test</button>
-            </div>
+          <label class="form-label">
+            <span class="label-text-nowrap">ACADEMIC YEAR</span>
+          </label>
+          <select id="accAcademicYearSelect" class="select-box" required>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+          </select>
+
+          <div class="form-label">
+            <span class="label-text-nowrap">4-DIGIT SECURITY PIN</span>
+            <button type="button" class="btn-badge-action" onclick="togglePinBox()">
+              ✏️ Change PIN
+            </button>
+          </div>
+          <div class="pin-input-wrap" style="margin-bottom: 0.4rem;">
+            <input type="password" id="accDisplayPin" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed;" />
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️️</button>
           </div>
 
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-top:1rem;">
-            <div class="form-group">
-              <label class="form-label">TIMER (MINUTES)</label>
-              <input type="number" id="testDurationInput" class="input-box" value="15" min="1" max="180" placeholder="e.g. 15" required />
+          <div id="pinUpdateDrawer" class="inline-update-box hidden">
+            <label class="form-label">
+              <span class="label-text-nowrap">EXISTING 4-DIGIT PIN</span>
+            </label>
+            <div class="pin-input-wrap">
+              <input type="password" id="accOldPinInput" class="input-box" placeholder="Enter current PIN" pattern="[0-9]{4}" maxlength="4" />
+              <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accOldPinInput', this)">👁️</button>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">QUESTION QUANTITY (COUNT)</label>
-              <input type="number" id="testQuantityInput" class="input-box" value="10" min="1" max="200" placeholder="e.g. 10" required />
+            <label class="form-label">
+              <span class="label-text-nowrap">NEW 4-DIGIT PIN</span>
+            </label>
+            <div class="pin-input-wrap">
+              <input type="password" id="accNewPinInput" class="input-box" placeholder="Enter new 4-digit PIN" pattern="[0-9]{4}" maxlength="4" />
+              <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accNewPinInput', this)">👁️</button>
             </div>
+
+            <button type="button" id="btnUpdatePin" class="btn-primary-action" style="background:#0f172a;" onclick="updateSecurityPin()">Verify & Save New PIN</button>
           </div>
 
-          <!-- PREVIEW WITH RESET / CLEAR BUTTON -->
-          <div class="form-group" style="margin-top:0.5rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-              <span class="form-label" style="margin-bottom:0;">PARSED QUESTIONS PREVIEW</span>
-              <div style="display:flex; gap:0.4rem; align-items:center;">
-                <span class="counter-pill" id="parsedCountBadge">0 MCQs Ready</span>
-                <button type="button" style="background:#7f1d1d; border:1px solid #ef4444; color:#fca5a5; border-radius:6px; padding:0.2rem 0.5rem; font-size:0.75rem; font-weight:700; cursor:pointer;" onclick="resetAllQuestions()">🗑️ Reset / Clear All</button>
-              </div>
-            </div>
-            <div id="parsedQuestionsPreviewContainer" style="max-height:280px; overflow-y:auto; border:1px solid var(--card-border); border-radius:8px; padding:0.5rem;">
-              <div style="text-align:center; color:var(--text-muted); font-size:0.8rem; padding:1rem;">Upload a PDF or paste text above to preview MCQs.</div>
-            </div>
-          </div>
+          <button type="submit" id="saveAccBtn" class="btn-primary-action" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">Save Details</button>
+          <button type="button" class="btn-primary-action" style="background:#ef4444;" onclick="logoutStudent()">Logout Session</button>
+        </form>
+      </section>
 
-          <button type="button" class="btn-save-changes" id="btnSaveExamConfig" onclick="saveExamConfiguration()">💾 Save Test & Publish to Live Site</button>
-        </div>
-      </div>
-    </section>
+    </div>
 
-    <!-- TAB 3: ENROLLED STUDENTS DIRECTORY -->
-    <section id="studentsDirectoryTab" class="tab-card hidden">
-      <div class="card-top-header">
-        <div class="card-title-group">
-          <h2 class="section-title">👥 Enrolled Students Directory</h2>
-          <p class="section-desc">Click on student's name to view complete registration details.</p>
-        </div>
-        <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
+    <!-- MINIMALIST ACTIVE USERS LIVE BOX -->
+    <div class="active-users-box">
+      <div class="active-users-title">
+        <span>⚡ Active Scholars Joined:</span>
       </div>
+      <span class="active-badge" id="totalUsersCount">0</span>
+    </div>
 
-      <div id="studentListView">
-        <div class="item-list" id="studentsListContainer">
-          <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading enrolled students...</div>
-        </div>
+    <!-- STUDENT QUERY / COMMENT TAB -->
+    <div class="comment-section-box">
+      <div class="comment-box-title">
+        <span>💬</span>
+        <span>Comment your query</span>
       </div>
+      <p class="comment-box-sub">
+        koi bhi question ya problem ho to comment me likh ke bata sakte ho.
+      </p>
 
-      <div id="studentDetailView" class="hidden">
-        <button class="btn-detail-back" onclick="backToStudentList()">← Back to Students List</button>
-        <div class="detail-view-box" id="studentDetailContent"></div>
-      </div>
-    </section>
-
-    <!-- TAB 4: COMMENTS -->
-    <section id="commentsTab" class="tab-card hidden">
-      <div class="card-top-header">
-        <div class="card-title-group">
-          <h2 class="section-title">✉️ Student Comments & Queries</h2>
-          <p class="section-desc">Click on comment to view full query and details.</p>
-        </div>
-        <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
-      </div>
-
-      <div id="commentListView">
-        <div class="item-list" id="commentsContainer">
-          <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No student comments posted yet.</div>
-        </div>
-      </div>
-
-      <div id="commentDetailView" class="hidden">
-        <button class="btn-detail-back" onclick="backToCommentList()">← Back to Comments List</button>
-        <div class="detail-view-box" id="commentDetailContent"></div>
-      </div>
-    </section>
+      <form onsubmit="handleCommentSubmit(event)">
+        <textarea id="studentQueryInput" class="textarea-box" placeholder="Apna question ya problem yahan likhein..." required></textarea>
+        <button type="submit" id="sendCommentBtn" class="btn-primary-action" style="padding: 0.75rem 1rem;">Send Query →</button>
+      </form>
+    </div>
 
   </main>
 
+  <div id="emptyDataModal" class="modal-overlay hidden" onclick="closeEmptyModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeEmptyModal()" title="Close">❌</button>
+      <div style="font-size:2.5rem; margin-bottom:0.5rem;">📂</div>
+      <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:0.3rem;" id="emptyModalTitle">Data Not Found</h3>
+      <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.25rem;" id="emptyModalDesc">
+        Is resource ke liye link abhi add nahi ki gayi hai.
+      </p>
+      <button class="btn-primary-action" onclick="closeEmptyModal()">Theek Hai (OK)</button>
+    </div>
+  </div>
+
   <footer>
-    &copy; Control Centre • Campus Study Hub Admin.
+    &copy; Campus Study Hub. Built for college students.
   </footer>
 
   <script>
+    // 0. SPLASH INTRO ANIMATION TIMEOUT DISMISSAL
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) {
+          splash.classList.add('hide-splash');
+          setTimeout(() => {
+            splash.style.display = 'none';
+          }, 700);
+        }
+      }, 2600);
+    });
+
+    // 1. FIREBASE CONFIGURATION
     const firebaseConfig = {
       apiKey: "AIzaSyBzjHop10vEagKwLaXxTj7x9xd9GQ92KxE",
       authDomain: "campus-study-hub-6b8ab.firebaseapp.com",
@@ -1075,13 +1008,10 @@
     }
     const database = firebase.database();
 
-    const REQUIRED_USER = "Alex";
-    const REQUIRED_PIN = "4560";
+    const WHATSAPP_NUMBER = "916359217206";
 
-    function encodeSubKey(str) {
-      return encodeURIComponent(str).replace(/\./g, '%2E');
-    }
-    function decodeSubKey(str) {
+    function safeDecode(str) {
+      if (!str) return '';
       try {
         return decodeURIComponent(str);
       } catch(e) {
@@ -1089,74 +1019,7 @@
       }
     }
 
-    // DEEP GUJARATI GLYPH DECODER (Corrects PDF.js mapping errors)
-    function deepFixGujaratiGlyphs(raw) {
-      if (!raw) return '';
-      let s = raw;
-
-      // Clean invisible PDF markers
-      s = s.replace(/[\u200B-\u200D\uFEFF\u00A0\uFFF0-\uFFFF]/g, ' ');
-
-      // Fix specific font mapping corruptions seen in screenshot
-      s = s.replace(/િિયાંનું\s*રીકયું/g, 'નીચેના પૈકી કયું');
-      s = s.replace(/િિયાંનું/g, 'નીચેનામાંથી');
-      s = s.replace(/િિયાં/g, 'નીચેના');
-      s = s.replace(/રીકયું/g, 'પૈકી કયું');
-      s = s.replace(/રી\s*\?/g, 'નથી?');
-      s = s.replace(/રી\?/g, 'નથી?');
-
-      // 'ન' corrupted to 'િ' in suffixes
-      s = s.replace(/કૌશલ્યિે/g, 'કૌશલ્યને');
-      s = s.replace(/કૌશલ્ય્િ/g, 'કૌશલ્યનું');
-      s = s.replace(/([ક-હ])િે\b/g, '$1ને');
-      s = s.replace(/([ક-હ])િા\b/g, '$1ના');
-      s = s.replace(/([ક-હ])િી\b/g, '$1ની');
-      s = s.replace(/([ક-હ])િું\b/g, '$1નું');
-      s = s.replace(/([ક-હ])િો\b/g, '$1નો');
-
-      // 'િ' corrupted to 'બ' in common academic vocabulary
-      s = s.replace(/મૌખબક/g, 'મૌખિક');
-      s = s.replace(/અમૌખબક/g, 'અમૌખિક');
-      s = s.replace(/અસ્ખબલત/g, 'અસ્ખલિત');
-      s = s.replace(/ભબન/g, 'બિન');
-      s = s.replace(/ભ\s*બન/g, 'બિન');
-      s = s.replace(/કશળતા/g, 'કુશળતા');
-      s = s.replace(/ક્ષ\s*મતા/g, 'ક્ષમતા');
-      s = s.replace(/બોલવાનીક્ષ\s*મતા/g, 'બોલવાની ક્ષમતા');
-      s = s.replace(/રીતેવ્યાખ્યાનયત/g, 'રીતે વ્યાખ્યાયિત');
-      s = s.replace(/વ્યાખ્યાનયત/g, 'વ્યાખ્યાયિત');
-      s = s.replace(/કરેછે/g, 'કરે છે');
-
-      // Fix disjoint vowel signs and quotes
-      s = s.replace(/([\u0A80-\u0AFF])\s+([\u0ABE-\u0ACD\u0AE2\u0AE3])/g, '$1$2');
-      s = s.replace(/([\u0ABE-\u0ACD])\s+([\u0A80-\u0AFF])/g, '$1$2');
-      s = s.replace(/["“”'‘]\s*([ક-હ])/g, '$1');
-      s = s.replace(/([ક-હ])\s*["“”'‘]/g, '$1');
-
-      s = s.replace(/[ \t]+/g, ' ');
-      s = s.replace(/(\r\n|\r|\n){2,}/g, '\n');
-
-      return s.trim();
-    }
-
-    function runManualGujaratiCleanup() {
-      const el = document.getElementById('rawQuestionTextInput');
-      if (el) {
-        el.value = deepFixGujaratiGlyphs(el.value);
-        parseRawTextQuestions();
-      }
-    }
-
-    const SEMESTER_CONFIG = [
-      { name: "Semester 1", course: "FYBA" },
-      { name: "Semester 2", course: "FYBA" },
-      { name: "Semester 3", course: "SYBA" },
-      { name: "Semester 4", course: "SYBA" },
-      { name: "Semester 5", course: "TYBA" },
-      { name: "Semester 6", course: "TYBA" }
-    ];
-
-    function getDefaultPriority(subName) {
+    function getSubjectFixedPriority(subName) {
       const clean = subName.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (clean.includes('sanskritm1') || clean === 'sanskrit1') return 10;
       if (clean.includes('sanskritm2') || clean === 'sanskrit2') return 20;
@@ -1168,19 +1031,54 @@
       return 100;
     }
 
-    let globalStudyData = null;
-    let cachedSubjects = {};
-    let cachedStudents = {};
-    let cachedComments = {};
-    let currentSelectedSemester = null;
-    let currentSelectedCourse = null;
-    let activeEditSubjectKey = null;
+    let studyData = {
+      "FYBA": { "Semester 1": {}, "Semester 2": {} },
+      "SYBA": { "Semester 3": {}, "Semester 4": {} },
+      "TYBA": { "Semester 5": {}, "Semester 6": {} }
+    };
 
-    let isSubjectsLoaded = false;
-    let isStudentsLoaded = false;
-    let isCommentsLoaded = false;
+    const state = {
+      course: null,
+      semester: null,
+      subjectKey: null,
+      subjectName: null,
+      step: 1,
+      inAccountTab: false,
+      previousHash: ''
+    };
 
-    let activeParsedQuestions = [];
+    function getActiveSubjectData() {
+      const courseData = studyData[state.course] || {};
+      const semData = courseData[state.semester] || {};
+      if (!semData) return {};
+
+      if (state.subjectKey && semData[state.subjectKey]) {
+        return semData[state.subjectKey];
+      }
+
+      if (state.subjectKey) {
+        const encodedKey = encodeURIComponent(state.subjectKey).replace(/\./g, '%2E');
+        if (semData[encodedKey]) {
+          state.subjectKey = encodedKey;
+          return semData[encodedKey];
+        }
+      }
+
+      const targetQuery = (state.subjectName || state.subjectKey || '').toLowerCase().trim();
+      const keys = Object.keys(semData);
+      const matchedKey = keys.find(k => {
+        const item = semData[k] || {};
+        const itemName = (item.subjectName || safeDecode(k) || '').toLowerCase().trim();
+        return itemName === targetQuery || safeDecode(k).toLowerCase().trim() === targetQuery;
+      });
+
+      if (matchedKey) {
+        state.subjectKey = matchedKey;
+        return semData[matchedKey];
+      }
+
+      return {};
+    }
 
     function togglePinVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
@@ -1194,1035 +1092,540 @@
       }
     }
 
-    function handleAdminLogin(e) {
-      e.preventDefault();
-      const u = document.getElementById('adminUserField').value.trim();
-      const p = document.getElementById('adminPinField').value.trim();
-
-      if (u.toLowerCase() === REQUIRED_USER.toLowerCase() && p === REQUIRED_PIN) {
-        sessionStorage.setItem('csh_admin_auth', 'true');
-        applyAdminSession();
-      } else {
-        alert("Galat Username ya PIN! Kripya sahi details enter karein.");
-      }
-    }
-
-    function applyAdminSession() {
-      document.getElementById('adminLoginSection').classList.add('hidden');
-      document.getElementById('menuTriggerBtn').classList.remove('hidden');
-      parseHash();
-    }
-
-    function adminLogout() {
-      sessionStorage.removeItem('csh_admin_auth');
-      window.location.hash = '';
-      closeDrawer();
-      window.location.reload();
-    }
-
-    const semesterMap = {
-      "FYBA": ["Semester 1", "Semester 2"],
-      "SYBA": ["Semester 3", "Semester 4"],
-      "TYBA": ["Semester 5", "Semester 6"]
-    };
-
-    function updateSemesterDropdown() {
-      const course = document.getElementById('courseSelect').value;
-      const semSelect = document.getElementById('semesterSelect');
-      semSelect.innerHTML = '';
-      const sems = semesterMap[course] || [];
-      sems.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s;
-        opt.innerText = s;
-        semSelect.appendChild(opt);
-      });
-    }
-
-    function openDrawer() {
-      document.getElementById('sideDrawer').classList.add('active');
-      document.getElementById('drawerOverlay').classList.add('active');
-    }
-
-    function closeDrawer() {
-      document.getElementById('sideDrawer').classList.remove('active');
-      document.getElementById('drawerOverlay').classList.remove('active');
-    }
-
-    const tabMapToHash = {
-      'addSubjectTab': 'add-subject',
-      'existingSubjectsTab': 'subjects',
-      'studentsDirectoryTab': 'students',
-      'commentsTab': 'comments'
-    };
-
-    const hashToTabMap = {
-      'add-subject': 'addSubjectTab',
-      'subjects': 'existingSubjectsTab',
-      'students': 'studentsDirectoryTab',
-      'comments': 'commentsTab'
-    };
-
-    function navigateToTab(tabId) {
-      closeDrawer();
-      const hash = tabMapToHash[tabId] || '';
-      window.location.hash = hash;
-    }
-
-    function closeToHome() {
-      window.location.hash = '';
-    }
-
-    function hideAllTabs() {
-      document.getElementById('homeDashboard').classList.add('hidden');
-      document.getElementById('addSubjectTab').classList.add('hidden');
-      document.getElementById('existingSubjectsTab').classList.add('hidden');
-      document.getElementById('studentsDirectoryTab').classList.add('hidden');
-      document.getElementById('commentsTab').classList.add('hidden');
-    }
-
-    function parseHash() {
-      if (sessionStorage.getItem('csh_admin_auth') !== 'true') return;
-
-      const rawHash = window.location.hash.replace(/^#\/?/, '');
-      hideAllTabs();
-
-      if (!rawHash) {
-        document.getElementById('homeDashboard').classList.remove('hidden');
-        return;
-      }
-
-      if (rawHash.startsWith('subject-detail/')) {
-        const subKey = decodeURIComponent(rawHash.replace('subject-detail/', ''));
-        document.getElementById('existingSubjectsTab').classList.remove('hidden');
-
-        if (isSubjectsLoaded && cachedSubjects[subKey]) {
-          showSubjectDetail(subKey, false);
-        } else {
-          const checkSubInterval = setInterval(() => {
-            if (isSubjectsLoaded) {
-              clearInterval(checkSubInterval);
-              if (cachedSubjects[subKey]) {
-                showSubjectDetail(subKey, false);
-              } else {
-                backToSemesterGrid(false);
-              }
-            }
-          }, 50);
-        }
-        return;
-      }
-
-      if (rawHash.startsWith('subjects/')) {
-        const semParam = decodeURIComponent(rawHash.replace('subjects/', ''));
-        document.getElementById('existingSubjectsTab').classList.remove('hidden');
-
-        const matched = SEMESTER_CONFIG.find(sc => sc.name.toLowerCase() === semParam.toLowerCase());
-        if (matched) {
-          if (isSubjectsLoaded) {
-            openSemesterSubjects(matched.name, matched.course, false);
-          } else {
-            const checkSemInterval = setInterval(() => {
-              if (isSubjectsLoaded) {
-                clearInterval(checkSemInterval);
-                openSemesterSubjects(matched.name, matched.course, false);
-              }
-            }, 50);
-          }
-        } else {
-          backToSemesterGrid(false);
-        }
-        return;
-      }
-
-      if (rawHash.startsWith('student-detail/')) {
-        const studentKey = decodeURIComponent(rawHash.replace('student-detail/', ''));
-        document.getElementById('studentsDirectoryTab').classList.remove('hidden');
-
-        const checkStdInterval = setInterval(() => {
-          if (isStudentsLoaded) {
-            clearInterval(checkStdInterval);
-            if (cachedStudents[studentKey]) {
-              showStudentDetail(studentKey, false);
-            }
-          }
-        }, 50);
-        return;
-      }
-
-      if (rawHash.startsWith('comment-detail/')) {
-        const commentKey = decodeURIComponent(rawHash.replace('comment-detail/', ''));
-        document.getElementById('commentsTab').classList.remove('hidden');
-
-        const checkCmtInterval = setInterval(() => {
-          if (isCommentsLoaded) {
-            clearInterval(checkCmtInterval);
-            if (cachedComments[commentKey]) {
-              showCommentDetail(commentKey, false);
-            }
-          }
-        }, 50);
-        return;
-      }
-
-      const tabId = hashToTabMap[rawHash];
-      if (tabId) {
-        document.getElementById(tabId).classList.remove('hidden');
-        if (tabId === 'existingSubjectsTab') backToSemesterGrid(false);
-        if (tabId === 'studentsDirectoryTab') backToStudentList(false);
-        if (tabId === 'commentsTab') backToCommentList(false);
-      } else {
-        document.getElementById('homeDashboard').classList.remove('hidden');
-      }
-    }
-
-    window.addEventListener('hashchange', parseHash);
-
-    function handleSubjectSubmit(e) {
-      e.preventDefault();
-      const course = document.getElementById('courseSelect').value;
-      const semester = document.getElementById('semesterSelect').value;
-      const subject = document.getElementById('subjectNameInput').value.trim();
-
-      const notes = document.getElementById('notesLinkInput').value.trim() || '#';
-      const questions = document.getElementById('questionsLinkInput').value.trim() || '#';
-      const papers = document.getElementById('papersLinkInput').value.trim() || '#';
-
-      if (!subject) return;
-
-      const btn = document.getElementById('saveSubjectBtn');
-      btn.innerText = "Publishing to Website...";
-      btn.disabled = true;
-
-      const safeKey = encodeSubKey(subject);
-      const semPath = `study_data/${course}/${semester}`;
-      const path = `${semPath}/${safeKey}`;
-
-      database.ref(semPath).once('value').then((semSnap) => {
-        const semData = semSnap.val() || {};
-        const existing = semData[safeKey] || {};
-
-        let permanentIndex = existing.orderIndex;
-        if (typeof permanentIndex === 'undefined' || permanentIndex === null) {
-          permanentIndex = getDefaultPriority(subject);
-        }
-
-        const createdAt = existing.createdAt || Date.now();
-
-        database.ref(path).set({
-          subjectName: subject,
-          notes: notes,
-          questions: questions,
-          papers: papers,
-          orderIndex: permanentIndex,
-          createdAt: createdAt,
-          updatedAt: new Date().toISOString()
-        }).then(() => {
-          alert(`Subject '${subject}' successfully published to ${course} (${semester})!`);
-          document.getElementById('subjectNameInput').value = '';
-          document.getElementById('notesLinkInput').value = '';
-          document.getElementById('questionsLinkInput').value = '';
-          document.getElementById('papersLinkInput').value = '';
-          btn.innerText = "Save & Publish Subject →";
-          btn.disabled = false;
-          openSemesterSubjects(semester, course, true);
-        }).catch(err => {
-          alert("Error publishing subject: " + err.message);
-          btn.innerText = "Save & Publish Subject →";
-          btn.disabled = false;
-        });
-      });
-    }
-
-    function listenToSubjects() {
-      database.ref('study_data').on('value', (snapshot) => {
-        globalStudyData = snapshot.val() || {};
-        cachedSubjects = {};
-
-        Object.keys(globalStudyData).forEach(course => {
-          Object.keys(globalStudyData[course]).forEach(semester => {
-            Object.keys(globalStudyData[course][semester]).forEach(subKeyRaw => {
-              const item = globalStudyData[course][semester][subKeyRaw];
-              const realSubjectName = item.subjectName || decodeSubKey(subKeyRaw);
-              const compositeKey = `${course}___${semester}___${subKeyRaw}`;
-
-              let assignedOrder = item.orderIndex;
-              if (typeof assignedOrder === 'undefined' || assignedOrder === null) {
-                assignedOrder = getDefaultPriority(realSubjectName);
-              }
-
-              cachedSubjects[compositeKey] = {
-                course,
-                semester,
-                subKeyRaw,
-                subject: realSubjectName,
-                orderIndex: assignedOrder,
-                createdAt: item.createdAt || 0,
-                updatedAt: item.updatedAt || '',
-                compositeKey: compositeKey,
-                ...item
-              };
-            });
-          });
-        });
-
-        isSubjectsLoaded = true;
-        renderSemesterGrid();
-
-        if (currentSelectedSemester && currentSelectedCourse) {
-          renderSubjectsForCurrentSemester();
-        }
-      });
-    }
-
-    function renderSemesterGrid() {
-      const container = document.getElementById('semesterGridContainer');
-      container.innerHTML = '';
-
-      SEMESTER_CONFIG.forEach(sc => {
-        const courseData = (globalStudyData && globalStudyData[sc.course]) ? globalStudyData[sc.course] : {};
-        const semData = courseData[sc.name] || {};
-        const count = Object.keys(semData).length;
-
-        const row = document.createElement('div');
-        row.className = 'clean-item-row';
-        row.innerHTML = `
-          <div class="clickable-name-area" onclick="openSemesterSubjects('${sc.name}', '${sc.course}', true)" style="cursor:pointer;">
-            <span style="font-size:1.25rem;">📁</span>
-            <div>
-              <div style="font-weight:700; font-size:0.98rem; color:#fff;">${sc.name}</div>
-              <div style="font-size:0.75rem; color:#38bdf8; font-weight:600;">${sc.course}</div>
-            </div>
-          </div>
-          <span class="counter-pill" style="font-size:0.8rem; padding:0.25rem 0.65rem;">${count} Subjects</span>
-        `;
-        container.appendChild(row);
-      });
-    }
-
-    function openSemesterSubjects(semName, courseName, updateHash = true) {
-      currentSelectedSemester = semName;
-      currentSelectedCourse = courseName;
-
-      if (updateHash) {
-        window.location.hash = `subjects/${encodeURIComponent(semName)}`;
-      }
-
-      document.getElementById('semesterSelectView').classList.add('hidden');
-      document.getElementById('subjectDetailView').classList.add('hidden');
-      document.getElementById('examConfigTab').classList.add('hidden');
-      document.getElementById('subjectListView').classList.remove('hidden');
-
-      document.getElementById('currentSemesterTitle').innerText = `📘 ${semName} (${courseName}) - Added Subjects`;
-      document.getElementById('subjectTabSubtitle').innerText = `Showing subjects added for ${semName}`;
-
-      renderSubjectsForCurrentSemester();
-    }
-
-    function renderSubjectsForCurrentSemester() {
-      const container = document.getElementById('existingSubjectsContainer');
-      container.innerHTML = '';
-
-      const courseData = (globalStudyData && globalStudyData[currentSelectedCourse]) ? globalStudyData[currentSelectedCourse] : {};
-      const semData = courseData[currentSelectedSemester] || {};
-      const subKeys = Object.keys(semData);
-
-      if (subKeys.length === 0) {
-        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:2rem 1rem;">No subjects added in ${currentSelectedSemester} yet.<br><span style="font-size:0.8rem;">Add subjects from the Menu!</span></div>`;
-        return;
-      }
-
-      const list = [];
-      subKeys.forEach(subKeyRaw => {
-        const compositeKey = `${currentSelectedCourse}___${currentSelectedSemester}___${subKeyRaw}`;
-        if (cachedSubjects[compositeKey]) {
-          list.push(cachedSubjects[compositeKey]);
-        }
-      });
-
-      list.sort((a, b) => a.orderIndex - b.orderIndex);
-
-      list.forEach((s) => {
-        const row = document.createElement('div');
-        row.className = 'clean-item-row';
-        row.innerHTML = `
-          <div class="clickable-name-area" onclick="showSubjectDetail('${s.compositeKey}', true)" title="Click to view & edit links">
-            <span style="font-size:1.15rem;">📘</span>
-            <span class="subject-title-text">${s.subject}</span>
-          </div>
-          <button class="btn-delete-item" onclick="deleteSubject('${s.course}', '${s.semester}', '${s.subKeyRaw}', '${s.subject.replace(/'/g, "\\'")}')">Delete</button>
-        `;
-        container.appendChild(row);
-      });
-    }
-
-    function backToSemesterGrid(updateHash = true) {
-      currentSelectedSemester = null;
-      currentSelectedCourse = null;
-      if (updateHash) window.location.hash = 'subjects';
-
-      document.getElementById('subjectListView').classList.add('hidden');
-      document.getElementById('subjectDetailView').classList.add('hidden');
-      document.getElementById('examConfigTab').classList.add('hidden');
-      document.getElementById('semesterSelectView').classList.remove('hidden');
-
-      document.getElementById('subjectTabSubtitle').innerText = "Select a semester to manage its subjects.";
-      renderSemesterGrid();
-    }
-
-    function showSubjectDetail(subKey, updateHash = true) {
-      activeEditSubjectKey = subKey;
-      const s = cachedSubjects[subKey];
-      if (!s) return;
-
-      currentSelectedSemester = s.semester;
-      currentSelectedCourse = s.course;
-
-      if (updateHash) {
-        window.location.hash = `subject-detail/${encodeURIComponent(subKey)}`;
-      }
-
-      const detailContainer = document.getElementById('subjectDetailContent');
-      detailContainer.innerHTML = `
-        <div class="detail-row-item">
-          <div class="detail-label">📘 Subject Name</div>
-          <div class="detail-value">${s.subject}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">🎓 Course & Semester</div>
-          <div class="detail-value">${s.course} • ${s.semester}</div>
-        </div>
-
-        <div class="detail-row-item">
-          <div class="detail-label-bar">
-            <span class="detail-label">📖 Notes Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editNotesInput')">✏️ Edit</button>
-          </div>
-          <input type="text" id="editNotesInput" class="detail-input-edit" value="${s.notes && s.notes !== '#' ? s.notes : ''}" placeholder="Enter Drive link for notes" />
-        </div>
-
-        <div class="detail-row-item">
-          <div class="detail-label-bar">
-            <span class="detail-label">📝 Important Questions Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editQuestionsInput')">✏️ Edit</button>
-          </div>
-          <input type="text" id="editQuestionsInput" class="detail-input-edit" value="${s.questions && s.questions !== '#' ? s.questions : ''}" placeholder="Enter Drive link for questions" />
-        </div>
-
-        <div class="detail-row-item">
-          <div class="detail-label-bar">
-            <span class="detail-label">📄 Previous Year Papers Link</span>
-            <button type="button" class="btn-inline-pencil" onclick="focusField('editPapersInput')">✏️ Edit</button>
-          </div>
-          <input type="text" id="editPapersInput" class="detail-input-edit" value="${s.papers && s.papers !== '#' ? s.papers : ''}" placeholder="Enter Drive link for papers" />
-        </div>
-
-        <div class="detail-row-item">
-          <div class="detail-label">🎯 Exam Preparation & MCQ Mock Test</div>
-          <button type="button" class="btn-open-exam-config" onclick="openExamConfigTab('${subKey}')">
-            <span>⚙️ Configure MCQ Test & Upload PDF →</span>
-          </button>
-        </div>
-
-        <div class="detail-row-item">
-          <div class="detail-label">🕒 Last Updated</div>
-          <div class="detail-value" style="font-size:0.85rem; color:var(--text-muted);">${s.updatedAt ? new Date(s.updatedAt).toLocaleString('en-IN') : 'N/A'}</div>
-        </div>
-
-        <button type="button" class="btn-save-changes" id="btnSaveSubjectLinks" onclick="saveSubjectLinksChanges()">💾 Save Resource Links</button>
-      `;
-
-      document.getElementById('semesterSelectView').classList.add('hidden');
-      document.getElementById('subjectListView').classList.add('hidden');
-      document.getElementById('examConfigTab').classList.add('hidden');
-      document.getElementById('subjectDetailView').classList.remove('hidden');
-    }
-
-    function focusField(fieldId) {
-      const el = document.getElementById(fieldId);
-      if (el) {
-        el.focus();
-        el.select();
-      }
-    }
-
-    function saveSubjectLinksChanges() {
-      if (!activeEditSubjectKey) return;
-      const s = cachedSubjects[activeEditSubjectKey];
-      if (!s) return;
-
-      const notes = document.getElementById('editNotesInput').value.trim() || '#';
-      const questions = document.getElementById('editQuestionsInput').value.trim() || '#';
-      const papers = document.getElementById('editPapersInput').value.trim() || '#';
-
-      const saveBtn = document.getElementById('btnSaveSubjectLinks');
-      saveBtn.innerText = "Saving Changes...";
-      saveBtn.disabled = true;
-
-      const path = `study_data/${s.course}/${s.semester}/${s.subKeyRaw}`;
-      
-      database.ref(path).update({
-        notes: notes,
-        questions: questions,
-        papers: papers,
-        updatedAt: new Date().toISOString()
-      }).then(() => {
-        s.notes = notes;
-        s.questions = questions;
-        s.papers = papers;
-
-        alert(`Resource Links for '${s.subject}' updated successfully!`);
-        saveBtn.innerText = "Saved Successfully ✓";
-        setTimeout(() => {
-          backToSubjectList(true);
-        }, 400);
-      }).catch(err => {
-        alert("Error saving links: " + err.message);
-        saveBtn.innerText = "💾 Save Resource Links";
-        saveBtn.disabled = false;
-      });
-    }
-
-    function backToSubjectList(updateHash = true) {
-      if (currentSelectedSemester) {
-        if (updateHash) window.location.hash = `subjects/${encodeURIComponent(currentSelectedSemester)}`;
-        document.getElementById('subjectDetailView').classList.add('hidden');
-        document.getElementById('examConfigTab').classList.add('hidden');
-        document.getElementById('subjectListView').classList.remove('hidden');
-      } else {
-        backToSemesterGrid(updateHash);
-      }
-    }
-
-    function deleteSubject(course, sem, subKeyRaw, subjectName) {
-      if (confirm(`Are you sure you want to remove '${subjectName}' from ${course} (${sem})?`)) {
-        database.ref(`study_data/${course}/${sem}/${subKeyRaw}`).remove().then(() => {
-          alert(`Subject '${subjectName}' removed from live site.`);
-          renderSubjectsForCurrentSemester();
-        });
-      }
-    }
-
-    // ==========================================
-    // EXAM CONFIGURATION & SMART GUJARATI PARSER
-    // ==========================================
-    function openExamConfigTab(subKey) {
-      const s = cachedSubjects[subKey];
-      if (!s) return;
-
-      document.getElementById('subjectDetailView').classList.add('hidden');
-      document.getElementById('examConfigTab').classList.remove('hidden');
-
-      document.getElementById('examConfigSubjectHeader').innerText = 
-        `Subject: ${s.subject} (${s.course} • ${s.semester})`;
-
-      document.getElementById('pdfFileInput').value = '';
-      document.getElementById('pdfFileLabel').innerText = 'Click to select PDF file';
-      document.getElementById('rawQuestionTextInput').value = '';
-      document.getElementById('manualAddBox').classList.add('hidden');
-
-      const safeKey = encodeSubKey(s.subject);
-      const configRef = database.ref(`exam_configs/${s.course}/${s.semester}/${safeKey}`);
-
-      configRef.once('value').then((snap) => {
-        const conf = snap.val() || {};
-        document.getElementById('testDurationInput').value = conf.durationMinutes || 15;
-        document.getElementById('testQuantityInput').value = conf.questionQuantity || 10;
-        
-        if (conf.questions && Array.isArray(conf.questions)) {
-          activeParsedQuestions = conf.questions;
-        } else {
-          activeParsedQuestions = [];
-        }
-        renderParsedPreview();
-      });
-    }
-
-    function backToSubjectDetailFromExam() {
-      document.getElementById('examConfigTab').classList.add('hidden');
-      document.getElementById('subjectDetailView').classList.remove('hidden');
-    }
-
-    function toggleManualAddBox() {
-      const el = document.getElementById('manualAddBox');
+    function togglePinBox() {
+      const el = document.getElementById('pinUpdateDrawer');
       el.classList.toggle('hidden');
     }
 
-    // RESET / CLEAR ALL QUESTIONS (SOLVES PROBLEM 1)
-    function resetAllQuestions() {
-      if (!activeEditSubjectKey) return;
-      const s = cachedSubjects[activeEditSubjectKey];
-      if (!s) return;
+    database.ref('study_data').on('value', (snapshot) => {
+      const liveData = snapshot.val();
+      studyData = {
+        "FYBA": { "Semester 1": {}, "Semester 2": {} },
+        "SYBA": { "Semester 3": {}, "Semester 4": {} },
+        "TYBA": { "Semester 5": {}, "Semester 6": {} }
+      };
 
-      if (confirm(`Kya aap '${s.subject}' ke saare MCQs reset/clear karna chahte hain?`)) {
-        activeParsedQuestions = [];
-        document.getElementById('rawQuestionTextInput').value = '';
-        document.getElementById('pdfFileInput').value = '';
-        document.getElementById('pdfFileLabel').innerText = 'Click to select PDF file';
-        renderParsedPreview();
-
-        const safeKey = encodeSubKey(s.subject);
-        database.ref(`exam_configs/${s.course}/${s.semester}/${safeKey}/questions`).remove().then(() => {
-          alert("Saare purane questions clear ho gaye hain! Ab aap nayi PDF upload kar sakte hain.");
+      if (liveData) {
+        Object.keys(liveData).forEach(course => {
+          if (!studyData[course]) studyData[course] = {};
+          Object.keys(liveData[course]).forEach(sem => {
+            const cleanSem = safeDecode(sem);
+            studyData[course][cleanSem] = liveData[course][sem];
+          });
         });
       }
-    }
 
-    function addManualQuestion() {
-      const q = deepFixGujaratiGlyphs(document.getElementById('manualQText').value.trim());
-      const a = deepFixGujaratiGlyphs(document.getElementById('manualOptA').value.trim());
-      const b = deepFixGujaratiGlyphs(document.getElementById('manualOptB').value.trim());
-      const c = deepFixGujaratiGlyphs(document.getElementById('manualOptC').value.trim());
-      const d = deepFixGujaratiGlyphs(document.getElementById('manualOptD').value.trim());
-      const cor = parseInt(document.getElementById('manualCorrectOpt').value) || 0;
+      if (state.step === 3) renderSubjects();
+      if (state.step === 4) updateView();
+    });
 
-      if (!q || !a || !b) {
-        alert("Kripya Question aur options enter karein!");
-        return;
-      }
+    database.ref('registered_students').on('value', (snapshot) => {
+      const count = snapshot.numChildren() || 0;
+      document.getElementById('totalUsersCount').innerText = count;
+    });
 
-      activeParsedQuestions.push({
-        question: q,
-        options: [a, b, c || "-", d || "-"],
-        correct: cor
-      });
-
-      document.getElementById('manualQText').value = '';
-      document.getElementById('manualOptA').value = '';
-      document.getElementById('manualOptB').value = '';
-      document.getElementById('manualOptC').value = '';
-      document.getElementById('manualOptD').value = '';
-
-      renderParsedPreview();
-      alert("Question successfully added to test preview!");
-    }
-
-    // AUTO-CLEAR OLD QUESTIONS UPON SELECTING NEW PDF
-    async function handlePDFUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      // Automatically reset previous questions list on fresh upload
-      activeParsedQuestions = [];
-      renderParsedPreview();
-
-      document.getElementById('pdfFileLabel').innerText = `Extracting & Repairing: ${file.name}...`;
-
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({
-          data: arrayBuffer,
-          cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/cmaps/',
-          cMapPacked: true
-        }).promise;
-
-        let fullText = '';
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          
-          let pageLines = [];
-          let currentLine = '';
-          let lastY = null;
-
-          for (let item of textContent.items) {
-            let itemStr = item.str;
-            if (lastY === null || Math.abs(item.transform[5] - lastY) < 4) {
-              currentLine += itemStr;
-            } else {
-              pageLines.push(currentLine);
-              currentLine = itemStr;
-            }
-            lastY = item.transform[5];
-          }
-          if (currentLine) pageLines.push(currentLine);
-
-          fullText += '\n' + pageLines.join('\n');
-        }
-
-        const repairedText = deepFixGujaratiGlyphs(fullText);
-        document.getElementById('pdfFileLabel').innerText = `✓ Loaded: ${file.name}`;
-        document.getElementById('rawQuestionTextInput').value = repairedText;
-        parseRawTextQuestions();
-      } catch (err) {
-        alert("Error reading PDF: " + err.message);
-        document.getElementById('pdfFileLabel').innerText = 'Failed to load PDF. Try pasting text.';
-      }
-    }
-
-    // MULTI-PATTERN GUJARATI MCQ DETECTOR WITH AUTOMATIC CLEANUP
-    function parseRawTextQuestions() {
-      let text = document.getElementById('rawQuestionTextInput').value;
-      if (!text.trim()) {
-        alert("Pehle PDF upload karein ya text paste karein!");
-        return;
-      }
-
-      text = deepFixGujaratiGlyphs(text);
-      const questions = [];
-
-      // Split questions by numbers e.g. (૧), (૨), 1., Q1, પ્રશ્ન
-      const rawBlocks = text.split(/(?:^|\n|\s+)(?:\([૦-૯\d]+\)|[૦-૯\d]+[\.\)]|Q[૦-૯\d]+[\.\:]|પ્રશ્ન\s*[\:\-\.]?\s*[૦-૯\d]+[\.\:]?)/i);
-
-      rawBlocks.forEach((block) => {
-        let clean = deepFixGujaratiGlyphs(block);
-        if (!clean || clean.length < 10) return;
-
-        // Split options: A), B), C), D) or (A), (B) or [A], [B] or અ, બ, ક, ડ or (અ), (બ)
-        const optMatches = clean.split(/(?:[A-Da-d]\)|\([A-Da-d]\)|[A-Da-d]\.|\([અબકડABKD]\)|[અબકડ]\)|\(૧\)|\(૨\)|\(૩\)|\(૪\)|\[[A-D]\])/i);
-
-        if (optMatches && optMatches.length >= 5) {
-          const qText = deepFixGujaratiGlyphs(optMatches[0]);
-          const optA = deepFixGujaratiGlyphs(optMatches[1]);
-          const optB = deepFixGujaratiGlyphs(optMatches[2]);
-          const optC = deepFixGujaratiGlyphs(optMatches[3]);
-          let optD = deepFixGujaratiGlyphs(optMatches[4]);
-
-          let correctIndex = 0;
-          const ansMatch = clean.match(/(?:Ans|Answer|ઉત્તર|જવાબ)[\s\:\-]+([A-Dઅ-ડa-d])/i);
-          if (ansMatch) {
-            const letter = ansMatch[1].toUpperCase();
-            if (letter === 'A' || letter === 'અ') correctIndex = 0;
-            else if (letter === 'B' || letter === 'બ') correctIndex = 1;
-            else if (letter === 'C' || letter === 'ક') correctIndex = 2;
-            else if (letter === 'D' || letter === 'ડ') correctIndex = 3;
-            optD = optD.replace(/(?:Ans|Answer|ઉત્તર|જવાબ)[\s\:\-]+.*$/i, '').trim();
-          }
-
-          if (qText && optA && optB) {
-            questions.push({
-              question: qText,
-              options: [optA, optB, optC || "-", optD || "-"],
-              correct: correctIndex
-            });
-          }
+    function verifyStudentActive(studentId) {
+      if (!studentId) return;
+      database.ref('registered_students/' + studentId).on('value', (snapshot) => {
+        if (!snapshot.exists()) {
+          localStorage.removeItem('csh_student');
+          alert("Your account was removed by the administrator.");
+          window.location.reload();
         }
       });
+    }
 
-      if (questions.length === 0) {
-        // Fallback: If only Answer Key list is in text
-        const ansKeyMatches = [...text.matchAll(/(?:^|\s+)([૦-૯\d]+)[\.\s\:\-]+([A-Da-dઅ-ડ])(?:\s+|$)/g)];
-        if (ansKeyMatches && ansKeyMatches.length >= 3) {
-          ansKeyMatches.forEach((m) => {
-            const qNum = m[1];
-            const ansLetter = m[2].toLowerCase();
-            let cor = 0;
-            if (ansLetter === 'b' || ansLetter === 'બ') cor = 1;
-            else if (ansLetter === 'c' || ansLetter === 'ક') cor = 2;
-            else if (ansLetter === 'd' || ansLetter === 'ડ') cor = 3;
+    function switchAuthMode(mode) {
+      const tabReg = document.getElementById('tabRegisterBtn');
+      const tabLog = document.getElementById('tabLoginBtn');
+      const regForm = document.getElementById('enrollForm');
+      const logForm = document.getElementById('returningLoginForm');
+      const heading = document.getElementById('authHeading');
+      const subheading = document.getElementById('authSubheading');
 
-            questions.push({
-              question: `પ્રશ્ન ${qNum}`,
-              options: ["વિકલ્પ A", "વિકલ્પ B", "વિકલ્પ C", "વિકલ્પ D"],
-              correct: cor
-            });
-          });
-        }
-      }
-
-      if (questions.length === 0) {
-        alert("Format match nahi hua! Kripya PDF me se direct Gujarati text copy karke box me paste karein aur '✨ Clean & Fix Gujarati' dabayein.");
+      if (mode === 'register') {
+        tabReg.classList.add('active');
+        tabLog.classList.remove('active');
+        regForm.classList.remove('hidden');
+        logForm.classList.add('hidden');
+        heading.innerText = "Student Registration";
+        subheading.innerText = "Register with your name & create a 4-digit PIN to access study materials.";
       } else {
-        activeParsedQuestions = questions;
-        renderParsedPreview();
-        alert(`${questions.length} Gujarati MCQs successfully ready ho gaye!`);
+        tabLog.classList.add('active');
+        tabReg.classList.remove('active');
+        logForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+        heading.innerText = "Welcome Back";
+        subheading.innerText = "Enter your registered name and 4-digit PIN.";
       }
     }
 
-    function renderParsedPreview() {
-      const container = document.getElementById('parsedQuestionsPreviewContainer');
-      const badge = document.getElementById('parsedCountBadge');
-      badge.innerText = `${activeParsedQuestions.length} MCQs Ready`;
+    function handleRegistration(e) {
+      e.preventDefault();
+      const name = document.getElementById('regNameInput').value.trim();
+      const collegeYear = document.getElementById('regCollegeYearSelect').value;
+      const academicYear = document.getElementById('regAcademicYearSelect').value;
+      const pin = document.getElementById('regPinInput').value.trim();
 
-      if (activeParsedQuestions.length === 0) {
-        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:0.8rem; padding:1rem;">Upload a PDF, paste text, or use manual add.</div>`;
+      if (!name || pin.length !== 4) {
+        alert("Please enter your name and a valid 4-digit PIN.");
         return;
       }
 
-      container.innerHTML = '';
-      activeParsedQuestions.forEach((q, idx) => {
-        const card = document.createElement('div');
-        card.className = 'q-preview-card';
-        card.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.35rem;">
-            <div style="font-weight:700; color:#fff; font-size:0.95rem;">Q${idx + 1}: ${q.question}</div>
-            <div style="display:flex; gap:0.35rem;">
-              <button type="button" class="btn-inline-pencil" onclick="editParsedQuestion(${idx})">✏️ Edit</button>
-              <button type="button" style="background:#ef4444; border:none; color:#fff; border-radius:4px; padding:0.2rem 0.45rem; font-size:0.75rem; cursor:pointer;" onclick="removeParsedQuestion(${idx})">✕</button>
-            </div>
-          </div>
-          <div style="color:var(--text-muted); font-size:0.85rem; line-height:1.6;">
-            A) ${q.options[0]} | B) ${q.options[1]}<br>
-            C) ${q.options[2]} | D) ${q.options[3]}
-          </div>
-          <div style="color:#10b981; font-weight:700; margin-top:0.3rem; font-size:0.8rem;">
-            Correct: Option ${String.fromCharCode(65 + q.correct)}
-          </div>
-        `;
-        container.appendChild(card);
+      const btn = document.getElementById('regSubmitBtn');
+      btn.innerText = "Creating Account...";
+      btn.disabled = true;
+
+      const safeNameKey = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const studentId = "student_" + safeNameKey + "_" + Date.now().toString().slice(-4);
+
+      const record = {
+        studentId: studentId,
+        name: name,
+        pin: pin,
+        collegeYear: collegeYear,
+        academicYear: academicYear,
+        joinedAt: new Date().toISOString()
+      };
+
+      database.ref('registered_students/' + studentId).set(record).then(() => {
+        localStorage.setItem('csh_student', JSON.stringify(record));
+        applyLoggedInState(record);
+      }).catch((err) => {
+        alert("Registration Error: " + err.message);
+        btn.innerText = "Create Account & Enter →";
+        btn.disabled = false;
       });
     }
 
-    // Direct Edit in Preview Card
-    function editParsedQuestion(idx) {
-      const q = activeParsedQuestions[idx];
-      const newQ = prompt("પ્રશ્ન સુધારો (Edit Question):", q.question);
-      if (newQ !== null && newQ.trim()) {
-        q.question = deepFixGujaratiGlyphs(newQ);
-        const newA = prompt("વિકલ્પ A (Option A):", q.options[0]);
-        if (newA !== null) q.options[0] = deepFixGujaratiGlyphs(newA);
-        const newB = prompt("વિકલ્પ B (Option B):", q.options[1]);
-        if (newB !== null) q.options[1] = deepFixGujaratiGlyphs(newB);
-        const newC = prompt("વિકલ્પ C (Option C):", q.options[2]);
-        if (newC !== null) q.options[2] = deepFixGujaratiGlyphs(newC);
-        const newD = prompt("વિકલ્પ D (Option D):", q.options[3]);
-        if (newD !== null) q.options[3] = deepFixGujaratiGlyphs(newD);
-        renderParsedPreview();
-      }
-    }
+    function handleLogin(e) {
+      e.preventDefault();
+      const enteredName = document.getElementById('loginNameInput').value.trim().toLowerCase();
+      const pin = document.getElementById('loginPinInput').value.trim();
 
-    function removeParsedQuestion(idx) {
-      activeParsedQuestions.splice(idx, 1);
-      renderParsedPreview();
-    }
-
-    function saveExamConfiguration() {
-      if (!activeEditSubjectKey) return;
-      const s = cachedSubjects[activeEditSubjectKey];
-      if (!s) return;
-
-      const duration = parseInt(document.getElementById('testDurationInput').value) || 15;
-      const quantity = parseInt(document.getElementById('testQuantityInput').value) || 10;
-
-      if (activeParsedQuestions.length === 0) {
-        alert("Kripya pehle questions upload ya add karein!");
+      if (!enteredName || pin.length !== 4) {
+        alert("Please enter your registered name and 4-digit PIN.");
         return;
       }
 
-      const saveBtn = document.getElementById('btnSaveExamConfig');
-      saveBtn.innerText = "Publishing MCQs to Test...";
+      const btn = document.getElementById('loginSubmitBtn');
+      btn.innerText = "Verifying...";
+      btn.disabled = true;
+
+      database.ref('registered_students').once('value').then((snapshot) => {
+        const allStudents = snapshot.val() || {};
+        let matchedStudent = null;
+
+        Object.keys(allStudents).forEach(k => {
+          const s = allStudents[k];
+          if (s.name && s.name.trim().toLowerCase() === enteredName) {
+            matchedStudent = s;
+          }
+        });
+
+        if (!matchedStudent) {
+          alert("Yeh naam registered nahi mila! Kripya New Registration karein.");
+          btn.innerText = "Login to Study Hub →";
+          btn.disabled = false;
+          switchAuthMode('register');
+          return;
+        }
+
+        if (matchedStudent.pin !== pin) {
+          alert("Incorrect PIN! Kripya sahi 4-digit PIN enter karein.");
+          btn.innerText = "Login to Study Hub →";
+          btn.disabled = false;
+          return;
+        }
+
+        localStorage.setItem('csh_student', JSON.stringify(matchedStudent));
+        applyLoggedInState(matchedStudent);
+      }).catch((err) => {
+        alert("Login Error: " + err.message);
+        btn.innerText = "Login to Study Hub →";
+        btn.disabled = false;
+      });
+    }
+
+    function applyLoggedInState(student) {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('studyContent').classList.remove('hidden');
+      document.getElementById('authProfileBar').classList.remove('hidden');
+
+      verifyStudentActive(student.studentId);
+      parseHash();
+    }
+
+    function logoutStudent() {
+      if (confirm("Are you sure you want to log out?")) {
+        localStorage.removeItem('csh_student');
+        window.location.hash = '';
+        window.location.reload();
+      }
+    }
+
+    function handleCommentSubmit(e) {
+      e.preventDefault();
+      const msg = document.getElementById('studentQueryInput').value.trim();
+      if (!msg) return;
+
+      const student = JSON.parse(localStorage.getItem('csh_student') || '{}');
+      const btn = document.getElementById('sendCommentBtn');
+
+      btn.innerText = "Sending Query...";
+      btn.disabled = true;
+
+      const commentData = {
+        userName: student.name || 'Anonymous Scholar',
+        collegeYear: student.collegeYear || 'FYBA',
+        academicYear: student.academicYear || '2026',
+        message: msg,
+        timestamp: new Date().toISOString()
+      };
+
+      database.ref('student_comments').push(commentData).then(() => {
+        alert("Aapka comment/query bhej diya gaya hai! Admin jald hi review karega.");
+        document.getElementById('studentQueryInput').value = '';
+        btn.innerText = "Sent Successfully ✓";
+        setTimeout(() => {
+          btn.innerText = "Send Query →";
+          btn.disabled = false;
+        }, 800);
+      }).catch(err => {
+        alert("Error sending comment: " + err.message);
+        btn.innerText = "Send Query →";
+        btn.disabled = false;
+      });
+    }
+
+    function showEmptyModal(title, message) {
+      document.getElementById('emptyModalTitle').innerText = title || "Data Not Found";
+      document.getElementById('emptyModalDesc').innerText = message || "Is resource ke liye link abhi add nahi ki gayi hai.";
+      document.getElementById('emptyDataModal').classList.remove('hidden');
+    }
+
+    function closeEmptyModal() {
+      document.getElementById('emptyDataModal').classList.add('hidden');
+    }
+
+    function openResource(type) {
+      if (type === 'assignments') {
+        const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subjectName})`);
+        window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
+        return;
+      }
+
+      if (type === 'exam') {
+        const subjectTarget = state.subjectName || state.subjectKey || 'Sanskrit M1';
+        window.location.href = `examprepar.html#${state.course}/${state.semester}/${encodeURIComponent(subjectTarget)}`;
+        return;
+      }
+
+      const subObj = getActiveSubjectData();
+      let targetUrl = subObj[type];
+
+      if (!targetUrl || targetUrl.trim() === '' || targetUrl.trim() === '#' || !targetUrl.startsWith('http')) {
+        let labelName = "Notes";
+        if (type === 'questions') labelName = "Important Questions";
+        if (type === 'papers') labelName = "Previous Papers";
+
+        const displayName = subObj.subjectName || state.subjectName || "Subject";
+        showEmptyModal("Data is Empty", `Abhi ${displayName} ke liye '${labelName}' upload nahi hua hai.`);
+      } else {
+        window.location.href = targetUrl.trim();
+      }
+    }
+
+    function openAccountTab() {
+      state.previousHash = window.location.hash || '';
+      state.inAccountTab = true;
+
+      document.getElementById('studyContent').classList.add('hidden');
+      document.getElementById('accountSection').classList.remove('hidden');
+
+      const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
+      document.getElementById('accNameInput').value = current.name || '';
+      document.getElementById('accDisplayPin').value = current.pin || '••••';
+      document.getElementById('accCollegeYearSelect').value = current.collegeYear || 'FYBA';
+      document.getElementById('accAcademicYearSelect').value = current.academicYear || '2026';
+
+      document.getElementById('pinUpdateDrawer').classList.add('hidden');
+      document.getElementById('accOldPinInput').value = '';
+      document.getElementById('accNewPinInput').value = '';
+
+      window.location.hash = '#/account';
+    }
+
+    function closeAccountTab() {
+      state.inAccountTab = false;
+      document.getElementById('accountSection').classList.add('hidden');
+      document.getElementById('studyContent').classList.remove('hidden');
+
+      if (state.previousHash && state.previousHash !== '#/account') {
+        window.location.hash = state.previousHash;
+      } else {
+        setHash();
+      }
+      updateView();
+    }
+
+    function saveAccountSettings(e) {
+      e.preventDefault();
+      const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
+      const name = document.getElementById('accNameInput').value.trim();
+      const collegeYear = document.getElementById('accCollegeYearSelect').value;
+      const academicYear = document.getElementById('accAcademicYearSelect').value;
+
+      const saveBtn = document.getElementById('saveAccBtn');
+      saveBtn.innerText = "Saving Changes...";
       saveBtn.disabled = true;
 
-      const safeKey = encodeSubKey(s.subject);
-      const configPath = `exam_configs/${s.course}/${s.semester}/${safeKey}`;
-
-      database.ref(configPath).set({
-        subjectName: s.subject,
-        durationMinutes: duration,
-        questionQuantity: quantity,
-        questions: activeParsedQuestions,
+      const updatedRecord = {
+        ...current,
+        name: name,
+        collegeYear: collegeYear,
+        academicYear: academicYear,
         updatedAt: new Date().toISOString()
-      }).then(() => {
-        alert(`MCQ Test for '${s.subject}' set successfully with ${activeParsedQuestions.length} questions & ${duration} mins timer!`);
-        saveBtn.innerText = "Saved Successfully ✓";
+      };
+
+      const studentId = current.studentId;
+      database.ref('registered_students/' + studentId).update(updatedRecord).finally(() => {
+        localStorage.setItem('csh_student', JSON.stringify(updatedRecord));
+        saveBtn.innerText = "Details Saved Successfully!";
         setTimeout(() => {
-          saveBtn.innerText = "💾 Save Test & Publish to Live Site";
+          saveBtn.innerText = "Save Details";
           saveBtn.disabled = false;
-          backToSubjectDetailFromExam();
-        }, 500);
+        }, 800);
+      });
+    }
+
+    function updateSecurityPin() {
+      const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
+      const oldPin = document.getElementById('accOldPinInput').value.trim();
+      const newPin = document.getElementById('accNewPinInput').value.trim();
+      const btn = document.getElementById('btnUpdatePin');
+
+      if (oldPin !== current.pin) {
+        alert("Purana PIN galat hai!");
+        return;
+      }
+
+      if (newPin.length !== 4) {
+        alert("Naya PIN bilkul 4 digits ka hona chahiye.");
+        return;
+      }
+
+      btn.innerText = "Updating...";
+      btn.disabled = true;
+
+      const studentId = current.studentId;
+      database.ref('registered_students/' + studentId).update({
+        pin: newPin,
+        pinUpdatedAt: new Date().toISOString()
+      }).then(() => {
+        current.pin = newPin;
+        localStorage.setItem('csh_student', JSON.stringify(current));
+
+        document.getElementById('accDisplayPin').value = newPin;
+        document.getElementById('accOldPinInput').value = '';
+        document.getElementById('accNewPinInput').value = '';
+        document.getElementById('pinUpdateDrawer').classList.add('hidden');
+
+        alert("Aapka 4-Digit Security PIN successfully change ho gaya!");
+        btn.innerText = "Verify & Save New PIN";
+        btn.disabled = false;
       }).catch(err => {
-        alert("Error saving test config: " + err.message);
-        saveBtn.innerText = "💾 Save Test & Publish to Live Site";
-        saveBtn.disabled = false;
+        alert("Error: " + err.message);
+        btn.innerText = "Verify & Save New PIN";
+        btn.disabled = false;
       });
-    }
-
-    function listenToStudents() {
-      const container = document.getElementById('studentsListContainer');
-      database.ref('registered_students').on('value', (snapshot) => {
-        const count = snapshot.numChildren() || 0;
-        document.getElementById('enrolledCountBadge').innerText = count;
-        document.getElementById('quickUserCount').innerText = count;
-
-        const data = snapshot.val();
-        cachedStudents = {};
-        if (!data) {
-          container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem;">No enrolled students registered yet.</div>`;
-          isStudentsLoaded = true;
-          return;
-        }
-
-        container.innerHTML = '';
-        Object.keys(data).forEach(key => {
-          const student = data[key];
-          cachedStudents[key] = student;
-
-          const row = document.createElement('div');
-          row.className = 'clean-item-row';
-          row.innerHTML = `
-            <div class="clickable-name-area" onclick="showStudentDetail('${key}', true)" title="Click to view full registration details">
-              <span style="font-size:1.15rem;">👤</span>
-              <span class="subject-title-text">${student.name}</span>
-            </div>
-            <button class="btn-delete-item" onclick="removeStudent('${key}', '${student.name.replace(/'/g, "\\'")}')">Remove Student</button>
-          `;
-          container.appendChild(row);
-        });
-        isStudentsLoaded = true;
-      });
-    }
-
-    function showStudentDetail(studentKey, updateHash = true) {
-      const s = cachedStudents[studentKey];
-      if (!s) return;
-
-      if (updateHash) {
-        window.location.hash = `student-detail/${encodeURIComponent(studentKey)}`;
-      }
-
-      const detailContainer = document.getElementById('studentDetailContent');
-      detailContainer.innerHTML = `
-        <div class="detail-row-item">
-          <div class="detail-label">👤 Student Full Name</div>
-          <div class="detail-value">${s.name}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">📞 Registered Mobile Number</div>
-          <div class="detail-value">+91 ${s.phone || 'N/A'}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">🎓 Year of College</div>
-          <div class="detail-value">${s.collegeYear || 'FYBA'}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">📅 Academic Year</div>
-          <div class="detail-value">${s.academicYear || '2026'}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">🔐 4-Digit Security PIN</div>
-          <div class="detail-value" style="font-family:monospace; color:#38bdf8; font-size:1.1rem; letter-spacing:0.1em;">${s.pin || '••••'}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">🕒 Registration Timestamp</div>
-          <div class="detail-value" style="font-size:0.85rem; color:var(--text-muted);">${s.joinedAt ? new Date(s.joinedAt).toLocaleString('en-IN') : 'N/A'}</div>
-        </div>
-        <div style="margin-top:1.25rem;">
-          <button class="btn-delete-item" style="width:100%; padding:0.75rem;" onclick="removeStudent('${studentKey}', '${s.name.replace(/'/g, "\\'")}')">Remove & Logout Scholar</button>
-        </div>
-      `;
-
-      document.getElementById('studentListView').classList.add('hidden');
-      document.getElementById('studentDetailView').classList.remove('hidden');
-    }
-
-    function backToStudentList(updateHash = true) {
-      if (updateHash) window.location.hash = 'students';
-      document.getElementById('studentDetailView').classList.add('hidden');
-      document.getElementById('studentListView').classList.remove('hidden');
-    }
-
-    function removeStudent(studentId, name) {
-      if (confirm(`Remove scholar '${name}'? This will automatically log them out of Campus Study Hub.`)) {
-        database.ref(`registered_students/${studentId}`).remove().then(() => {
-          alert(`Scholar '${name}' removed.`);
-          backToStudentList(true);
-        });
-      }
-    }
-
-    function listenToComments() {
-      const container = document.getElementById('commentsContainer');
-      database.ref('student_comments').on('value', (snapshot) => {
-        const count = snapshot.numChildren() || 0;
-        document.getElementById('commentsCountBadge').innerText = count;
-        document.getElementById('quickCommentCount').innerText = count;
-
-        const data = snapshot.val();
-        cachedComments = {};
-        if (!data) {
-          container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem;">No student comments posted yet.</div>`;
-          isCommentsLoaded = true;
-          return;
-        }
-
-        container.innerHTML = '';
-        Object.entries(data).reverse().forEach(([key, item]) => {
-          cachedComments[key] = item;
-
-          const row = document.createElement('div');
-          row.className = 'clean-item-row';
-          row.innerHTML = `
-            <div class="clickable-name-area" onclick="showCommentDetail('${key}', true)" title="Click to view full comment details">
-              <span style="font-size:1.15rem;">💬</span>
-              <span class="subject-title-text">${item.userName || 'Scholar'}</span>
-            </div>
-            <button class="btn-delete-item" onclick="deleteComment('${key}')">Delete</button>
-          `;
-          container.appendChild(row);
-        });
-        isCommentsLoaded = true;
-      });
-    }
-
-    function showCommentDetail(commentKey, updateHash = true) {
-      const c = cachedComments[commentKey];
-      if (!c) return;
-
-      if (updateHash) {
-        window.location.hash = `comment-detail/${encodeURIComponent(commentKey)}`;
-      }
-
-      const timeFormatted = c.timestamp ? new Date(c.timestamp).toLocaleString('en-IN', {
-        dateStyle: 'medium',
-        timeStyle: 'short'
-      }) : 'Just now';
-
-      const detailContainer = document.getElementById('commentDetailContent');
-      detailContainer.innerHTML = `
-        <div class="detail-row-item">
-          <div class="detail-label">👤 Student Name</div>
-          <div class="detail-value">${c.userName || 'Anonymous Scholar'}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">📞 Mobile Number</div>
-          <div class="detail-value">+91 ${c.userPhone ? c.userPhone : 'Not Provided'}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">🎓 Year of College</div>
-          <div class="detail-value">${c.collegeYear || 'FYBA'} (${c.academicYear || '2026'})</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">🕒 Date & Time</div>
-          <div class="detail-value">${timeFormatted}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">💬 Comment / Query Message</div>
-          <div class="detail-value" style="background:#131f3f; padding:0.85rem; border-radius:8px; margin-top:0.35rem; line-height:1.5;">${c.message || ''}</div>
-        </div>
-        <div style="margin-top:1.25rem;">
-          <button class="btn-delete-item" style="width:100%; padding:0.75rem;" onclick="deleteComment('${commentKey}')">Delete Comment</button>
-        </div>
-      `;
-
-      document.getElementById('commentListView').classList.add('hidden');
-      document.getElementById('commentDetailView').classList.remove('hidden');
-    }
-
-    function backToCommentList(updateHash = true) {
-      if (updateHash) window.location.hash = 'comments';
-      document.getElementById('commentDetailView').classList.add('hidden');
-      document.getElementById('commentListView').classList.remove('hidden');
-    }
-
-    function deleteComment(commentId) {
-      if (confirm("Delete this comment permanently?")) {
-        database.ref(`student_comments/${commentId}`).remove().then(() => {
-          backToCommentList(true);
-        });
-      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      updateSemesterDropdown();
-      listenToSubjects();
-      listenToStudents();
-      listenToComments();
-
-      if (sessionStorage.getItem('csh_admin_auth') === 'true') {
-        applyAdminSession();
+      const savedStudent = localStorage.getItem('csh_student');
+      if (savedStudent) {
+        applyLoggedInState(JSON.parse(savedStudent));
       }
     });
+
+    function parseHash() {
+      const saved = localStorage.getItem('csh_student');
+      if (!saved) return;
+
+      const raw = safeDecode(window.location.hash.replace(/^#\/?/, ''));
+      if (raw === 'account') {
+        openAccountTab();
+        return;
+      }
+
+      if (!raw) {
+        state.course = null;
+        state.semester = null;
+        state.subjectKey = null;
+        state.subjectName = null;
+        state.step = 1;
+        updateView();
+        return;
+      }
+
+      let parts = raw.includes('___') ? raw.split('___') : raw.split('/');
+      parts = parts.map(p => safeDecode(p.trim()));
+
+      if (parts[0]) { state.course = parts[0]; state.step = 2; }
+      if (parts[1]) { state.semester = parts[1]; state.step = 3; }
+      if (parts[2]) {
+        state.subjectKey = parts[2];
+        state.subjectName = parts[2];
+        state.step = 4;
+        
+        const subObj = getActiveSubjectData();
+        if (subObj && subObj.subjectName) {
+          state.subjectName = subObj.subjectName;
+        }
+      }
+      updateView();
+    }
+
+    function setHash() {
+      let path = '';
+      if (state.step === 2) path = `${state.course}`;
+      else if (state.step === 3) path = `${state.course}___${state.semester}`;
+      else if (state.step === 4) path = `${state.course}___${state.semester}___${state.subjectName || state.subjectKey}`;
+      
+      window.location.hash = path ? `#/${path}` : '';
+    }
+
+    function updateView() {
+      if (state.inAccountTab) return;
+
+      document.getElementById('step-course').classList.add('hidden');
+      document.getElementById('step-semester').classList.add('hidden');
+      document.getElementById('step-subject').classList.add('hidden');
+      document.getElementById('step-resources').classList.add('hidden');
+
+      const backBtn = document.getElementById('backBtn');
+      const breadcrumb = document.getElementById('breadcrumb');
+
+      if (state.step === 1) {
+        document.getElementById('step-course').classList.remove('hidden');
+        backBtn.classList.add('hidden');
+        breadcrumb.classList.add('hidden');
+      } else if (state.step === 2) {
+        document.getElementById('step-semester').classList.remove('hidden');
+        backBtn.classList.remove('hidden');
+        breadcrumb.classList.remove('hidden');
+        breadcrumb.innerText = `${state.course}`;
+        renderSemesters();
+      } else if (state.step === 3) {
+        document.getElementById('step-subject').classList.remove('hidden');
+        backBtn.classList.remove('hidden');
+        breadcrumb.classList.remove('hidden');
+        breadcrumb.innerText = `${state.course} > ${state.semester}`;
+        renderSubjects();
+      } else if (state.step === 4) {
+        document.getElementById('step-resources').classList.remove('hidden');
+        
+        const subObj = getActiveSubjectData();
+        const fullSubjectName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey);
+
+        document.getElementById('subject-title').innerText = `${fullSubjectName} Resources`;
+        backBtn.classList.remove('hidden');
+        breadcrumb.classList.remove('hidden');
+        breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName}`;
+      }
+    }
+
+    function renderSemesters() {
+      const container = document.getElementById('semester-list');
+      container.innerHTML = '';
+      const courseObj = studyData[state.course] || {};
+      const semesters = Object.keys(courseObj);
+
+      semesters.forEach(sem => {
+        const cleanSemName = safeDecode(sem);
+        const btn = document.createElement('button');
+        btn.className = 'btn-select';
+        btn.innerHTML = `<span class="btn-label">${cleanSemName}</span> <span>→</span>`;
+        btn.onclick = () => selectSemester(cleanSemName);
+        container.appendChild(btn);
+      });
+    }
+
+    function renderSubjects() {
+      const container = document.getElementById('subject-list');
+      container.innerHTML = '';
+      const courseObj = studyData[state.course] || {};
+      const semObj = courseObj[state.semester] || {};
+      const subjectKeys = Object.keys(semObj);
+
+      if (subjectKeys.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); padding:1rem 0; text-align:center;">No subjects added yet. Add from Admin panel!</p>';
+        return;
+      }
+
+      const subjectsArray = subjectKeys.map(key => {
+        const item = semObj[key] || {};
+        const displayName = item.subjectName || safeDecode(key);
+        
+        let priority = (typeof item.orderIndex !== 'undefined' && item.orderIndex !== null) 
+          ? item.orderIndex 
+          : getSubjectFixedPriority(displayName);
+
+        return {
+          key: key,
+          displayName: displayName,
+          priority: priority,
+          createdAt: item.createdAt || 0
+        };
+      });
+
+      subjectsArray.sort((a, b) => {
+        if (a.priority !== b.priority) {
+          return a.priority - b.priority;
+        }
+        return (a.createdAt || 0) - (b.createdAt || 0);
+      });
+
+      subjectsArray.forEach(sub => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-select';
+        btn.innerHTML = `<span class="btn-label">${sub.displayName}</span> <span>→</span>`;
+        btn.onclick = () => selectSubject(sub.key, sub.displayName);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectCourse(course) {
+      state.course = course;
+      state.step = 2;
+      setHash();
+      updateView();
+    }
+
+    function selectSemester(sem) {
+      state.semester = safeDecode(sem);
+      state.step = 3;
+      setHash();
+      updateView();
+    }
+
+    function selectSubject(key, displayName) {
+      state.subjectKey = key;
+      state.subjectName = displayName;
+      state.step = 4;
+      setHash();
+      updateView();
+    }
+
+    function goBack() {
+      if (state.inAccountTab) {
+        closeAccountTab();
+        return;
+      }
+      window.history.back();
+    }
+
+    window.addEventListener('hashchange', parseHash);
   </script>
 </body>
 </html>
