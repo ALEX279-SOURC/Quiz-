@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>માણસાઈના દીવા - MCQ પ્રેક્ટિસ પોર્ટલ</title>
+  <title>માણસાઈના દીવા - Team Quiz Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
@@ -65,17 +65,17 @@
       border: 1px solid var(--border);
       padding: 2rem;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+      margin-bottom: 1.5rem;
     }
 
-    /* Setup Screen */
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
     }
 
     .form-group label {
       display: block;
       font-weight: 600;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       color: var(--text);
     }
 
@@ -94,7 +94,6 @@
       background: white;
     }
 
-    /* Quiz Bar & Meta */
     .quiz-header {
       display: flex;
       justify-content: space-between;
@@ -176,7 +175,6 @@
       border-color: var(--primary);
       background: #eff6ff;
       font-weight: 600;
-      box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.15);
     }
 
     .option-index {
@@ -210,39 +208,20 @@
       cursor: pointer;
       border: none;
       transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
     }
 
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--correct); color: white; }
+    .btn-success:hover { background: #15803d; }
+    .btn-secondary { background: #e2e8f0; color: var(--text); }
+    .btn-secondary:hover { background: #cbd5e1; }
 
-    .btn-primary:hover {
-      background: var(--primary-dark);
-    }
-
-    .btn-success {
-      background: var(--correct);
-      color: white;
-    }
-
-    .btn-success:hover {
-      background: #15803d;
-    }
-
-    .btn-secondary {
-      background: #e2e8f0;
-      color: var(--text);
-    }
-
-    .btn-secondary:hover {
-      background: #cbd5e1;
-    }
-
-    /* Result View */
-    .result-view {
-      text-align: center;
-    }
+    .result-view { text-align: center; }
 
     .score-circle {
       width: 120px;
@@ -269,21 +248,10 @@
       border: 1px solid var(--border);
     }
 
-    .stat-item h3 {
-      font-size: 1.3rem;
-      color: var(--primary);
-    }
+    .stat-item h3 { font-size: 1.3rem; color: var(--primary); }
+    .stat-item p { font-size: 0.85rem; color: var(--muted); }
 
-    .stat-item p {
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    /* Mistakes Only Review */
-    .review-section {
-      margin-top: 2rem;
-      text-align: left;
-    }
+    .review-section { margin-top: 2rem; text-align: left; }
 
     .review-item {
       padding: 1.2rem;
@@ -294,62 +262,100 @@
       border-left: 5px solid var(--wrong);
     }
 
-    .review-q {
+    .review-q { font-weight: 700; margin-bottom: 0.5rem; color: var(--text); }
+    .badge-ans { font-size: 0.9rem; display: block; margin-top: 0.35rem; line-height: 1.5; }
+    .ans-correct { color: var(--correct); font-weight: 600; }
+    .ans-user-wrong { color: var(--wrong); font-weight: 600; }
+
+    /* Leaderboard Styling */
+    .scoreboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .scoreboard-table th, .scoreboard-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .scoreboard-table th {
+      background: #f1f5f9;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .scoreboard-table tr:first-child td {
       font-weight: 700;
-      margin-bottom: 0.6rem;
-      color: var(--text);
+      color: #b45309;
+      background: #fefce8;
     }
 
-    .badge-ans {
-      font-size: 0.9rem;
-      display: block;
-      margin-top: 0.35rem;
-      line-height: 1.5;
-    }
-
-    .ans-correct {
-      color: var(--correct);
-      font-weight: 600;
-    }
-
-    .ans-user-wrong {
-      color: var(--wrong);
-      font-weight: 600;
+    .rank-pill {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      text-align: center;
+      line-height: 24px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      font-size: 0.8rem;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>માણસાઈના દીવા - MCQ પ્રેક્ટિસ પોર્ટલ</h1>
+    <h1>માણસાઈના દીવા - Team Quiz Portal</h1>
   </header>
 
   <div class="container">
     
-    <!-- Setup Screen -->
+    <!-- 1. Creator Setup Card -->
     <div class="card" id="setupCard">
-      <h2 style="margin-bottom: 1.2rem; font-size: 1.3rem;">ટેસ્ટ સેટિંગ્સ</h2>
+      <h2 style="margin-bottom: 1.2rem; font-size: 1.3rem;">ટીમ ક્વિઝ સેટઅપ (Create Quiz)</h2>
       
       <div class="form-group">
-        <label for="questionCount">પ્રશ્નોની સંખ્યા પસંદ કરો:</label>
-        <select id="questionCount" class="form-control">
-          <option value="10">૧૦ પ્રશ્નો</option>
-          <option value="25">૨૫ પ્રશ્નો</option>
-          <option value="50">૫૦ પ્રશ્નો</option>
-          <option value="100">૧૦૦ પ્રશ્નો</option>
-          <option value="200" selected>સંપૂર્ણ ૨૦૦ પ્રશ્નો</option>
-        </select>
+        <label for="customQuestionCount">પ્રશ્નોની સંખ્યા લખો (૧ થી ૨૦૦):</label>
+        <input type="number" id="customQuestionCount" class="form-control" value="25" min="1" max="200">
       </div>
 
       <div class="form-group">
-        <label for="customTimer">તમારા હિસાબે સમય (મિનિટમાં) લખો: (૦ = Timer વગર)</label>
-        <input type="number" id="customTimer" class="form-control" placeholder="દા.ત. 15, 30, 60..." value="30" min="0" max="300">
+        <label for="customTimer">સમય મર્યાદા (મિનિટમાં) લખો (૦ = Timer વગર):</label>
+        <input type="number" id="customTimer" class="form-control" value="15" min="0" max="300">
       </div>
 
-      <button class="btn btn-primary" style="width: 100%; padding: 0.8rem;" onclick="startQuiz()">ટેસ્ટ શરૂ કરો</button>
+      <button class="btn btn-primary" style="width: 100%; padding: 0.8rem;" onclick="generateTeamLink()">ટીમ ક્વિઝ લિંક જનરેટ કરો</button>
+
+      <div id="linkOutput" style="display: none; margin-top: 1.5rem; padding: 1rem; background: #eff6ff; border-radius: 8px; border: 1px dashed var(--primary);">
+        <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--primary);">તમારી ટીમ ક્વિઝ લિંક તૈયાર છે:</p>
+        <input type="text" id="quizLinkText" class="form-control" readonly style="margin-bottom: 0.8rem; background: white;">
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-primary" onclick="copyQuizLink()">લિંક કૉપિ કરો</button>
+          <button class="btn btn-secondary" onclick="openGeneratedLink()">આ ટેબમાં ઓપન કરો</button>
+        </div>
+      </div>
     </div>
 
-    <!-- Quiz Screen -->
+    <!-- 2. Candidate Join Card -->
+    <div class="card" id="joinCard" style="display: none;">
+      <h2 style="margin-bottom: 1rem; font-size: 1.3rem;">ટીમ ક્વિઝમાં જોડાવો</h2>
+      <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1.2rem; border: 1px solid var(--border);">
+        <p><strong>કુલ પ્રશ્નો:</strong> <span id="joinQCount">0</span></p>
+        <p><strong>સમય મર્યાદા:</strong> <span id="joinTimeLimit">0</span> મિનિટ</p>
+      </div>
+
+      <div class="form-group">
+        <label for="candidateName">તમારું પ્રોફાઈલ નામ લખો:</label>
+        <input type="text" id="candidateName" class="form-control" placeholder="તમારું પૂરું નામ લખો..." autofocus>
+      </div>
+
+      <button class="btn btn-success" style="width: 100%; padding: 0.8rem;" onclick="startCandidateQuiz()">Start Quiz (ક્વિઝ શરૂ કરો)</button>
+    </div>
+
+    <!-- 3. Active Quiz Screen -->
     <div id="quizScreen" style="display: none;">
       <div class="progress-bar-container">
         <div id="progress" class="progress-bar"></div>
@@ -377,44 +383,67 @@
       </div>
     </div>
 
-    <!-- Result Screen -->
-    <div class="card result-view" id="resultCard" style="display: none;">
-      <h2>ટેસ્ટ પરિણામ (Result Card)</h2>
-      <div class="score-circle" id="finalScore">0/0</div>
-      
-      <div class="result-stats">
-        <div class="stat-item">
-          <h3 id="statPercentage">0%</h3>
-          <p>ટકાવારી (Percentage)</p>
-        </div>
-        <div class="stat-item">
-          <h3 id="statCorrect" style="color: var(--correct);">0</h3>
-          <p>સાચા ઉત્તર</p>
-        </div>
-        <div class="stat-item">
-          <h3 id="statWrong" style="color: var(--wrong);">0</h3>
-          <p>ખોટા ઉત્તર</p>
-        </div>
-        <div class="stat-item">
-          <h3 id="statTime">00:00</h3>
-          <p>લીધેલો સમય</p>
+    <!-- 4. Result & Live Scoreboard Dashboard -->
+    <div id="dashboardScreen" style="display: none;">
+      <div class="card result-view">
+        <h2>ટેસ્ટ પરિણામ (Report Card)</h2>
+        <p id="userProfileTag" style="font-weight: 600; color: var(--primary); margin-top: 0.3rem;"></p>
+        <div class="score-circle" id="finalScore">0/0</div>
+        
+        <div class="result-stats">
+          <div class="stat-item">
+            <h3 id="statPercentage">0%</h3>
+            <p>ટકાવારી (Score %)</p>
+          </div>
+          <div class="stat-item">
+            <h3 id="statCorrect" style="color: var(--correct);">0</h3>
+            <p>સાચા ઉત્તર</p>
+          </div>
+          <div class="stat-item">
+            <h3 id="statWrong" style="color: var(--wrong);">0</h3>
+            <p>ખોટા ઉત્તર</p>
+          </div>
+          <div class="stat-item">
+            <h3 id="statTime">00:00</h3>
+            <p>લીધેલો સમય</p>
+          </div>
         </div>
       </div>
 
-      <button class="btn btn-primary" onclick="location.reload()">નવી ટેસ્ટ શરૂ કરો</button>
-
-      <!-- Only Wrong / Skipped Questions Review -->
-      <div class="review-section">
+      <!-- Mistakes Section -->
+      <div class="card review-section">
         <h3 style="margin-bottom: 0.5rem; color: var(--wrong);">ફક્ત ખોટા પડેલા પ્રશ્નો અને સાચા ઉત્તરો</h3>
-        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem;">સુધારણા અને પુનરાવર્તન માટે નીચે માત્ર તમે ભૂલ કરેલા પ્રશ્નો દર્શાવેલા છે:</p>
+        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem;">સુધારણા માટે તમારા દ્વારા થયેલી ભૂલો નીચે મુજબ છે:</p>
         <div id="reviewContainer"></div>
+      </div>
+
+      <!-- Live Sync Scoreboard -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+          <h3 style="color: var(--primary);">ટીમ સ્કોરબોર્ડ (Live Leaderboard)</h3>
+          <span class="badge" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">Live Sync 🟢</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--muted);">વધુ સ્કોર અને ઓછા સમય પ્રમાણે રેન્કિંગ ગોઠવાયેલ છે:</p>
+        <table class="scoreboard-table">
+          <thead>
+            <tr>
+              <th>રેન્ક</th>
+              <th>નામ</th>
+              <th>સ્કોર</th>
+              <th>સમય</th>
+            </tr>
+          </thead>
+          <tbody id="scoreboardBody">
+            <!-- Dynamic Leaderboard Rows -->
+          </tbody>
+        </table>
       </div>
     </div>
 
   </div>
 
   <script>
-    // 200 Questions Bank
+    // 200 Questions Database
     const fullDatabase = [
       { q: "'માણસાઈના દીવા' પુસ્તકના મૂળ લેખક કોણ છે?", options: ["ઉમાશંકર જોશી", "ઝવેરચંદ મેઘાણી", "કનૈયાલાલ મુનશી", "રમણલાલ દેસાઈ"], ans: 1, cat: "સાહિત્યકાર પરિચય" },
       { q: "આ પુસ્તકમાં કોના જીવન અને મૂકસેવાની સત્યઘટનાઓ આલેખાયેલી છે?", options: ["મહાત્મા ગાંધી", "ઠક્કરબાપા", "પૂજ્ય રવિશંકર મહારાજ", "બબલભાઈ મહેતા"], ans: 2, cat: "પાત્ર પરિચય" },
@@ -462,18 +491,15 @@
       const topic = extraTopics[i % extraTopics.length];
       fullDatabase.push({
         q: `[પ્રશ્ન ${i}] '${topic.t}' સંદર્ભે ${topic.p} સાથે સંકળાયેલી મુખ્ય હકીકત કઈ છે?`,
-        options: [
-          topic.a,
-          "સરકારી પોલીસને લાંચ આપવી",
-          "ગામ છોડીને હિજરત કરી જવું",
-          "ચોરી કરવાનો પરાણે ઇનકાર"
-        ],
+        options: [topic.a, "પોલીસને લાંચ આપવી", "હિજરત કરી જવું", "ચોરી કરવાનો પરાણે ઇનકાર"],
         ans: 0,
         cat: topic.t
       });
     }
 
-    // State Variables
+    // Quiz Session State
+    let roomId = null;
+    let participantName = "";
     let activeQuestions = [];
     let userAnswers = [];
     let currentIndex = 0;
@@ -481,10 +507,63 @@
     let timeRemaining = 0;
     let totalTimeTaken = 0;
 
-    function startQuiz() {
-      const count = parseInt(document.getElementById('questionCount').value);
-      const customMinInput = document.getElementById('customTimer').value;
-      const customMinutes = parseInt(customMinInput) || 0;
+    // Realtime Broadcast Channel for Live Scoreboard Sync Across Tabs
+    const syncChannel = new BroadcastChannel('quiz_team_sync');
+    syncChannel.onmessage = (event) => {
+      if (event.data && event.data.roomId === roomId) {
+        renderScoreboard();
+      }
+    };
+
+    // Initialize View based on URL params
+    window.onload = function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('room')) {
+        roomId = urlParams.get('room');
+        const count = parseInt(urlParams.get('count')) || 25;
+        const time = parseInt(urlParams.get('time')) || 0;
+
+        document.getElementById('setupCard').style.display = 'none';
+        document.getElementById('joinCard').style.display = 'block';
+        document.getElementById('joinQCount').innerText = count;
+        document.getElementById('joinTimeLimit').innerText = time;
+      }
+    };
+
+    function generateTeamLink() {
+      const count = Math.min(200, Math.max(1, parseInt(document.getElementById('customQuestionCount').value) || 25));
+      const time = Math.max(0, parseInt(document.getElementById('customTimer').value) || 0);
+      const generatedRoom = 'room_' + Math.random().toString(36).substring(2, 8);
+
+      const base = window.location.origin + window.location.pathname;
+      const fullLink = `${base}?room=${generatedRoom}&count=${count}&time=${time}`;
+
+      document.getElementById('quizLinkText').value = fullLink;
+      document.getElementById('linkOutput').style.display = 'block';
+    }
+
+    function copyQuizLink() {
+      const copyText = document.getElementById('quizLinkText');
+      copyText.select();
+      navigator.clipboard.writeText(copyText.value);
+      alert("લિંક કૉપિ થઈ ગઈ છે! ટીમના સભ્યો સાથે શેર કરો.");
+    }
+
+    function openGeneratedLink() {
+      window.location.href = document.getElementById('quizLinkText').value;
+    }
+
+    function startCandidateQuiz() {
+      const nameInput = document.getElementById('candidateName').value.trim();
+      if (!nameInput) {
+        alert("કૃપા કરીને તમારું નામ લખો!");
+        return;
+      }
+      participantName = nameInput;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const count = parseInt(urlParams.get('count')) || 25;
+      const customMinutes = parseInt(urlParams.get('time')) || 0;
 
       activeQuestions = fullDatabase.slice(0, count);
       userAnswers = new Array(activeQuestions.length).fill(null);
@@ -509,7 +588,7 @@
         timerInterval = setInterval(() => { totalTimeTaken++; }, 1000);
       }
 
-      document.getElementById('setupCard').style.display = 'none';
+      document.getElementById('joinCard').style.display = 'none';
       document.getElementById('quizScreen').style.display = 'block';
       loadQuestion();
     }
@@ -541,7 +620,6 @@
           btn.classList.add('selected');
         }
         btn.innerHTML = `<span class="option-index">${letters[idx]}</span><span>${opt}</span>`;
-        // Instant answer select and auto-next
         btn.onclick = () => selectOption(idx);
         optionsContainer.appendChild(btn);
       });
@@ -551,13 +629,10 @@
 
     function selectOption(index) {
       userAnswers[currentIndex] = index;
-      
-      // Auto forward after clicking option
       if (currentIndex < activeQuestions.length - 1) {
         currentIndex++;
         loadQuestion();
       } else {
-        // Last question: update UI to reflect selection
         loadQuestion();
       }
     }
@@ -594,10 +669,11 @@
         }
       });
 
-      // Show Result Card
+      // Hide Quiz, Show Dashboard
       document.getElementById('quizScreen').style.display = 'none';
-      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('dashboardScreen').style.display = 'block';
 
+      document.getElementById('userProfileTag').innerText = `પ્રોફાઈલ: ${participantName}`;
       document.getElementById('finalScore').innerText = `${correctCount}/${activeQuestions.length}`;
       const percentage = ((correctCount / activeQuestions.length) * 100).toFixed(1);
       document.getElementById('statPercentage').innerText = `${percentage}%`;
@@ -606,21 +682,19 @@
 
       const spentMins = Math.floor(totalTimeTaken / 60);
       const spentSecs = totalTimeTaken % 60;
-      document.getElementById('statTime').innerText = 
-        `${spentMins.toString().padStart(2, '0')}:${spentSecs.toString().padStart(2, '0')}`;
+      const formattedTime = `${spentMins.toString().padStart(2, '0')}:${spentSecs.toString().padStart(2, '0')}`;
+      document.getElementById('statTime').innerText = formattedTime;
 
-      // Build Mistakes Only Review
+      // Render Mistakes Only
       const reviewContainer = document.getElementById('reviewContainer');
       reviewContainer.innerHTML = '';
       const letters = ['A', 'B', 'C', 'D'];
-
       let mistakesFound = false;
 
       activeQuestions.forEach((q, idx) => {
         const uAns = userAnswers[idx];
         const isRight = uAns === q.ans;
 
-        // ONLY show if answer is WRONG or SKIPPED
         if (!isRight) {
           mistakesFound = true;
           const item = document.createElement('div');
@@ -628,9 +702,9 @@
 
           let statusText = '';
           if (uAns === null) {
-            statusText = `<span class="badge-ans ans-user-wrong">❌ તમે આ પ્રશ્ન છોડી દીધો હતો (Not Answered)</span>`;
+            statusText = `<span class="badge-ans ans-user-wrong">❌ તમે આ પ્રશ્ન સ્કીપ કર્યો હતો</span>`;
           } else {
-            statusText = `<span class="badge-ans ans-user-wrong">❌ તમારો ખોટો ઉત્તર: (${letters[uAns]}) ${q.options[uAns]}</span>`;
+            statusText = `<span class="badge-ans ans-user-wrong">❌ તમારો ઉત્તર: (${letters[uAns]}) ${q.options[uAns]}</span>`;
           }
           statusText += `<span class="badge-ans ans-correct">✅ સાચો ઉત્તર: (${letters[q.ans]}) ${q.options[q.ans]}</span>`;
 
@@ -644,11 +718,65 @@
 
       if (!mistakesFound) {
         reviewContainer.innerHTML = `
-          <div style="background: #dcfce7; color: #166534; padding: 1.5rem; border-radius: 8px; text-align: center; font-weight: 600;">
-            🎉 અદ્ભુત! તમારા તમામ જવાબો સાચા છે. એક પણ ખોટો જવાબ નથી!
+          <div style="background: #dcfce7; color: #166534; padding: 1.2rem; border-radius: 8px; text-align: center; font-weight: 600;">
+            🎉 શાનદાર! તમારો એક પણ જવાબ ખોટો નથી પડ્યો!
           </div>
         `;
       }
+
+      // Save to Leaderboard & Sync
+      saveScore(participantName, correctCount, totalTimeTaken, formattedTime);
+    }
+
+    function saveScore(name, score, seconds, timeStr) {
+      const storageKey = `scoreboard_${roomId || 'general'}`;
+      let board = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+      board.push({
+        name: name,
+        score: score,
+        seconds: seconds,
+        timeStr: timeStr,
+        timestamp: Date.now()
+      });
+
+      localStorage.setItem(storageKey, JSON.stringify(board));
+
+      // Notify other open tabs/windows
+      syncChannel.postMessage({ roomId: roomId });
+      renderScoreboard();
+    }
+
+    function renderScoreboard() {
+      const storageKey = `scoreboard_${roomId || 'general'}`;
+      let board = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+      // Sorting Logic: Highest Score First, if equal then Least Time Taken
+      board.sort((a, b) => {
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+        return a.seconds - b.seconds;
+      });
+
+      const tbody = document.getElementById('scoreboardBody');
+      tbody.innerHTML = '';
+
+      if (board.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--muted);">હજુ સુધી કોઈએ ટેસ્ટ સબમિટ કર્યો નથી.</td></tr>`;
+        return;
+      }
+
+      board.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><span class="rank-pill">${index + 1}</span></td>
+          <td>${item.name}</td>
+          <td><strong>${item.score}</strong> / ${activeQuestions.length}</td>
+          <td>${item.timeStr}</td>
+        `;
+        tbody.appendChild(row);
+      });
     }
   </script>
 </body>
