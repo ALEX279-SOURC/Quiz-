@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>માણસાઈના દીવા - Team Quiz Portal</title>
+  <title>માણસાઈના દીવા - Ultimate MCQ Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
@@ -63,9 +63,34 @@
       background: var(--surface);
       border-radius: 12px;
       border: 1px solid var(--border);
-      padding: 2rem;
+      padding: 1.8rem;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
       margin-bottom: 1.5rem;
+    }
+
+    /* Tab Switcher */
+    .tabs-nav {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 1.5rem;
+      gap: 0.5rem;
+    }
+
+    .tab-btn {
+      padding: 0.7rem 1.2rem;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
     }
 
     .form-group {
@@ -92,6 +117,23 @@
     .form-control:focus {
       border-color: var(--primary);
       background: white;
+    }
+
+    /* Sticky Team Link Bar */
+    .sticky-link-bar {
+      background: #eff6ff;
+      border: 1.5px dashed var(--primary);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .link-copy-box {
+      display: flex;
+      gap: 0.5rem;
     }
 
     .quiz-header {
@@ -267,7 +309,6 @@
     .ans-correct { color: var(--correct); font-weight: 600; }
     .ans-user-wrong { color: var(--wrong); font-weight: 600; }
 
-    /* Leaderboard Styling */
     .scoreboard-table {
       width: 100%;
       border-collapse: collapse;
@@ -308,38 +349,55 @@
 <body>
 
   <header>
-    <h1>માણસાઈના દીવા - Team Quiz Portal</h1>
+    <h1>માણસાઈના દીવા - Ultimate MCQ Portal</h1>
   </header>
 
   <div class="container">
     
-    <!-- 1. Creator Setup Card -->
-    <div class="card" id="setupCard">
-      <h2 style="margin-bottom: 1.2rem; font-size: 1.3rem;">ટીમ ક્વિઝ સેટઅપ (Create Quiz)</h2>
-      
-      <div class="form-group">
-        <label for="customQuestionCount">પ્રશ્નોની સંખ્યા લખો (૧ થી ૨૦૦):</label>
-        <input type="number" id="customQuestionCount" class="form-control" value="25" min="1" max="200">
-      </div>
-
-      <div class="form-group">
-        <label for="customTimer">સમય મર્યાદા (મિનિટમાં) લખો (૦ = Timer વગર):</label>
-        <input type="number" id="customTimer" class="form-control" value="15" min="0" max="300">
-      </div>
-
-      <button class="btn btn-primary" style="width: 100%; padding: 0.8rem;" onclick="generateTeamLink()">ટીમ ક્વિઝ લિંક જનરેટ કરો</button>
-
-      <div id="linkOutput" style="display: none; margin-top: 1.5rem; padding: 1rem; background: #eff6ff; border-radius: 8px; border: 1px dashed var(--primary);">
-        <p style="font-weight: 600; margin-bottom: 0.5rem; color: var(--primary);">તમારી ટીમ ક્વિઝ લિંક તૈયાર છે:</p>
-        <input type="text" id="quizLinkText" class="form-control" readonly style="margin-bottom: 0.8rem; background: white;">
-        <div style="display: flex; gap: 0.5rem;">
-          <button class="btn btn-primary" onclick="copyQuizLink()">લિંક કૉપિ કરો</button>
-          <button class="btn btn-secondary" onclick="openGeneratedLink()">આ ટેબમાં ઓપન કરો</button>
-        </div>
+    <!-- Permanent Team Link Display if in Team Quiz -->
+    <div id="persistentLinkBar" class="sticky-link-bar" style="display: none;">
+      <span style="font-weight: 700; color: var(--primary);">🔗 ટીમ ક્વિઝ લિંક (શેર કરવા માટે ઉપલબ્ધ):</span>
+      <div class="link-copy-box">
+        <input type="text" id="persistentLinkText" class="form-control" readonly style="background: white;">
+        <button class="btn btn-primary" onclick="copyPersistentLink()">Copy</button>
       </div>
     </div>
 
-    <!-- 2. Candidate Join Card -->
+    <!-- 1. Selection & Setup View -->
+    <div class="card" id="setupCard">
+      <div class="tabs-nav">
+        <button class="tab-btn active" id="tabSolo" onclick="switchTab('solo')">Solo Practice (એકલ પ્રેક્ટિસ)</button>
+        <button class="tab-btn" id="tabTeam" onclick="switchTab('team')">Team Quiz (ટીમ લિંક બનાવો)</button>
+      </div>
+
+      <!-- Solo Tab Form -->
+      <div id="soloForm">
+        <div class="form-group">
+          <label for="soloQCount">કેટલા પ્રશ્નોની પ્રેક્ટિસ કરવી છે? (૧ થી ૨૦૦):</label>
+          <input type="number" id="soloQCount" class="form-control" value="20" min="1" max="200">
+        </div>
+        <div class="form-group">
+          <label for="soloTimer">સમય મર્યાદા (મિનિટમાં) લખો (૦ = Timer વગર):</label>
+          <input type="number" id="soloTimer" class="form-control" value="10" min="0" max="300">
+        </div>
+        <button class="btn btn-primary" style="width: 100%; padding: 0.8rem;" onclick="startSoloQuiz()">પ્રેક્ટિસ શરૂ કરો</button>
+      </div>
+
+      <!-- Team Tab Form -->
+      <div id="teamForm" style="display: none;">
+        <div class="form-group">
+          <label for="teamQCount">ટીમ માટે પ્રશ્નોની સંખ્યા (૧ થી ૨૦૦):</label>
+          <input type="number" id="teamQCount" class="form-control" value="25" min="1" max="200">
+        </div>
+        <div class="form-group">
+          <label for="teamTimer">સમય મર્યાદા (મિનિટમાં) લખો (૦ = Timer વગર):</label>
+          <input type="number" id="teamTimer" class="form-control" value="15" min="0" max="300">
+        </div>
+        <button class="btn btn-primary" style="width: 100%; padding: 0.8rem;" onclick="createTeamQuiz()">ટીમ ક્વિઝ લિંક જનરેટ કરો</button>
+      </div>
+    </div>
+
+    <!-- 2. Candidate Join Card (Shown via Shared Link) -->
     <div class="card" id="joinCard" style="display: none;">
       <h2 style="margin-bottom: 1rem; font-size: 1.3rem;">ટીમ ક્વિઝમાં જોડાવો</h2>
       <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1.2rem; border: 1px solid var(--border);">
@@ -349,13 +407,13 @@
 
       <div class="form-group">
         <label for="candidateName">તમારું પ્રોફાઈલ નામ લખો:</label>
-        <input type="text" id="candidateName" class="form-control" placeholder="તમારું પૂરું નામ લખો..." autofocus>
+        <input type="text" id="candidateName" class="form-control" placeholder="તમારું નામ લખો..." autofocus>
       </div>
 
-      <button class="btn btn-success" style="width: 100%; padding: 0.8rem;" onclick="startCandidateQuiz()">Start Quiz (ક્વિઝ શરૂ કરો)</button>
+      <button class="btn btn-success" style="width: 100%; padding: 0.8rem;" onclick="startCandidateQuiz()">Start Quiz (ટેસ્ટ શરૂ કરો)</button>
     </div>
 
-    <!-- 3. Active Quiz Screen -->
+    <!-- 3. Active Quiz View -->
     <div id="quizScreen" style="display: none;">
       <div class="progress-bar-container">
         <div id="progress" class="progress-bar"></div>
@@ -383,7 +441,7 @@
       </div>
     </div>
 
-    <!-- 4. Result & Live Scoreboard Dashboard -->
+    <!-- 4. Result & Dashboard View -->
     <div id="dashboardScreen" style="display: none;">
       <div class="card result-view">
         <h2>ટેસ્ટ પરિણામ (Report Card)</h2>
@@ -393,7 +451,7 @@
         <div class="result-stats">
           <div class="stat-item">
             <h3 id="statPercentage">0%</h3>
-            <p>ટકાવારી (Score %)</p>
+            <p>ટકાવારી</p>
           </div>
           <div class="stat-item">
             <h3 id="statCorrect" style="color: var(--correct);">0</h3>
@@ -408,22 +466,22 @@
             <p>લીધેલો સમય</p>
           </div>
         </div>
+        <button class="btn btn-primary" onclick="resetToHome()">નવી ટેસ્ટ શરૂ કરો</button>
       </div>
 
       <!-- Mistakes Section -->
       <div class="card review-section">
         <h3 style="margin-bottom: 0.5rem; color: var(--wrong);">ફક્ત ખોટા પડેલા પ્રશ્નો અને સાચા ઉત્તરો</h3>
-        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem;">સુધારણા માટે તમારા દ્વારા થયેલી ભૂલો નીચે મુજબ છે:</p>
+        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem;">સુધારણા માટે તમારા દ્વારા થયેલી ભૂલો:</p>
         <div id="reviewContainer"></div>
       </div>
 
-      <!-- Live Sync Scoreboard -->
-      <div class="card">
+      <!-- Scoreboard (Visible for Team Quiz) -->
+      <div class="card" id="scoreboardCard" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-          <h3 style="color: var(--primary);">ટીમ સ્કોરબોર્ડ (Live Leaderboard)</h3>
+          <h3 style="color: var(--primary);">ટીમ સ્કોરબોર્ડ (Leaderboard)</h3>
           <span class="badge" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">Live Sync 🟢</span>
         </div>
-        <p style="font-size: 0.85rem; color: var(--muted);">વધુ સ્કોર અને ઓછા સમય પ્રમાણે રેન્કિંગ ગોઠવાયેલ છે:</p>
         <table class="scoreboard-table">
           <thead>
             <tr>
@@ -433,9 +491,7 @@
               <th>સમય</th>
             </tr>
           </thead>
-          <tbody id="scoreboardBody">
-            <!-- Dynamic Leaderboard Rows -->
-          </tbody>
+          <tbody id="scoreboardBody"></tbody>
         </table>
       </div>
     </div>
@@ -443,8 +499,8 @@
   </div>
 
   <script>
-    // 200 Questions Database
-    const fullDatabase = [
+    // 200 Questions Master Database
+    const masterQuestions = [
       { q: "'માણસાઈના દીવા' પુસ્તકના મૂળ લેખક કોણ છે?", options: ["ઉમાશંકર જોશી", "ઝવેરચંદ મેઘાણી", "કનૈયાલાલ મુનશી", "રમણલાલ દેસાઈ"], ans: 1, cat: "સાહિત્યકાર પરિચય" },
       { q: "આ પુસ્તકમાં કોના જીવન અને મૂકસેવાની સત્યઘટનાઓ આલેખાયેલી છે?", options: ["મહાત્મા ગાંધી", "ઠક્કરબાપા", "પૂજ્ય રવિશંકર મહારાજ", "બબલભાઈ મહેતા"], ans: 2, cat: "પાત્ર પરિચય" },
       { q: "ઝવેરચંદ મેઘાણીનો જન્મ કયા સ્થળે થયો હતો?", options: ["ચોટીલા", "બગસરા", "રાજકોટ", "ધંધૂકા"], ans: 0, cat: "જીવન પરિચય" },
@@ -489,7 +545,7 @@
 
     for (let i = 31; i <= 200; i++) {
       const topic = extraTopics[i % extraTopics.length];
-      fullDatabase.push({
+      masterQuestions.push({
         q: `[પ્રશ્ન ${i}] '${topic.t}' સંદર્ભે ${topic.p} સાથે સંકળાયેલી મુખ્ય હકીકત કઈ છે?`,
         options: [topic.a, "પોલીસને લાંચ આપવી", "હિજરત કરી જવું", "ચોરી કરવાનો પરાણે ઇનકાર"],
         ans: 0,
@@ -497,9 +553,10 @@
       });
     }
 
-    // Quiz Session State
+    // App State
+    let isTeamMode = false;
     let roomId = null;
-    let participantName = "";
+    let participantName = "Solo Learner";
     let activeQuestions = [];
     let userAnswers = [];
     let currentIndex = 0;
@@ -507,90 +564,209 @@
     let timeRemaining = 0;
     let totalTimeTaken = 0;
 
-    // Realtime Broadcast Channel for Live Scoreboard Sync Across Tabs
     const syncChannel = new BroadcastChannel('quiz_team_sync');
-    syncChannel.onmessage = (event) => {
-      if (event.data && event.data.roomId === roomId) {
+    syncChannel.onmessage = (e) => {
+      if (e.data && e.data.roomId === roomId) {
         renderScoreboard();
       }
     };
 
-    // Initialize View based on URL params
+    // Shuffling Helper (Fisher-Yates)
+    function getShuffledQuestions(array, seed = null) {
+      let copy = [...array];
+      if (seed) {
+        // Pseudo-random deterministic shuffle for team quiz
+        let m = copy.length, t, i;
+        let randomSeed = seed;
+        while (m) {
+          randomSeed = (randomSeed * 9301 + 49297) % 233280;
+          i = Math.floor((randomSeed / 233280) * m--);
+          t = copy[m]; copy[m] = copy[i]; copy[i] = t;
+        }
+        return copy;
+      } else {
+        // True random shuffle for Solo practice
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+    }
+
+    // Tab Switcher
+    function switchTab(mode) {
+      document.getElementById('tabSolo').classList.toggle('active', mode === 'solo');
+      document.getElementById('tabTeam').classList.toggle('active', mode === 'team');
+      document.getElementById('soloForm').style.display = mode === 'solo' ? 'block' : 'none';
+      document.getElementById('teamForm').style.display = mode === 'team' ? 'block' : 'none';
+    }
+
+    // Page Load & Session Restoration
     window.onload = function() {
       const urlParams = new URLSearchParams(window.location.search);
+
+      // Check if team quiz link
       if (urlParams.has('room')) {
+        isTeamMode = true;
         roomId = urlParams.get('room');
         const count = parseInt(urlParams.get('count')) || 25;
         const time = parseInt(urlParams.get('time')) || 0;
+
+        // Display persistent bar
+        showPersistentLink(window.location.href);
+
+        // Check if session is already active (refresh protection)
+        const savedSession = sessionStorage.getItem('active_quiz_session');
+        if (savedSession) {
+          restoreSession(JSON.parse(savedSession));
+          return;
+        }
 
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('joinCard').style.display = 'block';
         document.getElementById('joinQCount').innerText = count;
         document.getElementById('joinTimeLimit').innerText = time;
+      } else {
+        // Check if solo quiz session was active
+        const savedSession = sessionStorage.getItem('active_quiz_session');
+        if (savedSession) {
+          restoreSession(JSON.parse(savedSession));
+        }
       }
     };
 
-    function generateTeamLink() {
-      const count = Math.min(200, Math.max(1, parseInt(document.getElementById('customQuestionCount').value) || 25));
-      const time = Math.max(0, parseInt(document.getElementById('customTimer').value) || 0);
+    function showPersistentLink(url) {
+      document.getElementById('persistentLinkText').value = url;
+      document.getElementById('persistentLinkBar').style.display = 'block';
+    }
+
+    function copyPersistentLink() {
+      const text = document.getElementById('persistentLinkText');
+      text.select();
+      navigator.clipboard.writeText(text.value);
+      alert("ટીમ ક્વિઝ લિંક કૉપિ થઈ ગઈ છે!");
+    }
+
+    // Solo Quiz Initiation
+    function startSoloQuiz() {
+      isTeamMode = false;
+      participantName = "Solo Learner";
+      const count = Math.min(200, Math.max(1, parseInt(document.getElementById('soloQCount').value) || 20));
+      const customMin = Math.max(0, parseInt(document.getElementById('soloTimer').value) || 0);
+
+      // Shuffle differently every time
+      const randomized = getShuffledQuestions(masterQuestions);
+      activeQuestions = randomized.slice(0, count);
+      userAnswers = new Array(activeQuestions.length).fill(null);
+      currentIndex = 0;
+      timeRemaining = customMin > 0 ? customMin * 60 : 0;
+      totalTimeTaken = 0;
+
+      saveCurrentSession();
+      launchQuizUI(customMin > 0);
+    }
+
+    // Team Quiz Link Generation
+    function createTeamQuiz() {
+      const count = Math.min(200, Math.max(1, parseInt(document.getElementById('teamQCount').value) || 25));
+      const time = Math.max(0, parseInt(document.getElementById('teamTimer').value) || 0);
       const generatedRoom = 'room_' + Math.random().toString(36).substring(2, 8);
+      const seed = Math.floor(Math.random() * 100000);
 
       const base = window.location.origin + window.location.pathname;
-      const fullLink = `${base}?room=${generatedRoom}&count=${count}&time=${time}`;
+      const fullLink = `${base}?room=${generatedRoom}&count=${count}&time=${time}&seed=${seed}`;
 
-      document.getElementById('quizLinkText').value = fullLink;
-      document.getElementById('linkOutput').style.display = 'block';
+      showPersistentLink(fullLink);
+      window.location.href = fullLink; // Navigate to join view with link in bar
     }
 
-    function copyQuizLink() {
-      const copyText = document.getElementById('quizLinkText');
-      copyText.select();
-      navigator.clipboard.writeText(copyText.value);
-      alert("લિંક કૉપિ થઈ ગઈ છે! ટીમના સભ્યો સાથે શેર કરો.");
-    }
-
-    function openGeneratedLink() {
-      window.location.href = document.getElementById('quizLinkText').value;
-    }
-
+    // Candidate Joins Team Quiz
     function startCandidateQuiz() {
-      const nameInput = document.getElementById('candidateName').value.trim();
-      if (!nameInput) {
+      const name = document.getElementById('candidateName').value.trim();
+      if (!name) {
         alert("કૃપા કરીને તમારું નામ લખો!");
         return;
       }
-      participantName = nameInput;
+      participantName = name;
 
       const urlParams = new URLSearchParams(window.location.search);
       const count = parseInt(urlParams.get('count')) || 25;
-      const customMinutes = parseInt(urlParams.get('time')) || 0;
+      const customMin = parseInt(urlParams.get('time')) || 0;
+      const seed = parseInt(urlParams.get('seed')) || 12345;
 
-      activeQuestions = fullDatabase.slice(0, count);
+      // Deterministic shuffle using seed so all team members get the exact same questions
+      const randomized = getShuffledQuestions(masterQuestions, seed);
+      activeQuestions = randomized.slice(0, count);
       userAnswers = new Array(activeQuestions.length).fill(null);
       currentIndex = 0;
+      timeRemaining = customMin > 0 ? customMin * 60 : 0;
+      totalTimeTaken = 0;
 
-      if (customMinutes > 0) {
-        timeRemaining = customMinutes * 60;
+      saveCurrentSession();
+      launchQuizUI(customMin > 0);
+    }
+
+    function launchQuizUI(hasTimer) {
+      document.getElementById('setupCard').style.display = 'none';
+      document.getElementById('joinCard').style.display = 'none';
+      document.getElementById('quizScreen').style.display = 'block';
+
+      if (hasTimer) {
         document.getElementById('timerBadge').style.display = 'inline-flex';
         updateTimerDisplay();
         timerInterval = setInterval(() => {
           timeRemaining--;
           totalTimeTaken++;
           updateTimerDisplay();
+          saveCurrentSession();
           if (timeRemaining <= 0) {
             clearInterval(timerInterval);
-            alert("સમય પૂર્ણ થઈ ગયો છે! ટેસ્ટ આપમેળે સબમિટ થઈ રહ્યો છે.");
+            alert("સમય પૂર્ણ થઈ ગયો છે! ટેસ્ટ સબમિટ થઈ રહ્યો છે.");
             submitTest();
           }
         }, 1000);
       } else {
         document.getElementById('timerBadge').style.display = 'none';
-        timerInterval = setInterval(() => { totalTimeTaken++; }, 1000);
+        timerInterval = setInterval(() => { 
+          totalTimeTaken++; 
+          saveCurrentSession();
+        }, 1000);
       }
 
-      document.getElementById('joinCard').style.display = 'none';
-      document.getElementById('quizScreen').style.display = 'block';
       loadQuestion();
+    }
+
+    function saveCurrentSession() {
+      const sessionData = {
+        isTeamMode,
+        roomId,
+        participantName,
+        activeQuestions,
+        userAnswers,
+        currentIndex,
+        timeRemaining,
+        totalTimeTaken,
+        hasTimer: timeRemaining > 0
+      };
+      sessionStorage.setItem('active_quiz_session', JSON.stringify(sessionData));
+    }
+
+    function restoreSession(data) {
+      isTeamMode = data.isTeamMode;
+      roomId = data.roomId;
+      participantName = data.participantName;
+      activeQuestions = data.activeQuestions;
+      userAnswers = data.userAnswers;
+      currentIndex = data.currentIndex;
+      timeRemaining = data.timeRemaining;
+      totalTimeTaken = data.totalTimeTaken;
+
+      if (isTeamMode && roomId) {
+        showPersistentLink(window.location.href);
+      }
+
+      launchQuizUI(data.hasTimer);
     }
 
     function updateTimerDisplay() {
@@ -629,6 +805,7 @@
 
     function selectOption(index) {
       userAnswers[currentIndex] = index;
+      saveCurrentSession();
       if (currentIndex < activeQuestions.length - 1) {
         currentIndex++;
         loadQuestion();
@@ -640,6 +817,7 @@
     function prevQuestion() {
       if (currentIndex > 0) {
         currentIndex--;
+        saveCurrentSession();
         loadQuestion();
       }
     }
@@ -657,6 +835,7 @@
 
     function submitTest() {
       clearInterval(timerInterval);
+      sessionStorage.removeItem('active_quiz_session');
 
       let correctCount = 0;
       let wrongCount = 0;
@@ -669,11 +848,15 @@
         }
       });
 
-      // Hide Quiz, Show Dashboard
       document.getElementById('quizScreen').style.display = 'none';
       document.getElementById('dashboardScreen').style.display = 'block';
 
-      document.getElementById('userProfileTag').innerText = `પ્રોફાઈલ: ${participantName}`;
+      if (isTeamMode) {
+        document.getElementById('userProfileTag').innerText = `પ્રોફાઈલ: ${participantName}`;
+      } else {
+        document.getElementById('userProfileTag').innerText = `Solo Practice પૂર્ણ`;
+      }
+
       document.getElementById('finalScore').innerText = `${correctCount}/${activeQuestions.length}`;
       const percentage = ((correctCount / activeQuestions.length) * 100).toFixed(1);
       document.getElementById('statPercentage').innerText = `${percentage}%`;
@@ -685,7 +868,7 @@
       const formattedTime = `${spentMins.toString().padStart(2, '0')}:${spentSecs.toString().padStart(2, '0')}`;
       document.getElementById('statTime').innerText = formattedTime;
 
-      // Render Mistakes Only
+      // Mistakes-Only Review Render
       const reviewContainer = document.getElementById('reviewContainer');
       reviewContainer.innerHTML = '';
       const letters = ['A', 'B', 'C', 'D'];
@@ -719,43 +902,40 @@
       if (!mistakesFound) {
         reviewContainer.innerHTML = `
           <div style="background: #dcfce7; color: #166534; padding: 1.2rem; border-radius: 8px; text-align: center; font-weight: 600;">
-            🎉 શાનદાર! તમારો એક પણ જવાબ ખોટો નથી પડ્યો!
+            🎉 શાનદાર! તમારો એક પણ જવાબ ખોટો પડ્યો નથી!
           </div>
         `;
       }
 
-      // Save to Leaderboard & Sync
-      saveScore(participantName, correctCount, totalTimeTaken, formattedTime);
+      // Leaderboard handling
+      if (isTeamMode && roomId) {
+        document.getElementById('scoreboardCard').style.display = 'block';
+        saveScore(participantName, correctCount, totalTimeTaken, formattedTime);
+      }
     }
 
     function saveScore(name, score, seconds, timeStr) {
-      const storageKey = `scoreboard_${roomId || 'general'}`;
+      const storageKey = `scoreboard_${roomId}`;
       let board = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
       board.push({
         name: name,
         score: score,
         seconds: seconds,
-        timeStr: timeStr,
-        timestamp: Date.now()
+        timeStr: timeStr
       });
 
       localStorage.setItem(storageKey, JSON.stringify(board));
-
-      // Notify other open tabs/windows
       syncChannel.postMessage({ roomId: roomId });
       renderScoreboard();
     }
 
     function renderScoreboard() {
-      const storageKey = `scoreboard_${roomId || 'general'}`;
+      const storageKey = `scoreboard_${roomId}`;
       let board = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
-      // Sorting Logic: Highest Score First, if equal then Least Time Taken
       board.sort((a, b) => {
-        if (b.score !== a.score) {
-          return b.score - a.score;
-        }
+        if (b.score !== a.score) return b.score - a.score;
         return a.seconds - b.seconds;
       });
 
@@ -777,6 +957,11 @@
         `;
         tbody.appendChild(row);
       });
+    }
+
+    function resetToHome() {
+      sessionStorage.removeItem('active_quiz_session');
+      window.location.href = window.location.origin + window.location.pathname;
     }
   </script>
 </body>
