@@ -847,6 +847,7 @@
             <button class="resource-card" onclick="openResource('papers')">
               <span>📄 Previous Papers</span> <span>Download ↗</span>
             </button>
+            <!-- DIRECT EXAM PREPARATION / PRACTICE QUIZ (SAME TAB REDIRECT) -->
             <button class="resource-card" style="border-color: #3b82f6; background: #eff6ff;" onclick="openResource('exam')">
               <span style="color: #1d4ed8; font-weight: 700;">🎯 Exam Preparation (MCQ Practice & Mock Test)</span> <span style="color: #1d4ed8;">Start Test ↗</span>
             </button>
@@ -1112,7 +1113,7 @@
       if (state.step === 4) updateView();
     });
 
-    // ACTIVE USERS COUNT: BASE 324 + REGISTRATIONS INCREMENT
+    // ACTIVE USERS COUNT: BASE 324 + LIVE INCREMENT
     database.ref('registered_students').on('value', (snapshot) => {
       const count = snapshot.numChildren() || 0;
       document.getElementById('totalUsersCount').innerText = 324 + count;
@@ -1302,6 +1303,7 @@
       document.getElementById('emptyDataModal').classList.add('hidden');
     }
 
+    // OPEN RESOURCE FUNCTION (SAME TAB REDIRECTION)
     function openResource(type) {
       if (type === 'assignments') {
         const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subjectName})`);
@@ -1309,9 +1311,9 @@
         return;
       }
 
+      // PRACTICE QUIZ / EXAM PREPARATION -> OPENS IN SAME TAB
       if (type === 'exam') {
-        const subjectTarget = state.subjectName || state.subjectKey || 'Sanskrit M1';
-        window.location.href = `examprepar.html#${state.course}/${state.semester}/${encodeURIComponent(subjectTarget)}`;
+        window.location.href = "https://alex279-sourc.github.io/Quiz-/mdc.html";
         return;
       }
 
