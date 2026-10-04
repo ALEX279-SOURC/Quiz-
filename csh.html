@@ -10,12 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Cinzel:wght@700;800&display=swap" rel="stylesheet">
 
-  <!-- PDF.js Library for Real Single-Page Canvas Rendering -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-  </script>
-
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -247,7 +241,7 @@
       transition: all 0.2s;
     }
 
-    /* FULL EDGE-TO-EDGE READER SCREEN */
+    /* FULL EDGE-TO-EDGE IN-APP READER (ZERO SIDES) */
     body.reader-fullscreen-active main {
       max-width: 100% !important;
       width: 100% !important;
@@ -269,7 +263,7 @@
       border: none !important;
       border-radius: 0 !important;
       box-shadow: none !important;
-      padding: 0.5rem 0.25rem !important;
+      padding: 0 !important;
       margin: 0 !important;
       background: #0f172a;
     }
@@ -372,32 +366,48 @@
       text-decoration: underline;
     }
 
-    /* BOOK VIEW CARD */
+    /* 3D BOOK COVER PRESENTATION */
     .book-viewer-box {
       text-align: center;
-      padding: 0.75rem 0.25rem;
+      padding: 1rem 0.5rem;
       animation: expandBox 0.25s ease-out;
     }
 
     .book-3d-cover-wrap {
       display: inline-block;
       cursor: pointer;
-      perspective: 800px;
+      perspective: 900px;
       margin-bottom: 1.25rem;
-      transition: transform 0.2s ease;
+      transition: transform 0.25s ease;
     }
 
     .book-3d-cover-wrap:hover {
-      transform: scale(1.03) rotateY(-4deg);
+      transform: scale(1.04) rotateY(-6deg);
     }
 
     .book-cover-image {
-      width: 165px;
-      height: 230px;
+      width: 170px;
+      height: 240px;
       object-fit: cover;
       border-radius: 8px;
-      box-shadow: -6px 10px 20px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0,0,0,0.06);
-      background: #f1f5f9;
+      box-shadow: -8px 12px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0,0,0,0.08);
+      background: #1e293b;
+    }
+
+    /* DIGITAL TEXTBOOK COVER (FALLBACK WHEN NO PHOTO UPLOADED) */
+    .book-digital-cover {
+      width: 170px;
+      height: 240px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+      border-left: 7px solid #3b82f6;
+      box-shadow: -8px 12px 24px rgba(0, 0, 0, 0.35);
+      color: #ffffff;
+      padding: 1.25rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
     }
 
     .book-action-buttons-grid {
@@ -440,132 +450,43 @@
     }
 
     /* ===================================================
-       3. 3D FLIP SINGLE-PAGE CANVAS READER (EDGE-TO-EDGE)
+       3. 100% RELIABLE EDGE-TO-EDGE IN-APP READER
        =================================================== */
     .reader-top-controls {
+      background: #0f172a;
+      color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.5rem;
-      padding: 0 0.5rem;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid #1e293b;
     }
 
-    .page-turn-bar {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .btn-page-nav {
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #fff;
-      padding: 0.35rem 0.65rem;
-      border-radius: 6px;
-      font-size: 0.82rem;
+    .reader-title-badge {
+      font-size: 0.92rem;
       font-weight: 700;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .btn-page-nav:hover {
-      background: var(--primary);
-    }
-
-    .page-indicator-pill {
-      background: #1e293b;
-      border: 1px solid #334155;
       color: #38bdf8;
-      font-weight: 800;
-      font-size: 0.82rem;
-      padding: 0.35rem 0.65rem;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 60%;
     }
 
-    .page-num-input {
-      width: 44px;
-      text-align: center;
-      border: 1px solid #3b82f6;
-      border-radius: 4px;
-      font-weight: 800;
-      font-size: 0.82rem;
-      outline: none;
-      background: #0b1329;
-      color: #fff;
-    }
-
-    /* FULL WIDTH CONTAINER - 0 MARGINS (NO SIDE SPACE) */
-    .book-canvas-stage {
+    /* FULL WIDTH VIEWER (ZERO SIDE BORDERS) */
+    .full-page-edge-wrap {
       width: 100vw;
-      margin-left: calc(-50vw + 50%);
-      margin-right: calc(-50vw + 50%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      height: calc(100vh - 120px);
+      min-height: 80vh;
       background: #0b1329;
-      perspective: 1400px;
       position: relative;
-      touch-action: pan-y;
-      min-height: 72vh;
       overflow: hidden;
     }
 
-    .book-page-canvas-wrap {
+    .in-app-pdf-frame {
       width: 100%;
-      display: flex;
-      justify-content: center;
-      transform-origin: left center;
-      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease;
-    }
-
-    /* 3D Flip Keyframes */
-    .flip-turn-forward {
-      animation: flip3DNext 0.35s ease-in-out forwards;
-    }
-
-    .flip-turn-backward {
-      animation: flip3DPrev 0.35s ease-in-out forwards;
-    }
-
-    @keyframes flip3DNext {
-      0% { transform: perspective(1400px) rotateY(0deg); opacity: 1; }
-      50% { transform: perspective(1400px) rotateY(-35deg) scale(0.96); opacity: 0.8; }
-      100% { transform: perspective(1400px) rotateY(0deg); opacity: 1; }
-    }
-
-    @keyframes flip3DPrev {
-      0% { transform: perspective(1400px) rotateY(0deg); opacity: 1; }
-      50% { transform: perspective(1400px) rotateY(35deg) scale(0.96); opacity: 0.8; }
-      100% { transform: perspective(1400px) rotateY(0deg); opacity: 1; }
-    }
-
-    #bookCanvas {
-      width: 100% !important;
-      max-width: 100% !important;
-      height: auto !important;
+      height: 100%;
+      border: none;
       display: block;
-      margin: 0 auto;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    }
-
-    .reader-loading-box {
-      text-align: center;
-      color: #94a3b8;
-      padding: 3rem 1rem;
-    }
-
-    .swipe-hint-pill {
-      font-size: 0.75rem;
-      color: #94a3b8;
-      text-align: center;
-      margin-top: 0.45rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.35rem;
     }
 
     .auth-tab-switch {
@@ -981,7 +902,7 @@
           </label>
           <div class="pin-input-wrap">
             <input type="password" id="regPinInput" class="input-box" placeholder="e.g. 1234" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁</button>
           </div>
 
           <button type="submit" id="regSubmitBtn" class="btn-primary-action">Create Account & Enter →</button>
@@ -1058,7 +979,7 @@
           </div>
         </section>
 
-        <!-- STEP 5: BOOK COVER & OPTIONS VIEW -->
+        <!-- STEP 5: BOOK VIEW (DYNAMIC TITLE & COVER - RESOLVES PHOTO 2) -->
         <section id="step-book" class="hidden">
           <div class="book-viewer-box">
             <h2 class="step-title" style="justify-content:center; margin-bottom:0.35rem;" id="bookViewerTitle">Subject Book</h2>
@@ -1066,8 +987,11 @@
               Read the book directly inside the portal or download it to your device.
             </p>
 
+            <!-- 3D Book Cover Container -->
             <div class="book-3d-cover-wrap" onclick="openInAppBookReader()" title="Tap to read book">
-              <img id="displayBookCoverImg" class="book-cover-image" src="https://via.placeholder.com/165x230?text=Loading+Cover..." alt="Book Cover" />
+              <div id="bookCoverGraphicContainer">
+                <img id="displayBookCoverImg" class="book-cover-image" src="" alt="Book Cover" />
+              </div>
             </div>
 
             <!-- ACTION BUTTONS: READ BOOK & DOWNLOAD BOOK (SIDE-BY-SIDE) -->
@@ -1076,50 +1000,23 @@
                 <span>📖 Read Book</span>
               </button>
               <button type="button" class="btn-book-action btn-download-book" onclick="downloadBookDirectly()">
-                <span>⬇️ Download Book</span>
+                <span>⬇️️ Download Book</span>
               </button>
             </div>
           </div>
         </section>
 
-        <!-- STEP 6: IN-APP 3D SINGLE-PAGE CANVAS READER (NO VERTICAL SCROLL, 100% FULL WIDTH) -->
+        <!-- STEP 6: 100% RELIABLE IN-APP READER (RESOLVES PHOTO 1 - ZERO MARGINS, NO FAILED CANVAS) -->
         <section id="step-book-reader" class="hidden">
           <div class="reader-top-controls">
-            <div class="page-turn-bar">
-              <button type="button" class="btn-page-nav" onclick="turnBookPage(-1)">◀ Prev</button>
-              <div class="page-indicator-pill">
-                <span>Page</span>
-                <input type="number" id="currentBookPageInput" class="page-num-input" value="1" min="1" onchange="jumpToBookPage(this.value)" />
-                <span>/ <span id="bookTotalPages">1</span></span>
-              </div>
-              <button type="button" class="btn-page-nav" onclick="turnBookPage(1)">Next ▶</button>
-            </div>
+            <button type="button" class="btn-badge-action" onclick="goBack()">← Back</button>
+            <span class="reader-title-badge" id="inAppReaderHeader">📖 Book Reader</span>
             <button type="button" class="btn-badge-action" onclick="downloadBookDirectly()">⬇️ Download</button>
           </div>
 
-          <!-- FULL SCREEN EDGE-TO-EDGE TOUCH CANVAS (ONE PAGE AT A TIME) -->
-          <div class="book-canvas-stage" id="touchBookContainer">
-            <!-- Loading Indicator -->
-            <div id="bookLoadingSpinner" class="reader-loading-box">
-              <div style="font-size:2rem; margin-bottom:0.5rem;">📖</div>
-              <div style="font-weight:700; color:#fff;">Loading Page... Please wait</div>
-            </div>
-
-            <!-- Single Page Canvas Wrapper with 3D Flip -->
-            <div id="bookCanvasWrap" class="book-page-canvas-wrap hidden">
-              <canvas id="bookCanvas"></canvas>
-            </div>
-
-            <!-- Fallback box if proxy network is blocked -->
-            <div id="bookLoadError" class="reader-loading-box hidden">
-              <div style="font-size:2rem; margin-bottom:0.4rem;">⚠️</div>
-              <div style="font-weight:700; color:#f87171; margin-bottom:0.5rem;">Unable to load pages in canvas.</div>
-              <button type="button" class="btn-primary-action" style="padding:0.6rem 1rem;" onclick="downloadBookDirectly()">⬇️️ Download & Read in PDF Viewer</button>
-            </div>
-          </div>
-
-          <div class="swipe-hint-pill">
-            <span>👆 Swipe Left or Right with your finger to flip page in 3D</span>
+          <!-- FULL-SCREEN EDGE-TO-EDGE VIEWER -->
+          <div class="full-page-edge-wrap" id="touchBookContainer">
+            <iframe id="inAppPdfIframe" class="in-app-pdf-frame" src="about:blank" title="Book Viewer" allow="autoplay"></iframe>
           </div>
         </section>
 
@@ -1241,7 +1138,7 @@
   </footer>
 
   <script>
-    // 0. FAST SPLASH DISMISSAL
+    // 0. FAST INTRO DISMISSAL
     function dismissSplashNow() {
       const splash = document.getElementById('splashScreen');
       if (splash) {
@@ -1257,7 +1154,7 @@
       if (sp && sp.parentNode) sp.parentNode.removeChild(sp);
     } else {
       sessionStorage.setItem('csh_splash_shown', 'true');
-      setTimeout(dismissSplashNow, 1400);
+      setTimeout(dismissSplashNow, 1200);
     }
 
     const firebaseConfig = {
@@ -1288,6 +1185,16 @@
       }
     }
 
+    // Google Drive URL to Native Embed Preview
+    function convertToGoogleDriveEmbed(url) {
+      if (!url || !url.startsWith('http')) return url;
+      const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+      if (fileIdMatch && fileIdMatch[1]) {
+        return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+      }
+      return url;
+    }
+
     function getSubjectFixedPriority(subName) {
       const clean = subName.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (clean.includes('sanskritm1') || clean === 'sanskrit1') return 10;
@@ -1312,7 +1219,6 @@
       subjectKey: null,
       subjectName: null,
       step: 1, // 1: course, 2: sem, 3: subject, 4: resources, 5: book cover, 6: in-app reader
-      bookPage: 1,
       inAccountTab: false
     };
 
@@ -1366,7 +1272,7 @@
       el.classList.toggle('hidden');
     }
 
-    // FIREBASE LIVE DATA LISTENER (RESETS REFRESH SAFETY)
+    // FIREBASE LIVE DATA LISTENER
     database.ref('study_data').on('value', (snapshot) => {
       const liveData = snapshot.val();
       studyData = {
@@ -1606,34 +1512,39 @@
     }
 
     // ========================================================
-    // BOOK VIEWER & REAL HTML5 CANVAS 3D FLIP READER
+    // BOOK VIEWER & DYNAMIC COVER RENDERING (FIXES PHOTO 2)
     // ========================================================
-    let currentPdfDoc = null;
-    let isPageRendering = false;
-    let pageNumPending = null;
+    function populateBookStepData() {
+      const subObj = getActiveSubjectData();
+      const displayName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey) || "Subject";
+
+      // 1. Dynamic Subject Title
+      document.getElementById('bookViewerTitle').innerText = `📘 ${displayName} Book`;
+
+      // 2. Dynamic Cover Setup
+      const container = document.getElementById('bookCoverGraphicContainer');
+      if (subObj.bookCover && subObj.bookCover.trim() !== '') {
+        container.innerHTML = `<img class="book-cover-image" src="${subObj.bookCover}" alt="${displayName} Cover" />`;
+      } else {
+        // If admin didn't upload cover, render realistic 3D digital book with subject title
+        container.innerHTML = `
+          <div class="book-digital-cover">
+            <div style="font-size:0.75rem; color:#93c5fd; font-weight:700; text-transform:uppercase;">${state.course || 'College'} • ${state.semester || ''}</div>
+            <div style="font-size:1.15rem; font-weight:800; line-height:1.3; color:#fff;">${displayName}</div>
+            <div style="font-size:0.7rem; color:#cbd5e1; font-weight:600;">Campus Study Hub • Library</div>
+          </div>
+        `;
+      }
+    }
 
     function openBookView() {
-      const subObj = getActiveSubjectData();
-      const displayName = subObj.subjectName || state.subjectName || "Subject";
-
-      document.getElementById('bookViewerTitle').innerText = `📚 ${displayName} Book`;
-      
-      const coverImg = document.getElementById('displayBookCoverImg');
-      if (subObj.bookCover && subObj.bookCover.trim() !== '') {
-        coverImg.src = subObj.bookCover;
-      } else {
-        coverImg.src = 'https://via.placeholder.com/165x230?text=' + encodeURIComponent(displayName);
-      }
-
       state.step = 5;
       setHash();
       updateView();
     }
 
-    // Opens Book directly into 3D Single-Page Canvas Reader
+    // Opens Book directly in 100% Edge-to-Edge view (FIXES PHOTO 1)
     function openInAppBookReader() {
-      if (!isFirebaseReady) return; // Wait for Firebase data to prevent false "Book Not Found"
-
       const subObj = getActiveSubjectData();
       const bookUrl = subObj.book;
 
@@ -1643,191 +1554,16 @@
         return;
       }
 
-      const savedPageKey = `csh_book_page_${state.course}_${state.semester}_${state.subjectKey}`;
-      const savedPage = parseInt(localStorage.getItem(savedPageKey)) || 1;
-      state.bookPage = savedPage;
-
       state.step = 6;
       setHash();
       updateView();
 
-      loadCanvasPdfDocument(bookUrl, savedPage);
-      initSwipeGestures();
+      const embedUrl = convertToGoogleDriveEmbed(bookUrl.trim());
+      document.getElementById('inAppReaderHeader').innerText = `📖 ${subObj.subjectName || state.subjectName} Book`;
+      document.getElementById('inAppPdfIframe').src = embedUrl;
     }
 
-    // Loads PDF with CORS proxies and prepares single-page rendering
-    async function loadCanvasPdfDocument(url, initialPage) {
-      document.getElementById('bookLoadingSpinner').classList.remove('hidden');
-      document.getElementById('bookCanvasWrap').classList.add('hidden');
-      document.getElementById('bookLoadError').classList.add('hidden');
-
-      const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-      let fetchUrl = url;
-      if (fileIdMatch && fileIdMatch[1]) {
-        const fileId = fileIdMatch[1];
-        const rawDirect = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
-        fetchUrl = `https://corsproxy.io/?url=${encodeURIComponent(rawDirect)}`;
-      }
-
-      try {
-        const loadingTask = pdfjsLib.getDocument({
-          url: fetchUrl,
-          cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/cmaps/',
-          cMapPacked: true
-        });
-
-        currentPdfDoc = await loadingTask.promise;
-        document.getElementById('bookTotalPages').innerText = currentPdfDoc.numPages;
-        document.getElementById('currentBookPageInput').max = currentPdfDoc.numPages;
-
-        let targetP = parseInt(initialPage) || 1;
-        if (targetP > currentPdfDoc.numPages) targetP = currentPdfDoc.numPages;
-        if (targetP < 1) targetP = 1;
-        state.bookPage = targetP;
-
-        document.getElementById('bookLoadingSpinner').classList.add('hidden');
-        document.getElementById('bookCanvasWrap').classList.remove('hidden');
-
-        renderSingleCanvasPage(state.bookPage);
-      } catch (err) {
-        console.warn("Primary proxy slow/failed, trying secondary proxy...", err);
-        try {
-          if (fileIdMatch && fileIdMatch[1]) {
-            const fileId = fileIdMatch[1];
-            const rawDirect = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
-            const altUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawDirect)}`;
-            
-            const altTask = pdfjsLib.getDocument({
-              url: altUrl,
-              cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/cmaps/',
-              cMapPacked: true
-            });
-
-            currentPdfDoc = await altTask.promise;
-            document.getElementById('bookTotalPages').innerText = currentPdfDoc.numPages;
-            document.getElementById('currentBookPageInput').max = currentPdfDoc.numPages;
-
-            let targetP = parseInt(initialPage) || 1;
-            if (targetP > currentPdfDoc.numPages) targetP = currentPdfDoc.numPages;
-            state.bookPage = targetP;
-
-            document.getElementById('bookLoadingSpinner').classList.add('hidden');
-            document.getElementById('bookCanvasWrap').classList.remove('hidden');
-
-            renderSingleCanvasPage(state.bookPage);
-            return;
-          }
-        } catch(e2) {
-          console.error("Secondary proxy also failed", e2);
-        }
-
-        document.getElementById('bookLoadingSpinner').classList.add('hidden');
-        document.getElementById('bookLoadError').classList.remove('hidden');
-      }
-    }
-
-    // Renders ONLY ONE SINGLE PAGE AT A TIME (NO VERTICAL SCROLLING!)
-    function renderSingleCanvasPage(num) {
-      if (!currentPdfDoc) return;
-      isPageRendering = true;
-
-      currentPdfDoc.getPage(num).then((page) => {
-        const canvas = document.getElementById('bookCanvas');
-        const ctx = canvas.getContext('2d');
-
-        // Fit screen width with 0 side borders
-        const screenWidth = window.innerWidth || document.documentElement.clientWidth;
-        const unscaledViewport = page.getViewport({ scale: 1 });
-        const scale = screenWidth / unscaledViewport.width;
-        const viewport = page.getViewport({ scale: Math.max(scale, 1.25) });
-
-        const outputScale = window.devicePixelRatio || 1;
-        canvas.width = Math.floor(viewport.width * outputScale);
-        canvas.height = Math.floor(viewport.height * outputScale);
-        canvas.style.width = "100%";
-        canvas.style.height = "auto";
-
-        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
-
-        const renderContext = {
-          canvasContext: ctx,
-          transform: transform,
-          viewport: viewport
-        };
-
-        page.render(renderContext).promise.then(() => {
-          isPageRendering = false;
-          if (pageNumPending !== null) {
-            renderSingleCanvasPage(pageNumPending);
-            pageNumPending = null;
-          }
-        });
-
-        document.getElementById('currentBookPageInput').value = num;
-
-        // Save page to localStorage so refresh keeps the exact page
-        const savedPageKey = `csh_book_page_${state.course}_${state.semester}_${state.subjectKey}`;
-        localStorage.setItem(savedPageKey, num);
-      });
-    }
-
-    // 3D Flip Page Action
-    function turnBookPage(delta) {
-      if (!currentPdfDoc) return;
-      let newPage = state.bookPage + delta;
-      if (newPage < 1) newPage = 1;
-      if (newPage > currentPdfDoc.numPages) newPage = currentPdfDoc.numPages;
-      if (newPage === state.bookPage) return;
-
-      const wrap = document.getElementById('bookCanvasWrap');
-      const isForward = delta > 0;
-
-      // Real 3D Flip Animation trigger
-      wrap.classList.remove('flip-turn-forward', 'flip-turn-backward');
-      void wrap.offsetWidth;
-      wrap.classList.add(isForward ? 'flip-turn-forward' : 'flip-turn-backward');
-
-      setTimeout(() => {
-        state.bookPage = newPage;
-        renderSingleCanvasPage(newPage);
-      }, 160);
-    }
-
-    function jumpToBookPage(val) {
-      if (!currentPdfDoc) return;
-      let p = parseInt(val) || 1;
-      if (p < 1) p = 1;
-      if (p > currentPdfDoc.numPages) p = currentPdfDoc.numPages;
-      state.bookPage = p;
-      renderSingleCanvasPage(p);
-    }
-
-    // Finger Swipe Gesture Listener
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    function initSwipeGestures() {
-      const container = document.getElementById('touchBookContainer');
-      if (!container) return;
-
-      container.ontouchstart = (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-      };
-
-      container.ontouchend = (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        const diff = touchEndX - touchStartX;
-        if (Math.abs(diff) > 40) {
-          if (diff < 0) {
-            turnBookPage(1); // Swipe Left -> 3D Flip to Next Page
-          } else {
-            turnBookPage(-1); // Swipe Right -> 3D Flip to Prev Page
-          }
-        }
-      };
-    }
-
-    // DIRECT BROWSER DOWNLOAD (DOES NOT OPEN GOOGLE DRIVE APP)
+    // DIRECT DOWNLOAD (Bypasses Google Drive App on Android)
     function downloadBookDirectly() {
       const subObj = getActiveSubjectData();
       const bookUrl = subObj.book;
@@ -1841,12 +1577,12 @@
       const fileIdMatch = bookUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || bookUrl.match(/id=([a-zA-Z0-9_-]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
         const fileId = fileIdMatch[1];
-        // drive.usercontent.google.com sends file bytes directly, bypassing Google Drive app
-        const directDownloadUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
-
+        // drive.usercontent.google.com triggers direct browser download without opening Google Drive app
+        const directDownloadUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&authuser=0`;
         const a = document.createElement('a');
         a.href = directDownloadUrl;
-        a.download = `${subObj.subjectName || 'Book'}.pdf`;
+        a.setAttribute('download', `${subObj.subjectName || 'Book'}.pdf`);
+        a.target = '_self';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1957,7 +1693,7 @@
       }
     });
 
-    // PURE STEP ROUTER WITH REFRESH SAFETY
+    // PURE HIERARCHICAL ROUTER (NO JUMPING OR LOOPING)
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
@@ -2067,13 +1803,11 @@
         const subObj = getActiveSubjectData();
         const fullSubjectName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey);
         breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName} > Book`;
+        populateBookStepData();
       } else if (state.step === 6) {
         document.getElementById('step-book-reader').classList.remove('hidden');
-        backBtn.classList.remove('hidden');
-        breadcrumb.classList.remove('hidden');
-        const subObj = getActiveSubjectData();
-        const fullSubjectName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey);
-        breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName} > Book Reader`;
+        backBtn.classList.add('hidden'); // Use in-app reader header back
+        breadcrumb.classList.add('hidden');
       }
     }
 
@@ -2159,7 +1893,7 @@
       updateView();
     }
 
-    // DETERMINISTIC BACK NAVIGATION
+    // STRICT STEP-BY-STEP BACK NAVIGATION
     function goBack() {
       if (state.inAccountTab) {
         closeAccountTab();
@@ -2167,7 +1901,7 @@
       }
 
       if (state.step === 6) {
-        currentPdfDoc = null;
+        document.getElementById('inAppPdfIframe').src = 'about:blank';
         state.step = 5;
         setHash();
         updateView();
