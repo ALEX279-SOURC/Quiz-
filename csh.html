@@ -65,10 +65,10 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
-      overscroll-behavior-y: contain;
+      overscroll-behavior-y: contain; /* Accidental pull-to-refresh band karne ke liye */
     }
 
-    /* 1. CINEMATIC 3D LOGO SPLASH SCREEN */
+    /* 1. SPLASH SCREEN */
     #splashScreen {
       position: fixed;
       top: 0;
@@ -192,7 +192,7 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* 2. TOP BAR & THEME SWITCHER */
+    /* 2. TOP BAR & CONTROLS */
     .top-bar {
       background: var(--topbar-bg);
       color: #fff;
@@ -290,7 +290,7 @@
       box-shadow: none !important;
       padding: 0 !important;
       margin: 0 !important;
-      background: #0f172a;
+      background: #0b1329;
     }
 
     .step-title {
@@ -480,24 +480,25 @@
       background: #1e293b;
     }
 
-    /* 3. IN-APP READER HEADER */
+    /* ===================================================
+       3. TOP CONTROLS & COMPLETELY HIDDEN POPOUT BAR
+       =================================================== */
     .reader-top-controls {
       background: #0f172a;
       color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 0.4rem;
-      padding: max(0.85rem, env(safe-area-inset-top, 0.85rem)) 0.75rem 0.65rem 0.75rem;
+      padding: max(0.9rem, env(safe-area-inset-top, 0.9rem)) 0.85rem 0.65rem 0.85rem;
       border-bottom: 1px solid #1e293b;
       position: sticky;
       top: 0;
       z-index: 1000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      gap: 0.5rem;
     }
 
     .reader-title-badge {
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: #38bdf8;
       overflow: hidden;
@@ -507,24 +508,32 @@
       text-align: center;
     }
 
+    /* SECONDARY BOOKMARK / MEMORY SUB-BAR */
+    .reader-sub-controls {
+      background: #131f3f;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0.85rem;
+      border-bottom: 1px solid #1e2e5c;
+      font-size: 0.8rem;
+    }
+
     .reader-page-nav-group {
       display: flex;
       align-items: center;
-      background: #1e293b;
-      border: 1px solid #334155;
-      padding: 0.2rem 0.4rem;
-      border-radius: 6px;
-      gap: 0.3rem;
+      gap: 0.35rem;
     }
 
     .btn-page-nav-mini {
       background: #0f172a;
       border: 1px solid #334155;
       color: #fff;
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       border-radius: 4px;
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       font-weight: 800;
       cursor: pointer;
       display: flex;
@@ -533,16 +542,46 @@
     }
 
     .page-mini-input {
-      width: 32px;
+      width: 38px;
       text-align: center;
       background: #0b1329;
       border: 1px solid #3b82f6;
       border-radius: 4px;
       color: #fff;
       font-weight: 800;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       outline: none;
-      padding: 0.15rem 0;
+      padding: 0.2rem 0;
+    }
+
+    /* FULL-PAGE CONTAINER WITH GOOGLE POPOUT BAR CLIPPED OUT (MARGIN-TOP -56PX) */
+    .full-page-edge-wrap {
+      width: 100vw;
+      height: calc(100vh - 125px);
+      background: #0b1329;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Pushes Google Drive's top bar (and the popout button) off-screen! */
+    .in-app-pdf-frame {
+      width: 100%;
+      height: calc(100% + 56px);
+      margin-top: -56px;
+      border: none;
+      display: block;
+    }
+
+    /* Top-Right Blocker Shield to 100% guarantee no pop-out button shows */
+    .popout-blocker-shield {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 65px;
+      height: 55px;
+      background: transparent;
+      z-index: 100;
+      pointer-events: auto;
     }
 
     .resume-page-banner {
@@ -555,26 +594,9 @@
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid #3b82f6;
-      animation: expandBox 0.25s ease-out;
     }
 
-    .full-page-edge-wrap {
-      width: 100vw;
-      height: calc(100vh - 80px);
-      background: #0b1329;
-      position: relative;
-      overflow: hidden;
-      overscroll-behavior: contain;
-    }
-
-    .in-app-pdf-frame {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-
-    /* 4. DUAL AUTH TABS & FORMS (DYNAMIC CONTRAST) */
+    /* 4. DUAL AUTH TABS & FORMS */
     .auth-tab-switch {
       display: flex;
       border: 1px solid var(--border);
@@ -675,7 +697,6 @@
       opacity: 0.85;
     }
 
-    /* FIX SELECT OPTION CONTRAST ON MOBILE CHROMIUM */
     select.select-box option {
       background-color: var(--card-bg);
       color: var(--text);
@@ -859,12 +880,8 @@
       animation: modalPop 0.2s ease-out;
     }
 
-    #emptyModalTitle {
-      color: var(--text);
-    }
-    #emptyModalDesc {
-      color: var(--text-muted);
-    }
+    #emptyModalTitle { color: var(--text); }
+    #emptyModalDesc { color: var(--text-muted); }
 
     @keyframes modalPop {
       0% { transform: scale(0.92); opacity: 0; }
@@ -937,7 +954,7 @@
     </div>
   </div>
 
-  <!-- TOP BAR: THEME TOGGLE & ACCOUNT -->
+  <!-- TOP BAR -->
   <div class="top-bar">
     <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
       🌙
@@ -951,7 +968,6 @@
 
   <header id="mainAppHeader">
     <div class="header-logo-wrap">
-      <!-- ADAPTIVE LOGO: USES currentColor TO MATCH TEXT CONTRAST IN BOTH THEMES -->
       <svg class="header-mini-logo" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M 82 25 A 25 25 0 0 1 118 25" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
         <path d="M 74 16 A 36 36 0 0 1 126 16" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
@@ -1113,30 +1129,37 @@
           </div>
         </section>
 
-        <!-- STEP 6: 100% RELIABLE IN-APP READER WITH PAGE MEMORY & COMFORT NOTCH -->
+        <!-- STEP 6: IN-APP READER WITH CLEAN CONTROLS (NO CLIPPING, NO POPOUT ICON) -->
         <section id="step-book-reader" class="hidden">
+          <!-- TOP ROW: BACK, TITLE, DOWNLOAD -->
           <div class="reader-top-controls">
             <button type="button" class="btn-badge-action" onclick="goBack()">← Back</button>
             <span class="reader-title-badge" id="inAppReaderHeader">📖 Book Reader</span>
-            
-            <div class="reader-page-nav-group">
-              <button type="button" class="btn-page-nav-mini" onclick="stepReaderPage(-1)">◀</button>
-              <input type="number" id="readerPageIndicatorInput" class="page-mini-input" value="1" min="1" max="1000" onchange="jumpToReaderPage(this.value)" />
-              <button type="button" class="btn-page-nav-mini" onclick="stepReaderPage(1)">▶</button>
-            </div>
-
-            <button type="button" class="btn-badge-action" style="background:#16a34a; border-color:#16a34a; color:#fff;" onclick="bookmarkCurrentPage()" title="Save current page so refresh never loses it">💾 Save</button>
             <button type="button" class="btn-badge-action" onclick="downloadBookDirectly()">⬇️ Download</button>
           </div>
 
-          <div id="resumePageNotice" class="resume-page-banner hidden">
-            <span id="resumeNoticeText">📍 Last read: Page 1</span>
-            <button type="button" class="btn-badge-action" style="padding:0.15rem 0.5rem; font-size:0.75rem; background:#fff; color:#1e3a8a;" onclick="applyResumePage()">Jump to Page</button>
+          <!-- SECONDARY ROW: PAGE NAVIGATOR & BOOKMARK -->
+          <div class="reader-sub-controls">
+            <div class="reader-page-nav-group">
+              <button type="button" class="btn-page-nav-mini" onclick="stepReaderPage(-1)">◀</button>
+              <span>Page</span>
+              <input type="number" id="readerPageIndicatorInput" class="page-mini-input" value="1" min="1" max="1000" onchange="jumpToReaderPage(this.value)" />
+              <button type="button" class="btn-page-nav-mini" onclick="stepReaderPage(1)">▶</button>
+            </div>
+            <button type="button" class="btn-badge-action" style="background:#16a34a; border-color:#16a34a; color:#fff;" onclick="bookmarkCurrentPage()" title="Save current page so refresh remembers it">💾 Save Page</button>
           </div>
 
-          <!-- FULL-SCREEN EDGE-TO-EDGE VIEWER -->
+          <!-- RESUME NOTIFICATION STRIP -->
+          <div id="resumePageNotice" class="resume-page-banner hidden">
+            <span id="resumeNoticeText">📍 Last read: Page 1</span>
+            <button type="button" class="btn-badge-action" style="padding:0.2rem 0.6rem; font-size:0.75rem; background:#fff; color:#1e3a8a;" onclick="applyResumePage()">Jump to Page</button>
+          </div>
+
+          <!-- FULL-SCREEN CONTAINER (POPOUT BAR CLIPPED OUT VISUALLY VIA MARGIN-TOP -56PX) -->
           <div class="full-page-edge-wrap" id="touchBookContainer">
-            <iframe id="inAppPdfIframe" class="in-app-pdf-frame" src="about:blank" title="Book Viewer" allow="autoplay"></iframe>
+            <!-- Shield to prevent accidental clicks on the corner -->
+            <div class="popout-blocker-shield"></div>
+            <iframe id="inAppPdfIframe" class="in-app-pdf-frame" src="about:blank" title="Book Viewer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
           </div>
         </section>
 
@@ -1185,7 +1208,7 @@
           </div>
           <div class="pin-input-wrap" style="margin-bottom: 0.4rem;">
             <input type="password" id="accDisplayPin" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed;" />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️</button>
           </div>
 
           <div id="pinUpdateDrawer" class="inline-update-box hidden">
@@ -1246,7 +1269,7 @@
       <button class="modal-close-btn" onclick="closeEmptyModal()" title="Close">❌</button>
       <div style="font-size:2.5rem; margin-bottom:0.5rem;">📂</div>
       <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:0.3rem;" id="emptyModalTitle">Data Not Found</h3>
-      <p style="font-size:0.88rem; margin-bottom:1.25rem;" id="emptyModalDesc">
+      <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.25rem;" id="emptyModalDesc">
         Is resource ke liye link abhi add nahi ki gayi hai.
       </p>
       <button class="btn-primary-action" onclick="closeEmptyModal()">Theek Hai (OK)</button>
@@ -1652,6 +1675,9 @@
       }
     }
 
+    // ========================================================
+    // BOOK VIEWER & DYNAMIC COVER RENDERING
+    // ========================================================
     function populateBookStepData() {
       const subObj = getActiveSubjectData();
       const displayName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey) || "Subject";
@@ -1678,6 +1704,7 @@
       updateView();
     }
 
+    // Opens Book directly in in-app reader & restores saved page
     function openInAppBookReader() {
       if (!isFirebaseReady) return;
 
@@ -1690,6 +1717,7 @@
         return;
       }
 
+      // Read saved page from localStorage
       const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
       const savedPage = parseInt(localStorage.getItem(savedPageKey)) || 1;
       state.bookPage = savedPage;
@@ -1738,7 +1766,7 @@
       const current = parseInt(document.getElementById('readerPageIndicatorInput').value) || state.bookPage || 1;
       const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
       localStorage.setItem(savedPageKey, current);
-      alert(`Page ${current} bookmarked successfully! Refresh karne par yahi page khulega.`);
+      alert(`Page ${current} bookmarked! Refresh karne par yahi page restore hoga.`);
     }
 
     function applyResumePage() {
@@ -1748,6 +1776,7 @@
       document.getElementById('resumePageNotice').classList.add('hidden');
     }
 
+    // DIRECT BROWSER DOWNLOAD (Does not open Google Drive App)
     function downloadBookDirectly() {
       const subObj = getActiveSubjectData();
       const bookUrl = subObj.book;
