@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>માણસાઈના દીવા - Ultimate MCQ Portal</title>
+  <title>Short questions prectice portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
@@ -68,7 +68,6 @@
       margin-bottom: 1.5rem;
     }
 
-    /* Tab Switcher */
     .tabs-nav {
       display: flex;
       border-bottom: 2px solid var(--border);
@@ -119,7 +118,6 @@
       background: white;
     }
 
-    /* Sticky Team Link Bar */
     .sticky-link-bar {
       background: #eff6ff;
       border: 1.5px dashed var(--primary);
@@ -348,13 +346,13 @@
 </head>
 <body>
 
+  <!-- Updated Header -->
   <header>
-    <h1>માણસાઈના દીવા - Ultimate MCQ Portal</h1>
+    <h1>Short questions prectice portal</h1>
   </header>
 
   <div class="container">
     
-    <!-- Permanent Team Link Display if in Team Quiz -->
     <div id="persistentLinkBar" class="sticky-link-bar" style="display: none;">
       <span style="font-weight: 700; color: var(--primary);">🔗 ટીમ ક્વિઝ લિંક (શેર કરવા માટે ઉપલબ્ધ):</span>
       <div class="link-copy-box">
@@ -397,7 +395,7 @@
       </div>
     </div>
 
-    <!-- 2. Candidate Join Card (Shown via Shared Link) -->
+    <!-- 2. Candidate Join Card -->
     <div class="card" id="joinCard" style="display: none;">
       <h2 style="margin-bottom: 1rem; font-size: 1.3rem;">ટીમ ક્વિઝમાં જોડાવો</h2>
       <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1.2rem; border: 1px solid var(--border);">
@@ -469,14 +467,12 @@
         <button class="btn btn-primary" onclick="resetToHome()">નવી ટેસ્ટ શરૂ કરો</button>
       </div>
 
-      <!-- Mistakes Section -->
       <div class="card review-section">
         <h3 style="margin-bottom: 0.5rem; color: var(--wrong);">ફક્ત ખોટા પડેલા પ્રશ્નો અને સાચા ઉત્તરો</h3>
         <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem;">સુધારણા માટે તમારા દ્વારા થયેલી ભૂલો:</p>
         <div id="reviewContainer"></div>
       </div>
 
-      <!-- Scoreboard (Visible for Team Quiz) -->
       <div class="card" id="scoreboardCard" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
           <h3 style="color: var(--primary);">ટીમ સ્કોરબોર્ડ (Leaderboard)</h3>
@@ -499,7 +495,6 @@
   </div>
 
   <script>
-    // 200 Questions Master Database
     const masterQuestions = [
       { q: "'માણસાઈના દીવા' પુસ્તકના મૂળ લેખક કોણ છે?", options: ["ઉમાશંકર જોશી", "ઝવેરચંદ મેઘાણી", "કનૈયાલાલ મુનશી", "રમણલાલ દેસાઈ"], ans: 1, cat: "સાહિત્યકાર પરિચય" },
       { q: "આ પુસ્તકમાં કોના જીવન અને મૂકસેવાની સત્યઘટનાઓ આલેખાયેલી છે?", options: ["મહાત્મા ગાંધી", "ઠક્કરબાપા", "પૂજ્ય રવિશંકર મહારાજ", "બબલભાઈ મહેતા"], ans: 2, cat: "પાત્ર પરિચય" },
@@ -553,7 +548,6 @@
       });
     }
 
-    // App State
     let isTeamMode = false;
     let roomId = null;
     let participantName = "Solo Learner";
@@ -571,11 +565,9 @@
       }
     };
 
-    // Shuffling Helper (Fisher-Yates)
     function getShuffledQuestions(array, seed = null) {
       let copy = [...array];
       if (seed) {
-        // Pseudo-random deterministic shuffle for team quiz
         let m = copy.length, t, i;
         let randomSeed = seed;
         while (m) {
@@ -585,7 +577,6 @@
         }
         return copy;
       } else {
-        // True random shuffle for Solo practice
         for (let i = copy.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [copy[i], copy[j]] = [copy[j], copy[i]];
@@ -594,7 +585,6 @@
       }
     }
 
-    // Tab Switcher
     function switchTab(mode) {
       document.getElementById('tabSolo').classList.toggle('active', mode === 'solo');
       document.getElementById('tabTeam').classList.toggle('active', mode === 'team');
@@ -602,21 +592,17 @@
       document.getElementById('teamForm').style.display = mode === 'team' ? 'block' : 'none';
     }
 
-    // Page Load & Session Restoration
     window.onload = function() {
       const urlParams = new URLSearchParams(window.location.search);
 
-      // Check if team quiz link
       if (urlParams.has('room')) {
         isTeamMode = true;
         roomId = urlParams.get('room');
         const count = parseInt(urlParams.get('count')) || 25;
         const time = parseInt(urlParams.get('time')) || 0;
 
-        // Display persistent bar
         showPersistentLink(window.location.href);
 
-        // Check if session is already active (refresh protection)
         const savedSession = sessionStorage.getItem('active_quiz_session');
         if (savedSession) {
           restoreSession(JSON.parse(savedSession));
@@ -628,7 +614,6 @@
         document.getElementById('joinQCount').innerText = count;
         document.getElementById('joinTimeLimit').innerText = time;
       } else {
-        // Check if solo quiz session was active
         const savedSession = sessionStorage.getItem('active_quiz_session');
         if (savedSession) {
           restoreSession(JSON.parse(savedSession));
@@ -648,14 +633,12 @@
       alert("ટીમ ક્વિઝ લિંક કૉપિ થઈ ગઈ છે!");
     }
 
-    // Solo Quiz Initiation
     function startSoloQuiz() {
       isTeamMode = false;
       participantName = "Solo Learner";
       const count = Math.min(200, Math.max(1, parseInt(document.getElementById('soloQCount').value) || 20));
       const customMin = Math.max(0, parseInt(document.getElementById('soloTimer').value) || 0);
 
-      // Shuffle differently every time
       const randomized = getShuffledQuestions(masterQuestions);
       activeQuestions = randomized.slice(0, count);
       userAnswers = new Array(activeQuestions.length).fill(null);
@@ -667,7 +650,6 @@
       launchQuizUI(customMin > 0);
     }
 
-    // Team Quiz Link Generation
     function createTeamQuiz() {
       const count = Math.min(200, Math.max(1, parseInt(document.getElementById('teamQCount').value) || 25));
       const time = Math.max(0, parseInt(document.getElementById('teamTimer').value) || 0);
@@ -678,10 +660,9 @@
       const fullLink = `${base}?room=${generatedRoom}&count=${count}&time=${time}&seed=${seed}`;
 
       showPersistentLink(fullLink);
-      window.location.href = fullLink; // Navigate to join view with link in bar
+      window.location.href = fullLink;
     }
 
-    // Candidate Joins Team Quiz
     function startCandidateQuiz() {
       const name = document.getElementById('candidateName').value.trim();
       if (!name) {
@@ -695,7 +676,6 @@
       const customMin = parseInt(urlParams.get('time')) || 0;
       const seed = parseInt(urlParams.get('seed')) || 12345;
 
-      // Deterministic shuffle using seed so all team members get the exact same questions
       const randomized = getShuffledQuestions(masterQuestions, seed);
       activeQuestions = randomized.slice(0, count);
       userAnswers = new Array(activeQuestions.length).fill(null);
@@ -868,7 +848,6 @@
       const formattedTime = `${spentMins.toString().padStart(2, '0')}:${spentSecs.toString().padStart(2, '0')}`;
       document.getElementById('statTime').innerText = formattedTime;
 
-      // Mistakes-Only Review Render
       const reviewContainer = document.getElementById('reviewContainer');
       reviewContainer.innerHTML = '';
       const letters = ['A', 'B', 'C', 'D'];
@@ -907,7 +886,6 @@
         `;
       }
 
-      // Leaderboard handling
       if (isTeamMode && roomId) {
         document.getElementById('scoreboardCard').style.display = 'block';
         saveScore(participantName, correctCount, totalTimeTaken, formattedTime);
