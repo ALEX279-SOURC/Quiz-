@@ -58,7 +58,7 @@
       justify-content: center;
       z-index: 99999;
       cursor: pointer;
-      transition: opacity 0.35s ease-out, visibility 0.35s;
+      transition: opacity 0.3s ease-out, visibility 0.3s;
     }
 
     #splashScreen.hide-splash {
@@ -238,6 +238,15 @@
       width: 100%;
       margin: 1.5rem auto 2.5rem;
       padding: 0 1rem;
+      transition: all 0.2s;
+    }
+
+    /* FULL EDGE-TO-EDGE READER MODE */
+    body.reader-fullscreen-active main {
+      max-width: 100% !important;
+      width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
     }
 
     .card {
@@ -250,9 +259,13 @@
       position: relative;
     }
 
-    /* Edge-to-edge full width reader card */
-    .card.reader-active-card {
-      padding: 0.85rem 0.5rem 0.5rem 0.5rem;
+    body.reader-fullscreen-active .card {
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      padding: 0.4rem 0.25rem !important;
+      margin: 0 !important;
+      background: #0b1329;
     }
 
     .step-title {
@@ -342,7 +355,7 @@
       color: var(--primary);
       font-weight: 700;
       cursor: pointer;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
@@ -353,7 +366,7 @@
       text-decoration: underline;
     }
 
-    /* IN-PLACE BOOK VIEWER CARD */
+    /* BOOK VIEW CARD */
     .book-viewer-box {
       text-align: center;
       padding: 0.75rem 0.25rem;
@@ -420,15 +433,13 @@
       background: #1e293b;
     }
 
-    /* ===================================================
-       3. 3D FLIP BOOK REALISTIC READER & FULL-BLEED CSS
-       =================================================== */
+    /* 3D FULL-BLEED IN-APP BOOK VIEWER */
     .reader-top-controls {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.6rem;
-      padding: 0 0.4rem;
+      margin-bottom: 0.5rem;
+      padding: 0 0.5rem;
     }
 
     .page-turn-bar {
@@ -443,7 +454,7 @@
       color: #fff;
       padding: 0.35rem 0.65rem;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.15s;
@@ -458,37 +469,36 @@
       border: 1px solid #bfdbfe;
       color: var(--primary);
       font-weight: 800;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       padding: 0.35rem 0.65rem;
       border-radius: 6px;
       display: flex;
       align-items: center;
-      gap: 0.2rem;
+      gap: 0.25rem;
     }
 
     .page-num-input {
-      width: 42px;
+      width: 44px;
       text-align: center;
       border: 1px solid #93c5fd;
       border-radius: 4px;
       font-weight: 800;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       outline: none;
       background: #fff;
       color: #1e3a8a;
     }
 
-    /* FULL-PAGE EDGE TO EDGE CONTAINER (USES ENTIRE SCREEN WIDTH) */
+    /* FULL WIDTH CONTAINER - 0 MARGINS */
     .full-page-edge-wrap {
-      width: 100%;
-      height: 82vh;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #000;
+      width: 100vw;
+      margin-left: calc(-50vw + 50%);
+      height: 84vh;
+      background: #0b1329;
       position: relative;
       perspective: 1600px;
       touch-action: pan-y;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
     }
 
     .in-app-pdf-frame {
@@ -497,33 +507,32 @@
       border: none;
       display: block;
       transform-origin: left center;
-      transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.45s ease;
+      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
     }
 
-    /* 3D Page Turn Keyframes */
     .turn-page-forward {
-      animation: flip3DForward 0.45s ease-in-out forwards;
+      animation: flip3DForward 0.4s ease-in-out forwards;
     }
 
     .turn-page-backward {
-      animation: flip3DBackward 0.45s ease-in-out forwards;
+      animation: flip3DBackward 0.4s ease-in-out forwards;
     }
 
     @keyframes flip3DForward {
       0% { transform: perspective(1600px) rotateY(0deg); opacity: 1; }
-      50% { transform: perspective(1600px) rotateY(-30deg) scale(0.96); opacity: 0.85; }
+      50% { transform: perspective(1600px) rotateY(-25deg) scale(0.96); opacity: 0.85; }
       100% { transform: perspective(1600px) rotateY(0deg); opacity: 1; }
     }
 
     @keyframes flip3DBackward {
       0% { transform: perspective(1600px) rotateY(0deg); opacity: 1; }
-      50% { transform: perspective(1600px) rotateY(30deg) scale(0.96); opacity: 0.85; }
+      50% { transform: perspective(1600px) rotateY(25deg) scale(0.96); opacity: 0.85; }
       100% { transform: perspective(1600px) rotateY(0deg); opacity: 1; }
     }
 
     .swipe-hint-pill {
-      font-size: 0.72rem;
-      color: var(--text-muted);
+      font-size: 0.75rem;
+      color: #94a3b8;
       text-align: center;
       margin-top: 0.45rem;
       display: flex;
@@ -885,7 +894,7 @@
     </div>
   </div>
 
-  <header>
+  <header id="mainAppHeader">
     <div class="header-logo-wrap">
       <svg class="header-mini-logo" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M 82 25 A 25 25 0 0 1 118 25" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
@@ -901,7 +910,7 @@
     <p>📚 Your College. Your Notes. One Place.</p>
   </header>
 
-  <main>
+  <main id="mainContainer">
     <div class="card" id="mainExplorerCard">
       
       <!-- GATEWAY 1: DUAL AUTH -->
@@ -945,7 +954,7 @@
           </label>
           <div class="pin-input-wrap">
             <input type="password" id="regPinInput" class="input-box" placeholder="e.g. 1234" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️</button>
           </div>
 
           <button type="submit" id="regSubmitBtn" class="btn-primary-action">Create Account & Enter →</button>
@@ -962,7 +971,7 @@
           </label>
           <div class="pin-input-wrap">
             <input type="password" id="loginPinInput" class="input-box" placeholder="Enter your 4-digit PIN" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('loginPinInput', this)">👁️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('loginPinInput', this)">👁️️</button>
           </div>
 
           <button type="submit" id="loginSubmitBtn" class="btn-primary-action">Login to Study Hub →</button>
@@ -1045,7 +1054,7 @@
           </div>
         </section>
 
-        <!-- STEP 6: IN-APP 3D FULL-BLEED BOOK READER (USES FULL SCREEN & REMEMBERS PAGE) -->
+        <!-- STEP 6: IN-APP 3D FULL-BLEED BOOK READER (NO WASTED SIDE SPACE) -->
         <section id="step-book-reader" class="hidden">
           <div class="reader-top-controls">
             <div class="page-turn-bar">
@@ -1059,7 +1068,7 @@
             <button type="button" class="btn-badge-action" onclick="downloadBookDirectly()">⬇️ Download</button>
           </div>
 
-          <!-- FULL SCREEN EDGE-TO-EDGE TOUCH-GESTURE CONTAINER -->
+          <!-- FULL SCREEN EDGE-TO-EDGE TOUCH-CONTAINER -->
           <div class="full-page-edge-wrap" id="touchBookContainer">
             <iframe id="inAppPdfIframe" class="in-app-pdf-frame" src="about:blank" title="Book Viewer"></iframe>
           </div>
@@ -1114,7 +1123,7 @@
           </div>
           <div class="pin-input-wrap" style="margin-bottom: 0.4rem;">
             <input type="password" id="accDisplayPin" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed;" />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️</button>
           </div>
 
           <div id="pinUpdateDrawer" class="inline-update-box hidden">
@@ -1145,7 +1154,7 @@
     </div>
 
     <!-- ACTIVE USERS LIVE BOX -->
-    <div class="active-users-box">
+    <div class="active-users-box" id="activeUsersCard">
       <div class="active-users-title">
         <span>⚡ Active Scholars Joined:</span>
       </div>
@@ -1153,7 +1162,7 @@
     </div>
 
     <!-- STUDENT QUERY / COMMENT TAB -->
-    <div class="comment-section-box">
+    <div class="comment-section-box" id="commentsSectionCard">
       <div class="comment-box-title">
         <span>💬</span>
         <span>Comment your query</span>
@@ -1182,28 +1191,28 @@
     </div>
   </div>
 
-  <footer>
+  <footer id="mainAppFooter">
     &copy; Campus Study Hub. Built for college students.
   </footer>
 
   <script>
-    // 0. GUARANTEED ZERO-LAG SPLASH DISMISSAL
+    // 0. GUARANTEED FAST DISMISSAL FOR SPLASH SCREEN
     function dismissSplashNow() {
       const splash = document.getElementById('splashScreen');
       if (splash) {
         splash.classList.add('hide-splash');
         setTimeout(() => {
-          if (splash.parentNode) splash.parentNode.removeChild(splash);
-        }, 400);
+          if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+        }, 300);
       }
     }
 
-    if (sessionStorage.getItem('csh_splash_shown') === 'true') {
+    if (sessionStorage.getItem('csh_splash_done') === 'true') {
       const sp = document.getElementById('splashScreen');
-      if (sp) sp.style.display = 'none';
+      if (sp && sp.parentNode) sp.parentNode.removeChild(sp);
     } else {
-      sessionStorage.setItem('csh_splash_shown', 'true');
-      setTimeout(dismissSplashNow, 1600);
+      sessionStorage.setItem('csh_splash_done', 'true');
+      setTimeout(dismissSplashNow, 1400);
     }
 
     const firebaseConfig = {
@@ -1223,6 +1232,7 @@
     const database = firebase.database();
 
     const WHATSAPP_NUMBER = "916359217206";
+    let isFirebaseReady = false;
 
     function safeDecode(str) {
       if (!str) return '';
@@ -1233,12 +1243,10 @@
       }
     }
 
-    // Google Drive URL to In-Page Embed Viewer Converter
     function convertToGoogleDriveEmbed(url, pageNum = 1) {
       if (!url || !url.startsWith('http')) return url;
       const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
-        // Preview embed with minimal controls and target page
         return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview#page=${pageNum}&view=FitH`;
       }
       return url;
@@ -1322,7 +1330,7 @@
         btn.innerText = '🙈';
       } else {
         input.type = 'password';
-        btn.innerText = '👁️';
+        btn.innerText = '👁️️';
       }
     }
 
@@ -1331,6 +1339,7 @@
       el.classList.toggle('hidden');
     }
 
+    // FIREBASE LIVE DATA LISTENER
     database.ref('study_data').on('value', (snapshot) => {
       const liveData = snapshot.val();
       studyData = {
@@ -1349,8 +1358,10 @@
         });
       }
 
-      if (state.step === 3) renderSubjects();
-      if (state.step >= 4) updateView();
+      isFirebaseReady = true;
+
+      // Automatically re-evaluate route after data arrives (resolves refresh error completely)
+      parseHash();
     });
 
     database.ref('registered_students').on('value', (snapshot) => {
@@ -1570,7 +1581,7 @@
     }
 
     // ========================================================
-    // BOOK VIEWER & 3D FLIP READER WITH REFRESH MEMORY
+    // BOOK VIEWER & IN-APP FULL-SCREEN READER
     // ========================================================
     function openBookView() {
       const subObj = getActiveSubjectData();
@@ -1590,8 +1601,10 @@
       updateView();
     }
 
-    // Opens Book directly in same window with remembered page number
+    // Opens Book directly in same tab without Google Drive redirect
     function openInAppBookReader() {
+      if (!isFirebaseReady) return; // Wait for Firebase to prevent false "Book Not Found"
+
       const subObj = getActiveSubjectData();
       const bookUrl = subObj.book;
 
@@ -1601,7 +1614,7 @@
         return;
       }
 
-      // Restore saved page from localStorage if exists
+      // Restore saved page from localStorage so refresh stays on current page
       const savedPageKey = `csh_book_page_${state.course}_${state.semester}_${state.subjectKey}`;
       const savedPage = parseInt(localStorage.getItem(savedPageKey)) || 1;
       state.bookPage = savedPage;
@@ -1617,7 +1630,7 @@
       initSwipeGestures();
     }
 
-    // Turn Page with 3D Flip effect and save to localStorage
+    // 3D Page Turn Simulation
     function turnBookPage(delta) {
       let newPage = state.bookPage + delta;
       if (newPage < 1) newPage = 1;
@@ -1629,26 +1642,25 @@
       state.bookPage = p;
       document.getElementById('currentBookPageInput').value = p;
 
-      // Save page state so refresh never loses the page!
+      // Save page state in localStorage
       const savedPageKey = `csh_book_page_${state.course}_${state.semester}_${state.subjectKey}`;
       localStorage.setItem(savedPageKey, p);
 
       const subObj = getActiveSubjectData();
       const iframe = document.getElementById('inAppPdfIframe');
       
-      // Trigger 3D Page Turn animation
       iframe.classList.remove('turn-page-forward', 'turn-page-backward');
       void iframe.offsetWidth; // Trigger reflow
       iframe.classList.add(direction === 'forward' ? 'turn-page-forward' : 'turn-page-backward');
 
-      // Update iframe to new page
-      iframe.src = convertToGoogleDriveEmbed(subObj.book, p);
+      if (subObj.book) {
+        iframe.src = convertToGoogleDriveEmbed(subObj.book, p);
+      }
     }
 
-    // 3D Finger Swipe Gesture Listener
+    // 3D Touch Swipe Listener
     let touchStartX = 0;
     let touchEndX = 0;
-    let isSwiping = false;
 
     function initSwipeGestures() {
       const container = document.getElementById('touchBookContainer');
@@ -1656,28 +1668,19 @@
 
       container.ontouchstart = (e) => {
         touchStartX = e.changedTouches[0].screenX;
-        isSwiping = true;
       };
 
       container.ontouchend = (e) => {
-        if (!isSwiping) return;
         touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-        isSwiping = false;
-      };
-    }
-
-    function handleSwipe() {
-      const diff = touchEndX - touchStartX;
-      if (Math.abs(diff) > 50) {
-        if (diff < 0) {
-          // Swipe Left -> Next Page (3D Flip Forward)
-          turnBookPage(1);
-        } else {
-          // Swipe Right -> Prev Page (3D Flip Backward)
-          turnBookPage(-1);
+        const diff = touchEndX - touchStartX;
+        if (Math.abs(diff) > 45) {
+          if (diff < 0) {
+            turnBookPage(1); // Swipe Left -> Next Page
+          } else {
+            turnBookPage(-1); // Swipe Right -> Prev Page
+          }
         }
-      }
+      };
     }
 
     function downloadBookDirectly() {
@@ -1796,7 +1799,7 @@
       }
     });
 
-    // PURE STEP ROUTER: NEVER JUMPS BACK TO BOOK IN LOOPS
+    // PURE HIERARCHICAL STEP ROUTER WITH REFRESH SAFETY
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
@@ -1830,7 +1833,9 @@
       if (parts[3] === 'book') state.step = 5;
       if (parts[3] === 'reader') {
         state.step = 6;
-        openInAppBookReader();
+        if (isFirebaseReady) {
+          openInAppBookReader();
+        }
       }
 
       updateView();
@@ -1857,14 +1862,20 @@
       document.getElementById('step-book').classList.add('hidden');
       document.getElementById('step-book-reader').classList.add('hidden');
 
-      const card = document.getElementById('mainExplorerCard');
+      const body = document.body;
       const backBtn = document.getElementById('backBtn');
       const breadcrumb = document.getElementById('breadcrumb');
+      const activeUsersCard = document.getElementById('activeUsersCard');
+      const commentsCard = document.getElementById('commentsSectionCard');
 
       if (state.step === 6) {
-        card.classList.add('reader-active-card');
+        body.classList.add('reader-fullscreen-active');
+        if (activeUsersCard) activeUsersCard.classList.add('hidden');
+        if (commentsCard) commentsCard.classList.add('hidden');
       } else {
-        card.classList.remove('reader-active-card');
+        body.classList.remove('reader-fullscreen-active');
+        if (activeUsersCard) activeUsersCard.classList.remove('hidden');
+        if (commentsCard) commentsCard.classList.remove('hidden');
       }
 
       if (state.step === 1) {
@@ -1904,7 +1915,7 @@
         breadcrumb.classList.remove('hidden');
         const subObj = getActiveSubjectData();
         const fullSubjectName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey);
-        breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName} > Book Reader`;
+        breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName} > Reader`;
       }
     }
 
@@ -1990,7 +2001,7 @@
       updateView();
     }
 
-    // CLEAN BACK NAVIGATION (NO LOOPING)
+    // DETERMINISTIC BACK NAVIGATION
     function goBack() {
       if (state.inAccountTab) {
         closeAccountTab();
@@ -1998,28 +2009,23 @@
       }
 
       if (state.step === 6) {
-        // Reader se Book Cover par
         document.getElementById('inAppPdfIframe').src = 'about:blank';
         state.step = 5;
         setHash();
         updateView();
       } else if (state.step === 5) {
-        // Book Cover se Subject Resources par
         state.step = 4;
         setHash();
         updateView();
       } else if (state.step === 4) {
-        // Resources se Subjects list par
         state.step = 3;
         setHash();
         updateView();
       } else if (state.step === 3) {
-        // Subjects se Semesters list par
         state.step = 2;
         setHash();
         updateView();
       } else if (state.step === 2) {
-        // Semesters se Courses list par
         state.step = 1;
         setHash();
         updateView();
