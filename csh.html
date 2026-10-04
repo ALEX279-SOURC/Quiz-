@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -15,8 +15,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
   <style>
-    /* CSS VARIABLES: LIGHT & DARK MODE SUPPORT */
-    :root {
+    /* CSS VARIABLES: HIGH CONTRAST LIGHT & DARK MODES */
+    :root, [data-theme="light"] {
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
       --bg: #f8fafc;
@@ -24,9 +24,11 @@
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
+      --input-bg: #f1f5f9;
       --topbar-bg: #0f172a;
       --topbar-btn: #1e293b;
       --topbar-border: #334155;
+      --accent-soft: rgba(37, 99, 235, 0.08);
       --radius: 12px;
       --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     }
@@ -39,9 +41,11 @@
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --border: #1e2e5c;
-      --topbar-bg: #070d1d;
+      --input-bg: #070f26;
+      --topbar-bg: #060b18;
       --topbar-btn: #131f3f;
       --topbar-border: #1e2e5c;
+      --accent-soft: rgba(59, 130, 246, 0.16);
       --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
     }
 
@@ -61,6 +65,7 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      overscroll-behavior-y: contain;
     }
 
     /* 1. CINEMATIC 3D LOGO SPLASH SCREEN */
@@ -187,7 +192,7 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* 2. TOP BAR & CONTROLS */
+    /* 2. TOP BAR & THEME SWITCHER */
     .top-bar {
       background: var(--topbar-bg);
       color: #fff;
@@ -236,6 +241,7 @@
     .header-mini-logo {
       width: 38px;
       height: 38px;
+      color: var(--text);
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.18));
     }
 
@@ -261,7 +267,6 @@
       transition: all 0.2s;
     }
 
-    /* FULL EDGE-TO-EDGE READER SCREEN */
     body.reader-fullscreen-active main {
       max-width: 100% !important;
       width: 100% !important;
@@ -291,6 +296,7 @@
     .step-title {
       font-size: 1.25rem;
       font-weight: 700;
+      color: var(--text);
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
@@ -328,13 +334,15 @@
 
     .btn-select:hover {
       border-color: var(--primary);
-      background: rgba(37, 99, 235, 0.08);
+      background: var(--accent-soft);
+      color: var(--primary);
     }
 
     .btn-select span.btn-label {
       word-break: break-word;
       line-height: 1.35;
       flex: 1;
+      color: inherit;
     }
 
     .resource-card {
@@ -355,14 +363,18 @@
     }
 
     .resource-card:hover {
-      background: rgba(148, 163, 184, 0.12);
+      background: var(--accent-soft);
       border-color: var(--primary);
     }
 
+    .resource-card span {
+      color: inherit;
+    }
+
     .btn-order {
-      background: #f59e0b;
+      background: #f59e0b !important;
       color: #fff !important;
-      border-color: #d97706;
+      border-color: #d97706 !important;
     }
 
     .btn-order:hover {
@@ -386,7 +398,7 @@
       text-decoration: underline;
     }
 
-    /* 3D BOOK COVER PRESENTATION */
+    /* 3D BOOK COVER & CARDS */
     .book-viewer-box {
       text-align: center;
       padding: 1rem 0.5rem;
@@ -468,15 +480,15 @@
       background: #1e293b;
     }
 
-    /* 3. READER TOP BAR WITH SAFE-AREA PADDING (PREVENTS CLIPPING WITH NOTCH) */
+    /* 3. IN-APP READER HEADER */
     .reader-top-controls {
       background: #0f172a;
       color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
-      padding: max(0.85rem, env(safe-area-inset-top, 0.85rem)) 0.85rem 0.75rem 0.85rem;
+      gap: 0.4rem;
+      padding: max(0.85rem, env(safe-area-inset-top, 0.85rem)) 0.75rem 0.65rem 0.75rem;
       border-bottom: 1px solid #1e293b;
       position: sticky;
       top: 0;
@@ -485,7 +497,7 @@
     }
 
     .reader-title-badge {
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       font-weight: 700;
       color: #38bdf8;
       overflow: hidden;
@@ -495,21 +507,33 @@
       text-align: center;
     }
 
-    .page-box-wrap {
+    .reader-page-nav-group {
       display: flex;
       align-items: center;
       background: #1e293b;
       border: 1px solid #334155;
-      padding: 0.25rem 0.5rem;
+      padding: 0.2rem 0.4rem;
       border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #cbd5e1;
-      gap: 0.35rem;
+      gap: 0.3rem;
+    }
+
+    .btn-page-nav-mini {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #fff;
+      width: 26px;
+      height: 26px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .page-mini-input {
-      width: 36px;
+      width: 32px;
       text-align: center;
       background: #0b1329;
       border: 1px solid #3b82f6;
@@ -521,13 +545,26 @@
       padding: 0.15rem 0;
     }
 
-    /* EDGE-TO-EDGE FULL-WIDTH BOOK FRAME */
+    .resume-page-banner {
+      background: #1e3a8a;
+      color: #fff;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #3b82f6;
+      animation: expandBox 0.25s ease-out;
+    }
+
     .full-page-edge-wrap {
       width: 100vw;
-      height: calc(100vh - 75px);
+      height: calc(100vh - 80px);
       background: #0b1329;
       position: relative;
       overflow: hidden;
+      overscroll-behavior: contain;
     }
 
     .in-app-pdf-frame {
@@ -537,13 +574,14 @@
       display: block;
     }
 
+    /* 4. DUAL AUTH TABS & FORMS (DYNAMIC CONTRAST) */
     .auth-tab-switch {
       display: flex;
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 4px;
       margin-bottom: 1.5rem;
-      background: rgba(148, 163, 184, 0.15);
+      background: var(--input-bg);
     }
 
     .auth-tab-btn {
@@ -573,6 +611,7 @@
     .login-gate h2 {
       font-size: 1.35rem;
       font-weight: 800;
+      color: var(--text);
       margin-bottom: 0.4rem;
     }
 
@@ -599,7 +638,7 @@
     }
 
     .btn-badge-action {
-      background: rgba(37, 99, 235, 0.12);
+      background: var(--accent-soft);
       border: 1px solid var(--primary);
       color: var(--primary);
       font-size: 0.75rem;
@@ -627,7 +666,18 @@
       font-size: 0.95rem;
       margin-bottom: 0.85rem;
       outline: none;
-      background: rgba(148, 163, 184, 0.08);
+      background: var(--input-bg);
+      color: var(--text);
+    }
+
+    .input-box::placeholder, .textarea-box::placeholder {
+      color: var(--text-muted);
+      opacity: 0.85;
+    }
+
+    /* FIX SELECT OPTION CONTRAST ON MOBILE CHROMIUM */
+    select.select-box option {
+      background-color: var(--card-bg);
       color: var(--text);
     }
 
@@ -685,7 +735,7 @@
     }
 
     .inline-update-box {
-      background: rgba(148, 163, 184, 0.1);
+      background: var(--input-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 0.9rem;
@@ -702,7 +752,7 @@
       position: absolute;
       top: 14px;
       right: 14px;
-      background: rgba(148, 163, 184, 0.15);
+      background: var(--input-bg);
       border: 1px solid var(--border);
       color: var(--text-muted);
       width: 34px;
@@ -739,6 +789,7 @@
     .active-users-title {
       font-size: 0.95rem;
       font-weight: 700;
+      color: var(--text);
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -797,14 +848,22 @@
     .modal-content {
       background: var(--card-bg);
       color: var(--text);
+      border: 1px solid var(--border);
       border-radius: 16px;
       padding: 1.75rem 1.5rem 1.5rem;
       max-width: 380px;
       width: 100%;
       position: relative;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--shadow);
       text-align: center;
       animation: modalPop 0.2s ease-out;
+    }
+
+    #emptyModalTitle {
+      color: var(--text);
+    }
+    #emptyModalDesc {
+      color: var(--text-muted);
     }
 
     @keyframes modalPop {
@@ -816,8 +875,8 @@
       position: absolute;
       top: 12px;
       right: 12px;
-      background: rgba(148, 163, 184, 0.15);
-      border: none;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
       font-size: 1.1rem;
       cursor: pointer;
       width: 32px;
@@ -848,7 +907,6 @@
   <div id="splashScreen" onclick="dismissSplashNow()">
     <div class="light-flare"></div>
     <div class="splash-container">
-      
       <svg class="splash-logo-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M 82 25 A 25 25 0 0 1 118 25" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/>
         <path d="M 74 16 A 36 36 0 0 1 126 16" stroke="#111827" stroke-width="4.5" stroke-linecap="round"/>
@@ -879,7 +937,7 @@
     </div>
   </div>
 
-  <!-- TOP BAR: DARK/LIGHT MODE TOGGLE & PROFILE -->
+  <!-- TOP BAR: THEME TOGGLE & ACCOUNT -->
   <div class="top-bar">
     <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
       🌙
@@ -893,14 +951,15 @@
 
   <header id="mainAppHeader">
     <div class="header-logo-wrap">
+      <!-- ADAPTIVE LOGO: USES currentColor TO MATCH TEXT CONTRAST IN BOTH THEMES -->
       <svg class="header-mini-logo" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M 82 25 A 25 25 0 0 1 118 25" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
-        <path d="M 74 16 A 36 36 0 0 1 126 16" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
-        <path d="M 100 135 C 122 120 156 122 178 127 L 174 44 C 152 40 120 38 100 52 C 80 38 48 40 26 44 L 22 127 C 44 122 78 120 100 135 Z" fill="#1e293b"/>
-        <path d="M 98 128 C 78 116 52 117 34 121 L 37 53 C 54 50 78 49 96 61 Z" fill="#ffffff"/>
-        <path d="M 102 128 C 122 116 148 117 166 121 L 163 53 C 146 50 122 49 104 61 Z" fill="#ffffff"/>
-        <path d="M 86 80 L 98 78 L 98 94 L 114 94 L 114 78 L 126 80 L 122 126 L 110 125 L 110 104 L 98 104 L 98 125 L 86 126 Z" fill="#1e293b"/>
-        <polygon points="100,50 138,68 100,84 62,68" fill="#1e293b"/>
+        <path d="M 82 25 A 25 25 0 0 1 118 25" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 74 16 A 36 36 0 0 1 126 16" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 100 135 C 122 120 156 122 178 127 L 174 44 C 152 40 120 38 100 52 C 80 38 48 40 26 44 L 22 127 C 44 122 78 120 100 135 Z" fill="currentColor"/>
+        <path d="M 98 128 C 78 116 52 117 34 121 L 37 53 C 54 50 78 49 96 61 Z" fill="var(--card-bg)"/>
+        <path d="M 102 128 C 122 116 148 117 166 121 L 163 53 C 146 50 122 49 104 61 Z" fill="var(--card-bg)"/>
+        <path d="M 86 80 L 98 78 L 98 94 L 114 94 L 114 78 L 126 80 L 122 126 L 110 125 L 110 104 L 98 104 L 98 125 L 86 126 Z" fill="currentColor"/>
+        <polygon points="100,50 138,68 100,84 62,68" fill="currentColor"/>
       </svg>
       <h1>CAMPUS STUDY HUB</h1>
     </div>
@@ -1006,7 +1065,7 @@
         <section id="step-resources" class="hidden">
           <h2 class="step-title" id="subject-title">Resources</h2>
           <div class="grid">
-            <button class="resource-card" style="border-color: #3b82f6; background: rgba(59, 130, 246, 0.1);" onclick="openBookView()">
+            <button class="resource-card" style="border-color: #3b82f6; background: var(--accent-soft);" onclick="openBookView()">
               <span style="color: var(--primary); font-weight: 700;">📚 Book</span> <span style="color: var(--primary);">View & Read ↗</span>
             </button>
 
@@ -1042,7 +1101,7 @@
               </div>
             </div>
 
-            <!-- ACTION BUTTONS: READ BOOK & DOWNLOAD BOOK (SIDE-BY-SIDE) -->
+            <!-- ACTION BUTTONS: READ BOOK & DOWNLOAD BOOK -->
             <div class="book-action-buttons-grid">
               <button type="button" class="btn-book-action btn-read-in-app" onclick="openInAppBookReader()">
                 <span>📖 Read Book</span>
@@ -1054,16 +1113,25 @@
           </div>
         </section>
 
-        <!-- STEP 6: 100% RELIABLE IN-APP READER WITH BREATHING SPACE HEADER -->
+        <!-- STEP 6: 100% RELIABLE IN-APP READER WITH PAGE MEMORY & COMFORT NOTCH -->
         <section id="step-book-reader" class="hidden">
           <div class="reader-top-controls">
             <button type="button" class="btn-badge-action" onclick="goBack()">← Back</button>
             <span class="reader-title-badge" id="inAppReaderHeader">📖 Book Reader</span>
-            <div class="page-box-wrap" title="Current Page Memory">
-              <span>Pg</span>
-              <input type="number" id="readerPageIndicatorInput" class="page-mini-input" value="1" min="1" max="1000" onchange="updateSavedBookPage(this.value)" />
+            
+            <div class="reader-page-nav-group">
+              <button type="button" class="btn-page-nav-mini" onclick="stepReaderPage(-1)">◀</button>
+              <input type="number" id="readerPageIndicatorInput" class="page-mini-input" value="1" min="1" max="1000" onchange="jumpToReaderPage(this.value)" />
+              <button type="button" class="btn-page-nav-mini" onclick="stepReaderPage(1)">▶</button>
             </div>
+
+            <button type="button" class="btn-badge-action" style="background:#16a34a; border-color:#16a34a; color:#fff;" onclick="bookmarkCurrentPage()" title="Save current page so refresh never loses it">💾 Save</button>
             <button type="button" class="btn-badge-action" onclick="downloadBookDirectly()">⬇️ Download</button>
+          </div>
+
+          <div id="resumePageNotice" class="resume-page-banner hidden">
+            <span id="resumeNoticeText">📍 Last read: Page 1</span>
+            <button type="button" class="btn-badge-action" style="padding:0.15rem 0.5rem; font-size:0.75rem; background:#fff; color:#1e3a8a;" onclick="applyResumePage()">Jump to Page</button>
           </div>
 
           <!-- FULL-SCREEN EDGE-TO-EDGE VIEWER -->
@@ -1117,7 +1185,7 @@
           </div>
           <div class="pin-input-wrap" style="margin-bottom: 0.4rem;">
             <input type="password" id="accDisplayPin" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed;" />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️️</button>
           </div>
 
           <div id="pinUpdateDrawer" class="inline-update-box hidden">
@@ -1178,7 +1246,7 @@
       <button class="modal-close-btn" onclick="closeEmptyModal()" title="Close">❌</button>
       <div style="font-size:2.5rem; margin-bottom:0.5rem;">📂</div>
       <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:0.3rem;" id="emptyModalTitle">Data Not Found</h3>
-      <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.25rem;" id="emptyModalDesc">
+      <p style="font-size:0.88rem; margin-bottom:1.25rem;" id="emptyModalDesc">
         Is resource ke liye link abhi add nahi ki gayi hai.
       </p>
       <button class="btn-primary-action" onclick="closeEmptyModal()">Theek Hai (OK)</button>
@@ -1190,7 +1258,7 @@
   </footer>
 
   <script>
-    // 0. DARK / LIGHT THEME CONTROLLER
+    // 0. THEME SWITCHER LOGIC
     function applySavedTheme() {
       const savedTheme = localStorage.getItem('csh_theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
@@ -1207,9 +1275,7 @@
 
     function updateThemeIcon(theme) {
       const btn = document.getElementById('themeToggleBtn');
-      if (btn) {
-        btn.innerText = theme === 'dark' ? '☀️' : '🌙';
-      }
+      if (btn) btn.innerText = theme === 'dark' ? '☀️' : '🌙';
     }
     applySavedTheme();
 
@@ -1260,12 +1326,12 @@
       }
     }
 
-    // Embed URL with page support
     function convertToGoogleDriveEmbed(url, pageNum = 1) {
       if (!url || !url.startsWith('http')) return url;
       const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
-        return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview#page=${pageNum}`;
+        const pIndex = Math.max(0, parseInt(pageNum) - 1);
+        return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview#:0.page.${pIndex}`;
       }
       return url;
     }
@@ -1293,7 +1359,7 @@
       semester: null,
       subjectKey: null,
       subjectName: null,
-      step: 1, // 1: course, 2: sem, 3: subject, 4: resources, 5: book cover, 6: in-app reader
+      step: 1,
       bookPage: 1,
       inAccountTab: false
     };
@@ -1348,7 +1414,6 @@
       el.classList.toggle('hidden');
     }
 
-    // FIREBASE LIVE DATA LISTENER (AUTO-TRIGGER AFTER RELOAD)
     database.ref('study_data').on('value', (snapshot) => {
       const liveData = snapshot.val();
       studyData = {
@@ -1587,9 +1652,6 @@
       }
     }
 
-    // ========================================================
-    // BOOK VIEWER & DYNAMIC COVER RENDERING
-    // ========================================================
     function populateBookStepData() {
       const subObj = getActiveSubjectData();
       const displayName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey) || "Subject";
@@ -1616,9 +1678,8 @@
       updateView();
     }
 
-    // Opens Book directly in 100% Edge-to-Edge view & remembers exact page
     function openInAppBookReader() {
-      if (!isFirebaseReady) return; // Wait for Firebase data to avoid false 'Book Not Found'
+      if (!isFirebaseReady) return;
 
       const subObj = getActiveSubjectData();
       const bookUrl = subObj.book;
@@ -1629,7 +1690,6 @@
         return;
       }
 
-      // Read saved page from localStorage so refresh keeps the same page
       const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
       const savedPage = parseInt(localStorage.getItem(savedPageKey)) || 1;
       state.bookPage = savedPage;
@@ -1642,21 +1702,52 @@
       document.getElementById('inAppReaderHeader').innerText = `📘 ${subObj.subjectName || state.subjectName}`;
       document.getElementById('readerPageIndicatorInput').value = savedPage;
       document.getElementById('inAppPdfIframe').src = embedUrl;
+
+      const notice = document.getElementById('resumePageNotice');
+      if (savedPage > 1) {
+        document.getElementById('resumeNoticeText').innerText = `📍 Saved Reading Point: Page ${savedPage}`;
+        notice.classList.remove('hidden');
+      } else {
+        notice.classList.add('hidden');
+      }
     }
 
-    function updateSavedBookPage(pageNum) {
+    function stepReaderPage(delta) {
+      let current = parseInt(document.getElementById('readerPageIndicatorInput').value) || state.bookPage || 1;
+      let next = current + delta;
+      if (next < 1) next = 1;
+      jumpToReaderPage(next);
+    }
+
+    function jumpToReaderPage(pageNum) {
       const p = parseInt(pageNum) || 1;
       state.bookPage = p;
+      document.getElementById('readerPageIndicatorInput').value = p;
+
       const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
       localStorage.setItem(savedPageKey, p);
 
       const subObj = getActiveSubjectData();
       if (subObj && subObj.book) {
-        document.getElementById('inAppPdfIframe').src = convertToGoogleDriveEmbed(subObj.book, p);
+        const embedUrl = convertToGoogleDriveEmbed(subObj.book, p);
+        document.getElementById('inAppPdfIframe').src = embedUrl;
       }
     }
 
-    // DIRECT DOWNLOAD (Bypasses Google Drive App on Android)
+    function bookmarkCurrentPage() {
+      const current = parseInt(document.getElementById('readerPageIndicatorInput').value) || state.bookPage || 1;
+      const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
+      localStorage.setItem(savedPageKey, current);
+      alert(`Page ${current} bookmarked successfully! Refresh karne par yahi page khulega.`);
+    }
+
+    function applyResumePage() {
+      const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
+      const savedPage = parseInt(localStorage.getItem(savedPageKey)) || 1;
+      jumpToReaderPage(savedPage);
+      document.getElementById('resumePageNotice').classList.add('hidden');
+    }
+
     function downloadBookDirectly() {
       const subObj = getActiveSubjectData();
       const bookUrl = subObj.book;
@@ -1785,7 +1876,6 @@
       }
     });
 
-    // PURE HIERARCHICAL ROUTER (NO JUMPING OR LOOPING)
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
@@ -1985,7 +2075,6 @@
       updateView();
     }
 
-    // DETERMINISTIC BACK NAVIGATION
     function goBack() {
       if (state.inAccountTab) {
         closeAccountTab();
