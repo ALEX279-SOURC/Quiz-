@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Short questions prectice portal</title>
+  <title>QuickQuiz - Short Questions Practice Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
@@ -41,14 +41,22 @@
     header {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
-      padding: 1.2rem 1rem;
+      padding: 1.4rem 1rem;
       text-align: center;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.2rem;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      font-weight: 500;
+      opacity: 0.9;
     }
 
     .container {
@@ -68,6 +76,79 @@
       margin-bottom: 1.5rem;
     }
 
+    /* Subject Selection Styles */
+    .subject-header {
+      margin-bottom: 1.2rem;
+    }
+
+    .breadcrumb-text {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .subject-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .subject-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .subject-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.2rem;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .subject-btn:hover {
+      border-color: var(--primary);
+      background: #f1f5f9;
+      transform: translateY(-1px);
+    }
+
+    .subject-btn span.arrow {
+      color: var(--muted);
+      font-size: 1.1rem;
+      transition: transform 0.2s;
+    }
+
+    .subject-btn:hover span.arrow {
+      transform: translateX(4px);
+      color: var(--primary);
+    }
+
+    /* Back link button */
+    .back-nav-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-bottom: 1rem;
+      padding: 0;
+    }
+
+    /* Tab Switcher */
     .tabs-nav {
       display: flex;
       border-bottom: 2px solid var(--border);
@@ -346,13 +427,15 @@
 </head>
 <body>
 
-  <!-- Updated Header -->
+  <!-- Header Section -->
   <header>
-    <h1>Short questions prectice portal</h1>
+    <h1>QuickQuiz</h1>
+    <p>Short Questions Practice Portal</p>
   </header>
 
   <div class="container">
     
+    <!-- Permanent Team Link Display if in Team Quiz -->
     <div id="persistentLinkBar" class="sticky-link-bar" style="display: none;">
       <span style="font-weight: 700; color: var(--primary);">🔗 ટીમ ક્વિઝ લિંક (શેર કરવા માટે ઉપલબ્ધ):</span>
       <div class="link-copy-box">
@@ -361,8 +444,43 @@
       </div>
     </div>
 
-    <!-- 1. Selection & Setup View -->
-    <div class="card" id="setupCard">
+    <!-- Screen 1: Subject Selection (Photo 2 design) -->
+    <div class="card" id="subjectSelectionCard">
+      <div class="subject-header">
+        <div class="breadcrumb-text">FYBA &gt; Semester 1</div>
+        <h2 class="subject-title">Select Subject</h2>
+      </div>
+
+      <div class="subject-grid">
+        <button class="subject-btn" onclick="chooseSubject('Sanskrit M1')">
+          <span>Sanskrit M1</span> <span class="arrow">→</span>
+        </button>
+        <button class="subject-btn" onclick="chooseSubject('Sanskrit M2')">
+          <span>Sanskrit M2</span> <span class="arrow">→</span>
+        </button>
+        <button class="subject-btn" onclick="chooseSubject('Gujrati minor (1)')">
+          <span>Gujrati minor (1)</span> <span class="arrow">→</span>
+        </button>
+        <button class="subject-btn" onclick="chooseSubject('MDC Gujrati (1)')">
+          <span>MDC Gujrati (1)</span> <span class="arrow">→</span>
+        </button>
+        <button class="subject-btn" onclick="chooseSubject('AEC Gujrati (1)')">
+          <span>AEC Gujrati (1)</span> <span class="arrow">→</span>
+        </button>
+        <button class="subject-btn" onclick="chooseSubject('SEC Gujrati (1)')">
+          <span>SEC Gujrati (1)</span> <span class="arrow">→</span>
+        </button>
+        <button class="subject-btn" onclick="chooseSubject('VAC ( IKS / BKS )')">
+          <span>VAC ( IKS / BKS )</span> <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Screen 2: Quiz Creation / Settings for selected subject -->
+    <div class="card" id="setupCard" style="display: none;">
+      <button class="back-nav-btn" onclick="backToSubjects()">← Back to Subjects</button>
+      <div class="breadcrumb-text" id="activeSubjectBadge" style="color: var(--primary); font-size: 0.95rem; margin-bottom: 0.8rem;"></div>
+      
       <div class="tabs-nav">
         <button class="tab-btn active" id="tabSolo" onclick="switchTab('solo')">Solo Practice (એકલ પ્રેક્ટિસ)</button>
         <button class="tab-btn" id="tabTeam" onclick="switchTab('team')">Team Quiz (ટીમ લિંક બનાવો)</button>
@@ -395,9 +513,11 @@
       </div>
     </div>
 
-    <!-- 2. Candidate Join Card -->
+    <!-- Screen 3: Candidate Join Card (Shown via Shared Link) -->
     <div class="card" id="joinCard" style="display: none;">
-      <h2 style="margin-bottom: 1rem; font-size: 1.3rem;">ટીમ ક્વિઝમાં જોડાવો</h2>
+      <h2 style="margin-bottom: 0.4rem; font-size: 1.3rem;">ટીમ ક્વિઝમાં જોડાવો</h2>
+      <div class="breadcrumb-text" id="joinSubjectLabel" style="color: var(--primary); font-size: 0.95rem; margin-bottom: 1rem;"></div>
+      
       <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1.2rem; border: 1px solid var(--border);">
         <p><strong>કુલ પ્રશ્નો:</strong> <span id="joinQCount">0</span></p>
         <p><strong>સમય મર્યાદા:</strong> <span id="joinTimeLimit">0</span> મિનિટ</p>
@@ -411,7 +531,7 @@
       <button class="btn btn-success" style="width: 100%; padding: 0.8rem;" onclick="startCandidateQuiz()">Start Quiz (ટેસ્ટ શરૂ કરો)</button>
     </div>
 
-    <!-- 3. Active Quiz View -->
+    <!-- Screen 4: Active Quiz View -->
     <div id="quizScreen" style="display: none;">
       <div class="progress-bar-container">
         <div id="progress" class="progress-bar"></div>
@@ -439,7 +559,7 @@
       </div>
     </div>
 
-    <!-- 4. Result & Dashboard View -->
+    <!-- Screen 5: Result & Dashboard View -->
     <div id="dashboardScreen" style="display: none;">
       <div class="card result-view">
         <h2>ટેસ્ટ પરિણામ (Report Card)</h2>
@@ -467,12 +587,14 @@
         <button class="btn btn-primary" onclick="resetToHome()">નવી ટેસ્ટ શરૂ કરો</button>
       </div>
 
+      <!-- Mistakes Section -->
       <div class="card review-section">
         <h3 style="margin-bottom: 0.5rem; color: var(--wrong);">ફક્ત ખોટા પડેલા પ્રશ્નો અને સાચા ઉત્તરો</h3>
         <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem;">સુધારણા માટે તમારા દ્વારા થયેલી ભૂલો:</p>
         <div id="reviewContainer"></div>
       </div>
 
+      <!-- Scoreboard (Visible for Team Quiz) -->
       <div class="card" id="scoreboardCard" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
           <h3 style="color: var(--primary);">ટીમ સ્કોરબોર્ડ (Leaderboard)</h3>
@@ -495,6 +617,7 @@
   </div>
 
   <script>
+    // 200 Questions Master Database
     const masterQuestions = [
       { q: "'માણસાઈના દીવા' પુસ્તકના મૂળ લેખક કોણ છે?", options: ["ઉમાશંકર જોશી", "ઝવેરચંદ મેઘાણી", "કનૈયાલાલ મુનશી", "રમણલાલ દેસાઈ"], ans: 1, cat: "સાહિત્યકાર પરિચય" },
       { q: "આ પુસ્તકમાં કોના જીવન અને મૂકસેવાની સત્યઘટનાઓ આલેખાયેલી છે?", options: ["મહાત્મા ગાંધી", "ઠક્કરબાપા", "પૂજ્ય રવિશંકર મહારાજ", "બબલભાઈ મહેતા"], ans: 2, cat: "પાત્ર પરિચય" },
@@ -548,6 +671,8 @@
       });
     }
 
+    // App State
+    let selectedSubject = "Gujrati minor (1)";
     let isTeamMode = false;
     let roomId = null;
     let participantName = "Solo Learner";
@@ -564,6 +689,18 @@
         renderScoreboard();
       }
     };
+
+    function chooseSubject(subj) {
+      selectedSubject = subj;
+      document.getElementById('activeSubjectBadge').innerText = `Selected Subject: ${selectedSubject}`;
+      document.getElementById('subjectSelectionCard').style.display = 'none';
+      document.getElementById('setupCard').style.display = 'block';
+    }
+
+    function backToSubjects() {
+      document.getElementById('setupCard').style.display = 'none';
+      document.getElementById('subjectSelectionCard').style.display = 'block';
+    }
 
     function getShuffledQuestions(array, seed = null) {
       let copy = [...array];
@@ -598,6 +735,7 @@
       if (urlParams.has('room')) {
         isTeamMode = true;
         roomId = urlParams.get('room');
+        selectedSubject = urlParams.get('subj') || "Gujrati minor (1)";
         const count = parseInt(urlParams.get('count')) || 25;
         const time = parseInt(urlParams.get('time')) || 0;
 
@@ -609,8 +747,10 @@
           return;
         }
 
+        document.getElementById('subjectSelectionCard').style.display = 'none';
         document.getElementById('setupCard').style.display = 'none';
         document.getElementById('joinCard').style.display = 'block';
+        document.getElementById('joinSubjectLabel').innerText = `Subject: ${selectedSubject}`;
         document.getElementById('joinQCount').innerText = count;
         document.getElementById('joinTimeLimit').innerText = time;
       } else {
@@ -657,7 +797,7 @@
       const seed = Math.floor(Math.random() * 100000);
 
       const base = window.location.origin + window.location.pathname;
-      const fullLink = `${base}?room=${generatedRoom}&count=${count}&time=${time}&seed=${seed}`;
+      const fullLink = `${base}?room=${generatedRoom}&subj=${encodeURIComponent(selectedSubject)}&count=${count}&time=${time}&seed=${seed}`;
 
       showPersistentLink(fullLink);
       window.location.href = fullLink;
@@ -688,6 +828,7 @@
     }
 
     function launchQuizUI(hasTimer) {
+      document.getElementById('subjectSelectionCard').style.display = 'none';
       document.getElementById('setupCard').style.display = 'none';
       document.getElementById('joinCard').style.display = 'none';
       document.getElementById('quizScreen').style.display = 'block';
@@ -719,6 +860,7 @@
 
     function saveCurrentSession() {
       const sessionData = {
+        selectedSubject,
         isTeamMode,
         roomId,
         participantName,
@@ -733,6 +875,7 @@
     }
 
     function restoreSession(data) {
+      selectedSubject = data.selectedSubject || "Gujrati minor (1)";
       isTeamMode = data.isTeamMode;
       roomId = data.roomId;
       participantName = data.participantName;
@@ -759,7 +902,7 @@
     function loadQuestion() {
       const cur = activeQuestions[currentIndex];
       document.getElementById('questionCounter').innerText = `${currentIndex + 1} / ${activeQuestions.length}`;
-      document.getElementById('categoryBadge').innerText = cur.cat;
+      document.getElementById('categoryBadge').innerText = `${selectedSubject} • ${cur.cat}`;
       document.getElementById('questionText').innerText = cur.q;
 
       const progress = ((currentIndex + 1) / activeQuestions.length) * 100;
@@ -832,9 +975,9 @@
       document.getElementById('dashboardScreen').style.display = 'block';
 
       if (isTeamMode) {
-        document.getElementById('userProfileTag').innerText = `પ્રોફાઈલ: ${participantName}`;
+        document.getElementById('userProfileTag').innerText = `પ્રોફાઈલ: ${participantName} | વિષય: ${selectedSubject}`;
       } else {
-        document.getElementById('userProfileTag').innerText = `Solo Practice પૂર્ણ`;
+        document.getElementById('userProfileTag').innerText = `Solo Practice પૂર્ણ | વિષય: ${selectedSubject}`;
       }
 
       document.getElementById('finalScore').innerText = `${correctCount}/${activeQuestions.length}`;
