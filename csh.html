@@ -29,7 +29,7 @@
       --topbar-btn: #1e293b;
       --topbar-border: #334155;
       --accent-soft: rgba(37, 99, 235, 0.08);
-      --radius: 12px;
+      --radius: 14px;
       --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     }
 
@@ -65,7 +65,7 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
-      overscroll-behavior-y: contain; /* Accidental pull-to-refresh band karne ke liye */
+      overscroll-behavior-y: contain;
     }
 
     /* 1. SPLASH SCREEN */
@@ -398,7 +398,7 @@
       text-decoration: underline;
     }
 
-    /* 3D BOOK COVER & CARDS */
+    /* 3D BOOK COVER & CARDS (IMAGE 3 MATCH) */
     .book-viewer-box {
       text-align: center;
       padding: 1rem 0.5rem;
@@ -480,9 +480,7 @@
       background: #1e293b;
     }
 
-    /* ===================================================
-       3. TOP CONTROLS & COMPLETELY HIDDEN POPOUT BAR
-       =================================================== */
+    /* 3. CLEAN READER BAR (WITHOUT PAGE COUNTER / SAVE PAGE STRIP) */
     .reader-top-controls {
       background: #0f172a;
       color: #fff;
@@ -498,7 +496,7 @@
     }
 
     .reader-title-badge {
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       font-weight: 700;
       color: #38bdf8;
       overflow: hidden;
@@ -508,62 +506,29 @@
       text-align: center;
     }
 
-    /* SECONDARY BOOKMARK / MEMORY SUB-BAR */
-    .reader-sub-controls {
-      background: #131f3f;
-      color: #cbd5e1;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.45rem 0.85rem;
-      border-bottom: 1px solid #1e2e5c;
-      font-size: 0.8rem;
-    }
-
-    .reader-page-nav-group {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .btn-page-nav-mini {
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: #fff;
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .page-mini-input {
-      width: 38px;
-      text-align: center;
-      background: #0b1329;
-      border: 1px solid #3b82f6;
-      border-radius: 4px;
-      color: #fff;
-      font-weight: 800;
-      font-size: 0.82rem;
-      outline: none;
-      padding: 0.2rem 0;
-    }
-
-    /* FULL-PAGE CONTAINER WITH GOOGLE POPOUT BAR CLIPPED OUT (MARGIN-TOP -56PX) */
-    .full-page-edge-wrap {
+    /* LEFT TO RIGHT HORIZONTAL SCROLL CAROUSEL CONTAINER */
+    .horizontal-reader-container {
       width: 100vw;
-      height: calc(100vh - 125px);
+      height: calc(100vh - 65px);
       background: #0b1329;
+      position: relative;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .horizontal-reader-frame-wrap {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100%;
+      scroll-snap-align: start;
       position: relative;
       overflow: hidden;
     }
 
-    /* Pushes Google Drive's top bar (and the popout button) off-screen! */
+    /* HIDES GOOGLE DRIVE POP-OUT TOOLBAR (MARGIN-TOP -56PX) */
     .in-app-pdf-frame {
       width: 100%;
       height: calc(100% + 56px);
@@ -572,7 +537,6 @@
       display: block;
     }
 
-    /* Top-Right Blocker Shield to 100% guarantee no pop-out button shows */
     .popout-blocker-shield {
       position: absolute;
       top: 0;
@@ -584,19 +548,36 @@
       pointer-events: auto;
     }
 
-    .resume-page-banner {
-      background: #1e3a8a;
-      color: #fff;
-      padding: 0.45rem 0.75rem;
-      font-size: 0.82rem;
-      font-weight: 700;
+    /* 4. MODAL POPUP FOR STUDENT ACCOUNT DETAILS (IMAGE 3 CARD STYLE) */
+    .account-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(11, 19, 41, 0.75);
+      backdrop-filter: blur(6px);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #3b82f6;
+      justify-content: center;
+      z-index: 99998;
+      padding: 1rem;
+      animation: modalPop 0.25s ease-out;
     }
 
-    /* 4. DUAL AUTH TABS & FORMS */
+    .account-card-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 480px;
+      padding: 1.5rem;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
     .auth-tab-switch {
       display: flex;
       border: 1px solid var(--border);
@@ -862,7 +843,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 9999;
+      z-index: 99999;
       padding: 1rem;
     }
 
@@ -1103,7 +1084,7 @@
           </div>
         </section>
 
-        <!-- STEP 5: BOOK COVER & OPTIONS VIEW -->
+        <!-- STEP 5: BOOK COVER & OPTIONS VIEW (MATCHING IMAGE 3) -->
         <section id="step-book" class="hidden">
           <div class="book-viewer-box">
             <h2 class="step-title" style="justify-content:center; margin-bottom:0.35rem;" id="bookViewerTitle">Subject Book</h2>
@@ -1117,7 +1098,7 @@
               </div>
             </div>
 
-            <!-- ACTION BUTTONS: READ BOOK & DOWNLOAD BOOK -->
+            <!-- ACTION BUTTONS: READ BOOK & DOWNLOAD BOOK (MATCHING IMAGE 3) -->
             <div class="book-action-buttons-grid">
               <button type="button" class="btn-book-action btn-read-in-app" onclick="openInAppBookReader()">
                 <span>📖 Read Book</span>
@@ -1129,112 +1110,25 @@
           </div>
         </section>
 
-        <!-- STEP 6: IN-APP READER WITH CLEAN CONTROLS (NO CLIPPING, NO POPOUT ICON) -->
+        <!-- STEP 6: IN-APP HORIZONTAL SCROLL READER (NO PAGE/SAVE STRIP, LEFT TO RIGHT) -->
         <section id="step-book-reader" class="hidden">
-          <!-- TOP ROW: BACK, TITLE, DOWNLOAD -->
+          <!-- TOP ROW: ONLY BACK, TITLE, DOWNLOAD (CLEAN) -->
           <div class="reader-top-controls">
             <button type="button" class="btn-badge-action" onclick="goBack()">← Back</button>
             <span class="reader-title-badge" id="inAppReaderHeader">📖 Book Reader</span>
             <button type="button" class="btn-badge-action" onclick="downloadBookDirectly()">⬇️ Download</button>
           </div>
 
-          <!-- SECONDARY ROW: PAGE NAVIGATOR & BOOKMARK -->
-          <div class="reader-sub-controls">
-            <div class="reader-page-nav-group">
-              <button type="button" class="btn-page-nav-mini" onclick="stepReaderPage(-1)">◀</button>
-              <span>Page</span>
-              <input type="number" id="readerPageIndicatorInput" class="page-mini-input" value="1" min="1" max="1000" onchange="jumpToReaderPage(this.value)" />
-              <button type="button" class="btn-page-nav-mini" onclick="stepReaderPage(1)">▶</button>
+          <!-- HORIZONTAL SCROLL CAROUSEL (SWIPE / SCROLL LEFT TO RIGHT) -->
+          <div class="horizontal-reader-container" id="horizontalReaderScrollBox">
+            <div class="horizontal-reader-frame-wrap">
+              <div class="popout-blocker-shield"></div>
+              <iframe id="inAppPdfIframe" class="in-app-pdf-frame" src="about:blank" title="Book Viewer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
             </div>
-            <button type="button" class="btn-badge-action" style="background:#16a34a; border-color:#16a34a; color:#fff;" onclick="bookmarkCurrentPage()" title="Save current page so refresh remembers it">💾 Save Page</button>
-          </div>
-
-          <!-- RESUME NOTIFICATION STRIP -->
-          <div id="resumePageNotice" class="resume-page-banner hidden">
-            <span id="resumeNoticeText">📍 Last read: Page 1</span>
-            <button type="button" class="btn-badge-action" style="padding:0.2rem 0.6rem; font-size:0.75rem; background:#fff; color:#1e3a8a;" onclick="applyResumePage()">Jump to Page</button>
-          </div>
-
-          <!-- FULL-SCREEN CONTAINER (POPOUT BAR CLIPPED OUT VISUALLY VIA MARGIN-TOP -56PX) -->
-          <div class="full-page-edge-wrap" id="touchBookContainer">
-            <!-- Shield to prevent accidental clicks on the corner -->
-            <div class="popout-blocker-shield"></div>
-            <iframe id="inAppPdfIframe" class="in-app-pdf-frame" src="about:blank" title="Book Viewer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
           </div>
         </section>
 
       </div>
-
-      <!-- GATEWAY 3: ACCOUNT DETAILS TAB -->
-      <section id="accountSection" class="hidden">
-        <button class="card-close-btn" onclick="closeAccountTab()" title="Close and return">✕</button>
-        
-        <h2 class="step-title">⚙️ Student Account Details</h2>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-          Your registered credentials. You can update your Name, College Year, or PIN.
-        </p>
-
-        <form onsubmit="saveAccountSettings(event)">
-          <label class="form-label">
-            <span class="label-text-nowrap">FULL NAME</span>
-          </label>
-          <input type="text" id="accNameInput" class="input-box" required />
-
-          <label class="form-label" style="margin-top:0.4rem;">
-            <span class="label-text-nowrap">YEAR OF COLLEGE</span>
-          </label>
-          <select id="accCollegeYearSelect" class="select-box" required>
-            <option value="FYBA">FYBA</option>
-            <option value="SYBA">SYBA</option>
-            <option value="TYBA">TYBA</option>
-          </select>
-
-          <label class="form-label">
-            <span class="label-text-nowrap">ACADEMIC YEAR</span>
-          </label>
-          <select id="accAcademicYearSelect" class="select-box" required>
-            <option value="2026">2026</option>
-            <option value="2025">2025</option>
-            <option value="2024">2024</option>
-            <option value="2027">2027</option>
-            <option value="2028">2028</option>
-          </select>
-
-          <div class="form-label">
-            <span class="label-text-nowrap">4-DIGIT SECURITY PIN</span>
-            <button type="button" class="btn-badge-action" onclick="togglePinBox()">
-              ✏️ Change PIN
-            </button>
-          </div>
-          <div class="pin-input-wrap" style="margin-bottom: 0.4rem;">
-            <input type="password" id="accDisplayPin" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed;" />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁️</button>
-          </div>
-
-          <div id="pinUpdateDrawer" class="inline-update-box hidden">
-            <label class="form-label">
-              <span class="label-text-nowrap">EXISTING 4-DIGIT PIN</span>
-            </label>
-            <div class="pin-input-wrap">
-              <input type="password" id="accOldPinInput" class="input-box" placeholder="Enter current PIN" pattern="[0-9]{4}" maxlength="4" />
-              <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accOldPinInput', this)">👁️</button>
-            </div>
-
-            <label class="form-label">
-              <span class="label-text-nowrap">NEW 4-DIGIT PIN</span>
-            </label>
-            <div class="pin-input-wrap">
-              <input type="password" id="accNewPinInput" class="input-box" placeholder="Enter new 4-digit PIN" pattern="[0-9]{4}" maxlength="4" />
-              <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accNewPinInput', this)">👁️</button>
-            </div>
-
-            <button type="button" id="btnUpdatePin" class="btn-primary-action" style="background:#0f172a;" onclick="updateSecurityPin()">Verify & Save New PIN</button>
-          </div>
-
-          <button type="submit" id="saveAccBtn" class="btn-primary-action" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">Save Details</button>
-          <button type="button" class="btn-primary-action" style="background:#ef4444;" onclick="logoutStudent()">Logout Session</button>
-        </form>
-      </section>
 
     </div>
 
@@ -1264,12 +1158,85 @@
 
   </main>
 
+  <!-- GATEWAY 3: CARD-STYLE MODAL FOR STUDENT ACCOUNT DETAILS (MATCHING IMAGE 3 DESIGN) -->
+  <div id="accountModal" class="account-modal-overlay hidden" onclick="closeAccountTab()">
+    <div class="account-card-box" onclick="event.stopPropagation()">
+      <button class="card-close-btn" onclick="closeAccountTab()" title="Close">✕</button>
+      
+      <h2 class="step-title" style="margin-bottom:0.25rem;">⚙️ Student Account Details</h2>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.25rem;">
+        Your registered credentials. You can update your Name, College Year, or PIN.
+      </p>
+
+      <form onsubmit="saveAccountSettings(event)">
+        <label class="form-label">
+          <span class="label-text-nowrap">FULL NAME</span>
+        </label>
+        <input type="text" id="accNameInput" class="input-box" required />
+
+        <label class="form-label" style="margin-top:0.4rem;">
+          <span class="label-text-nowrap">YEAR OF COLLEGE</span>
+        </label>
+        <select id="accCollegeYearSelect" class="select-box" required>
+          <option value="FYBA">FYBA</option>
+          <option value="SYBA">SYBA</option>
+          <option value="TYBA">TYBA</option>
+        </select>
+
+        <label class="form-label">
+          <span class="label-text-nowrap">ACADEMIC YEAR</span>
+        </label>
+        <select id="accAcademicYearSelect" class="select-box" required>
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2027">2027</option>
+          <option value="2028">2028</option>
+        </select>
+
+        <div class="form-label">
+          <span class="label-text-nowrap">4-DIGIT SECURITY PIN</span>
+          <button type="button" class="btn-badge-action" onclick="togglePinBox()">
+            ✏️ Change PIN
+          </button>
+        </div>
+        <div class="pin-input-wrap" style="margin-bottom: 0.4rem;">
+          <input type="password" id="accDisplayPin" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed;" />
+          <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accDisplayPin', this)">👁</button>
+        </div>
+
+        <div id="pinUpdateDrawer" class="inline-update-box hidden">
+          <label class="form-label">
+            <span class="label-text-nowrap">EXISTING 4-DIGIT PIN</span>
+          </label>
+          <div class="pin-input-wrap">
+            <input type="password" id="accOldPinInput" class="input-box" placeholder="Enter current PIN" pattern="[0-9]{4}" maxlength="4" />
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accOldPinInput', this)">👁️</button>
+          </div>
+
+          <label class="form-label">
+            <span class="label-text-nowrap">NEW 4-DIGIT PIN</span>
+          </label>
+          <div class="pin-input-wrap">
+            <input type="password" id="accNewPinInput" class="input-box" placeholder="Enter new 4-digit PIN" pattern="[0-9]{4}" maxlength="4" />
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accNewPinInput', this)">👁️️</button>
+          </div>
+
+          <button type="button" id="btnUpdatePin" class="btn-primary-action" style="background:#0f172a;" onclick="updateSecurityPin()">Verify & Save New PIN</button>
+        </div>
+
+        <button type="submit" id="saveAccBtn" class="btn-primary-action" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">Save Details</button>
+        <button type="button" class="btn-primary-action" style="background:#ef4444;" onclick="logoutStudent()">Logout Session</button>
+      </form>
+    </div>
+  </div>
+
   <div id="emptyDataModal" class="modal-overlay hidden" onclick="closeEmptyModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <button class="modal-close-btn" onclick="closeEmptyModal()" title="Close">❌</button>
       <div style="font-size:2.5rem; margin-bottom:0.5rem;">📂</div>
       <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:0.3rem;" id="emptyModalTitle">Data Not Found</h3>
-      <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.25rem;" id="emptyModalDesc">
+      <p style="font-size:0.88rem; margin-bottom:1.25rem;" id="emptyModalDesc">
         Is resource ke liye link abhi add nahi ki gayi hai.
       </p>
       <button class="btn-primary-action" onclick="closeEmptyModal()">Theek Hai (OK)</button>
@@ -1281,7 +1248,7 @@
   </footer>
 
   <script>
-    // 0. THEME SWITCHER LOGIC
+    // 0. THEME SWITCHER
     function applySavedTheme() {
       const savedTheme = localStorage.getItem('csh_theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
@@ -1349,12 +1316,11 @@
       }
     }
 
-    function convertToGoogleDriveEmbed(url, pageNum = 1) {
+    function convertToGoogleDriveEmbed(url) {
       if (!url || !url.startsWith('http')) return url;
       const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
-        const pIndex = Math.max(0, parseInt(pageNum) - 1);
-        return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview#:0.page.${pIndex}`;
+        return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
       }
       return url;
     }
@@ -1382,9 +1348,7 @@
       semester: null,
       subjectKey: null,
       subjectName: null,
-      step: 1,
-      bookPage: 1,
-      inAccountTab: false
+      step: 1
     };
 
     function getActiveSubjectData() {
@@ -1428,7 +1392,7 @@
         btn.innerText = '🙈';
       } else {
         input.type = 'password';
-        btn.innerText = '👁️';
+        btn.innerText = '👁️️';
       }
     }
 
@@ -1676,7 +1640,7 @@
     }
 
     // ========================================================
-    // BOOK VIEWER & DYNAMIC COVER RENDERING
+    // BOOK COVER STEP & DYNAMIC COVER RENDERING (IMAGE 3)
     // ========================================================
     function populateBookStepData() {
       const subObj = getActiveSubjectData();
@@ -1704,7 +1668,7 @@
       updateView();
     }
 
-    // Opens Book directly in in-app reader & restores saved page
+    // OPENS HORIZONTAL SCROLL READER
     function openInAppBookReader() {
       if (!isFirebaseReady) return;
 
@@ -1717,66 +1681,16 @@
         return;
       }
 
-      // Read saved page from localStorage
-      const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
-      const savedPage = parseInt(localStorage.getItem(savedPageKey)) || 1;
-      state.bookPage = savedPage;
-
       state.step = 6;
       setHash();
       updateView();
 
-      const embedUrl = convertToGoogleDriveEmbed(bookUrl.trim(), savedPage);
+      const embedUrl = convertToGoogleDriveEmbed(bookUrl.trim());
       document.getElementById('inAppReaderHeader').innerText = `📘 ${subObj.subjectName || state.subjectName}`;
-      document.getElementById('readerPageIndicatorInput').value = savedPage;
       document.getElementById('inAppPdfIframe').src = embedUrl;
-
-      const notice = document.getElementById('resumePageNotice');
-      if (savedPage > 1) {
-        document.getElementById('resumeNoticeText').innerText = `📍 Saved Reading Point: Page ${savedPage}`;
-        notice.classList.remove('hidden');
-      } else {
-        notice.classList.add('hidden');
-      }
     }
 
-    function stepReaderPage(delta) {
-      let current = parseInt(document.getElementById('readerPageIndicatorInput').value) || state.bookPage || 1;
-      let next = current + delta;
-      if (next < 1) next = 1;
-      jumpToReaderPage(next);
-    }
-
-    function jumpToReaderPage(pageNum) {
-      const p = parseInt(pageNum) || 1;
-      state.bookPage = p;
-      document.getElementById('readerPageIndicatorInput').value = p;
-
-      const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
-      localStorage.setItem(savedPageKey, p);
-
-      const subObj = getActiveSubjectData();
-      if (subObj && subObj.book) {
-        const embedUrl = convertToGoogleDriveEmbed(subObj.book, p);
-        document.getElementById('inAppPdfIframe').src = embedUrl;
-      }
-    }
-
-    function bookmarkCurrentPage() {
-      const current = parseInt(document.getElementById('readerPageIndicatorInput').value) || state.bookPage || 1;
-      const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
-      localStorage.setItem(savedPageKey, current);
-      alert(`Page ${current} bookmarked! Refresh karne par yahi page restore hoga.`);
-    }
-
-    function applyResumePage() {
-      const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
-      const savedPage = parseInt(localStorage.getItem(savedPageKey)) || 1;
-      jumpToReaderPage(savedPage);
-      document.getElementById('resumePageNotice').classList.add('hidden');
-    }
-
-    // DIRECT BROWSER DOWNLOAD (Does not open Google Drive App)
+    // DIRECT BROWSER DOWNLOAD
     function downloadBookDirectly() {
       const subObj = getActiveSubjectData();
       const bookUrl = subObj.book;
@@ -1803,11 +1717,10 @@
       }
     }
 
+    // ========================================================
+    // CARD-MODAL ACCOUNT OPEN / CLOSE (MATCHING IMAGE 3 CARD)
+    // ========================================================
     function openAccountTab() {
-      state.inAccountTab = true;
-      document.getElementById('studyContent').classList.add('hidden');
-      document.getElementById('accountSection').classList.remove('hidden');
-
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
       document.getElementById('accNameInput').value = current.name || '';
       document.getElementById('accDisplayPin').value = current.pin || '••••';
@@ -1817,13 +1730,12 @@
       document.getElementById('pinUpdateDrawer').classList.add('hidden');
       document.getElementById('accOldPinInput').value = '';
       document.getElementById('accNewPinInput').value = '';
+
+      document.getElementById('accountModal').classList.remove('hidden');
     }
 
     function closeAccountTab() {
-      state.inAccountTab = false;
-      document.getElementById('accountSection').classList.add('hidden');
-      document.getElementById('studyContent').classList.remove('hidden');
-      updateView();
+      document.getElementById('accountModal').classList.add('hidden');
     }
 
     function saveAccountSettings(e) {
@@ -1852,7 +1764,8 @@
         setTimeout(() => {
           saveBtn.innerText = "Save Details";
           saveBtn.disabled = false;
-        }, 800);
+          closeAccountTab();
+        }, 600);
       });
     }
 
@@ -1905,6 +1818,7 @@
       }
     });
 
+    // PURE HIERARCHICAL ROUTER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
@@ -1958,8 +1872,6 @@
     }
 
     function updateView() {
-      if (state.inAccountTab) return;
-
       document.getElementById('step-course').classList.add('hidden');
       document.getElementById('step-semester').classList.add('hidden');
       document.getElementById('step-subject').classList.add('hidden');
@@ -2104,12 +2016,8 @@
       updateView();
     }
 
+    // DETERMINISTIC BACK NAVIGATION
     function goBack() {
-      if (state.inAccountTab) {
-        closeAccountTab();
-        return;
-      }
-
       if (state.step === 6) {
         document.getElementById('inAppPdfIframe').src = 'about:blank';
         state.step = 5;
