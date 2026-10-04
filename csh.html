@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Campus Study Hub | College Notes</title>
 
   <!-- Google Typography -->
@@ -15,6 +15,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
   <style>
+    /* CSS VARIABLES: LIGHT & DARK MODE SUPPORT */
     :root {
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
@@ -23,8 +24,25 @@
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
+      --topbar-bg: #0f172a;
+      --topbar-btn: #1e293b;
+      --topbar-border: #334155;
       --radius: 12px;
       --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    [data-theme="dark"] {
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --bg: #0b1329;
+      --card-bg: #131f3f;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #1e2e5c;
+      --topbar-bg: #070d1d;
+      --topbar-btn: #131f3f;
+      --topbar-border: #1e2e5c;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
     }
 
     * {
@@ -32,6 +50,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     }
 
     body {
@@ -168,19 +187,20 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* 2. TOP BAR & MAIN LAYOUT */
+    /* 2. TOP BAR & CONTROLS */
     .top-bar {
-      background: #0f172a;
+      background: var(--topbar-bg);
       color: #fff;
       padding: 0.6rem 1.25rem;
       display: flex;
       justify-content: flex-end;
       align-items: center;
+      gap: 0.65rem;
     }
 
-    .profile-btn {
-      background: #1e293b;
-      border: 1px solid #334155;
+    .theme-toggle-btn, .profile-btn {
+      background: var(--topbar-btn);
+      border: 1px solid var(--topbar-border);
       color: #fff;
       width: 38px;
       height: 38px;
@@ -193,8 +213,8 @@
       transition: background 0.2s, transform 0.1s;
     }
 
-    .profile-btn:hover { background: #334155; }
-    .profile-btn:active { transform: scale(0.95); }
+    .theme-toggle-btn:hover, .profile-btn:hover { background: #334155; }
+    .theme-toggle-btn:active, .profile-btn:active { transform: scale(0.95); }
 
     header {
       background: var(--card-bg);
@@ -241,7 +261,7 @@
       transition: all 0.2s;
     }
 
-    /* FULL EDGE-TO-EDGE IN-APP READER (ZERO SIDES) */
+    /* FULL EDGE-TO-EDGE READER SCREEN */
     body.reader-fullscreen-active main {
       max-width: 100% !important;
       width: 100% !important;
@@ -308,7 +328,7 @@
 
     .btn-select:hover {
       border-color: var(--primary);
-      background: #eff6ff;
+      background: rgba(37, 99, 235, 0.08);
     }
 
     .btn-select span.btn-label {
@@ -335,7 +355,7 @@
     }
 
     .resource-card:hover {
-      background: #f1f5f9;
+      background: rgba(148, 163, 184, 0.12);
       border-color: var(--primary);
     }
 
@@ -394,7 +414,6 @@
       background: #1e293b;
     }
 
-    /* DIGITAL TEXTBOOK COVER (FALLBACK WHEN NO PHOTO UPLOADED) */
     .book-digital-cover {
       width: 170px;
       height: 240px;
@@ -449,17 +468,20 @@
       background: #1e293b;
     }
 
-    /* ===================================================
-       3. 100% RELIABLE EDGE-TO-EDGE IN-APP READER
-       =================================================== */
+    /* 3. READER TOP BAR WITH SAFE-AREA PADDING (PREVENTS CLIPPING WITH NOTCH) */
     .reader-top-controls {
       background: #0f172a;
       color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.65rem 0.85rem;
+      gap: 0.5rem;
+      padding: max(0.85rem, env(safe-area-inset-top, 0.85rem)) 0.85rem 0.75rem 0.85rem;
       border-bottom: 1px solid #1e293b;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     }
 
     .reader-title-badge {
@@ -469,14 +491,40 @@
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      max-width: 60%;
+      flex: 1;
+      text-align: center;
     }
 
-    /* FULL WIDTH VIEWER (ZERO SIDE BORDERS) */
+    .page-box-wrap {
+      display: flex;
+      align-items: center;
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #cbd5e1;
+      gap: 0.35rem;
+    }
+
+    .page-mini-input {
+      width: 36px;
+      text-align: center;
+      background: #0b1329;
+      border: 1px solid #3b82f6;
+      border-radius: 4px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.8rem;
+      outline: none;
+      padding: 0.15rem 0;
+    }
+
+    /* EDGE-TO-EDGE FULL-WIDTH BOOK FRAME */
     .full-page-edge-wrap {
       width: 100vw;
-      height: calc(100vh - 120px);
-      min-height: 80vh;
+      height: calc(100vh - 75px);
       background: #0b1329;
       position: relative;
       overflow: hidden;
@@ -495,7 +543,7 @@
       border-radius: 8px;
       padding: 4px;
       margin-bottom: 1.5rem;
-      background: #f1f5f9;
+      background: rgba(148, 163, 184, 0.15);
     }
 
     .auth-tab-btn {
@@ -512,7 +560,7 @@
     }
 
     .auth-tab-btn.active {
-      background: #fff;
+      background: var(--card-bg);
       color: var(--primary);
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
@@ -551,28 +599,24 @@
     }
 
     .btn-badge-action {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
+      background: rgba(37, 99, 235, 0.12);
+      border: 1px solid var(--primary);
       color: var(--primary);
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      padding: 0.25rem 0.65rem;
+      padding: 0.35rem 0.75rem;
       border-radius: 9999px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
       white-space: nowrap;
+      transition: all 0.2s;
     }
 
     .btn-badge-action:hover {
-      background: #2563eb;
-      color: #ffffff;
-      border-color: #2563eb;
-      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
-      transform: translateY(-1px);
+      background: var(--primary);
+      color: #fff;
     }
 
     .input-box, .select-box, .textarea-box {
@@ -583,7 +627,7 @@
       font-size: 0.95rem;
       margin-bottom: 0.85rem;
       outline: none;
-      background: #f8fafc;
+      background: rgba(148, 163, 184, 0.08);
       color: var(--text);
     }
 
@@ -596,7 +640,7 @@
 
     .input-box:focus, .select-box:focus, .textarea-box:focus {
       border-color: var(--primary);
-      background: #fff;
+      background: var(--card-bg);
     }
 
     .pin-input-wrap {
@@ -641,8 +685,8 @@
     }
 
     .inline-update-box {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 0.9rem;
       margin: 0.2rem 0 1rem 0;
@@ -658,9 +702,9 @@
       position: absolute;
       top: 14px;
       right: 14px;
-      background: #f1f5f9;
+      background: rgba(148, 163, 184, 0.15);
       border: 1px solid var(--border);
-      color: #64748b;
+      color: var(--text-muted);
       width: 34px;
       height: 34px;
       border-radius: 50%;
@@ -751,7 +795,8 @@
     }
 
     .modal-content {
-      background: #ffffff;
+      background: var(--card-bg);
+      color: var(--text);
       border-radius: 16px;
       padding: 1.75rem 1.5rem 1.5rem;
       max-width: 380px;
@@ -771,7 +816,7 @@
       position: absolute;
       top: 12px;
       right: 12px;
-      background: #f1f5f9;
+      background: rgba(148, 163, 184, 0.15);
       border: none;
       font-size: 1.1rem;
       cursor: pointer;
@@ -781,7 +826,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #64748b;
+      color: var(--text-muted);
     }
 
     .hidden {
@@ -834,7 +879,11 @@
     </div>
   </div>
 
+  <!-- TOP BAR: DARK/LIGHT MODE TOGGLE & PROFILE -->
   <div class="top-bar">
+    <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+      🌙
+    </button>
     <div id="authProfileBar" class="hidden">
       <button class="profile-btn" onclick="openAccountTab()" title="Account Settings">
         👤
@@ -957,8 +1006,8 @@
         <section id="step-resources" class="hidden">
           <h2 class="step-title" id="subject-title">Resources</h2>
           <div class="grid">
-            <button class="resource-card" style="border-color: #3b82f6; background: #eff6ff;" onclick="openBookView()">
-              <span style="color: #1d4ed8; font-weight: 700;">📚 Book</span> <span style="color: #1d4ed8;">View & Read ↗</span>
+            <button class="resource-card" style="border-color: #3b82f6; background: rgba(59, 130, 246, 0.1);" onclick="openBookView()">
+              <span style="color: var(--primary); font-weight: 700;">📚 Book</span> <span style="color: var(--primary);">View & Read ↗</span>
             </button>
 
             <button class="resource-card" onclick="openResource('notes')">
@@ -979,7 +1028,7 @@
           </div>
         </section>
 
-        <!-- STEP 5: BOOK VIEW (DYNAMIC TITLE & COVER - RESOLVES PHOTO 2) -->
+        <!-- STEP 5: BOOK COVER & OPTIONS VIEW -->
         <section id="step-book" class="hidden">
           <div class="book-viewer-box">
             <h2 class="step-title" style="justify-content:center; margin-bottom:0.35rem;" id="bookViewerTitle">Subject Book</h2>
@@ -987,7 +1036,6 @@
               Read the book directly inside the portal or download it to your device.
             </p>
 
-            <!-- 3D Book Cover Container -->
             <div class="book-3d-cover-wrap" onclick="openInAppBookReader()" title="Tap to read book">
               <div id="bookCoverGraphicContainer">
                 <img id="displayBookCoverImg" class="book-cover-image" src="" alt="Book Cover" />
@@ -1000,17 +1048,21 @@
                 <span>📖 Read Book</span>
               </button>
               <button type="button" class="btn-book-action btn-download-book" onclick="downloadBookDirectly()">
-                <span>⬇️️ Download Book</span>
+                <span>⬇️ Download Book</span>
               </button>
             </div>
           </div>
         </section>
 
-        <!-- STEP 6: 100% RELIABLE IN-APP READER (RESOLVES PHOTO 1 - ZERO MARGINS, NO FAILED CANVAS) -->
+        <!-- STEP 6: 100% RELIABLE IN-APP READER WITH BREATHING SPACE HEADER -->
         <section id="step-book-reader" class="hidden">
           <div class="reader-top-controls">
             <button type="button" class="btn-badge-action" onclick="goBack()">← Back</button>
             <span class="reader-title-badge" id="inAppReaderHeader">📖 Book Reader</span>
+            <div class="page-box-wrap" title="Current Page Memory">
+              <span>Pg</span>
+              <input type="number" id="readerPageIndicatorInput" class="page-mini-input" value="1" min="1" max="1000" onchange="updateSavedBookPage(this.value)" />
+            </div>
             <button type="button" class="btn-badge-action" onclick="downloadBookDirectly()">⬇️ Download</button>
           </div>
 
@@ -1138,7 +1190,30 @@
   </footer>
 
   <script>
-    // 0. FAST INTRO DISMISSAL
+    // 0. DARK / LIGHT THEME CONTROLLER
+    function applySavedTheme() {
+      const savedTheme = localStorage.getItem('csh_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      localStorage.setItem('csh_theme', nextTheme);
+      updateThemeIcon(nextTheme);
+    }
+
+    function updateThemeIcon(theme) {
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.innerText = theme === 'dark' ? '☀️' : '🌙';
+      }
+    }
+    applySavedTheme();
+
+    // 1. FAST SPLASH DISMISSAL
     function dismissSplashNow() {
       const splash = document.getElementById('splashScreen');
       if (splash) {
@@ -1185,12 +1260,12 @@
       }
     }
 
-    // Google Drive URL to Native Embed Preview
-    function convertToGoogleDriveEmbed(url) {
+    // Embed URL with page support
+    function convertToGoogleDriveEmbed(url, pageNum = 1) {
       if (!url || !url.startsWith('http')) return url;
       const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
-        return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+        return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview#page=${pageNum}`;
       }
       return url;
     }
@@ -1219,6 +1294,7 @@
       subjectKey: null,
       subjectName: null,
       step: 1, // 1: course, 2: sem, 3: subject, 4: resources, 5: book cover, 6: in-app reader
+      bookPage: 1,
       inAccountTab: false
     };
 
@@ -1272,7 +1348,7 @@
       el.classList.toggle('hidden');
     }
 
-    // FIREBASE LIVE DATA LISTENER
+    // FIREBASE LIVE DATA LISTENER (AUTO-TRIGGER AFTER RELOAD)
     database.ref('study_data').on('value', (snapshot) => {
       const liveData = snapshot.val();
       studyData = {
@@ -1512,21 +1588,18 @@
     }
 
     // ========================================================
-    // BOOK VIEWER & DYNAMIC COVER RENDERING (FIXES PHOTO 2)
+    // BOOK VIEWER & DYNAMIC COVER RENDERING
     // ========================================================
     function populateBookStepData() {
       const subObj = getActiveSubjectData();
       const displayName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey) || "Subject";
 
-      // 1. Dynamic Subject Title
       document.getElementById('bookViewerTitle').innerText = `📘 ${displayName} Book`;
 
-      // 2. Dynamic Cover Setup
       const container = document.getElementById('bookCoverGraphicContainer');
       if (subObj.bookCover && subObj.bookCover.trim() !== '') {
         container.innerHTML = `<img class="book-cover-image" src="${subObj.bookCover}" alt="${displayName} Cover" />`;
       } else {
-        // If admin didn't upload cover, render realistic 3D digital book with subject title
         container.innerHTML = `
           <div class="book-digital-cover">
             <div style="font-size:0.75rem; color:#93c5fd; font-weight:700; text-transform:uppercase;">${state.course || 'College'} • ${state.semester || ''}</div>
@@ -1543,8 +1616,10 @@
       updateView();
     }
 
-    // Opens Book directly in 100% Edge-to-Edge view (FIXES PHOTO 1)
+    // Opens Book directly in 100% Edge-to-Edge view & remembers exact page
     function openInAppBookReader() {
+      if (!isFirebaseReady) return; // Wait for Firebase data to avoid false 'Book Not Found'
+
       const subObj = getActiveSubjectData();
       const bookUrl = subObj.book;
 
@@ -1554,13 +1629,31 @@
         return;
       }
 
+      // Read saved page from localStorage so refresh keeps the same page
+      const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
+      const savedPage = parseInt(localStorage.getItem(savedPageKey)) || 1;
+      state.bookPage = savedPage;
+
       state.step = 6;
       setHash();
       updateView();
 
-      const embedUrl = convertToGoogleDriveEmbed(bookUrl.trim());
-      document.getElementById('inAppReaderHeader').innerText = `📖 ${subObj.subjectName || state.subjectName} Book`;
+      const embedUrl = convertToGoogleDriveEmbed(bookUrl.trim(), savedPage);
+      document.getElementById('inAppReaderHeader').innerText = `📘 ${subObj.subjectName || state.subjectName}`;
+      document.getElementById('readerPageIndicatorInput').value = savedPage;
       document.getElementById('inAppPdfIframe').src = embedUrl;
+    }
+
+    function updateSavedBookPage(pageNum) {
+      const p = parseInt(pageNum) || 1;
+      state.bookPage = p;
+      const savedPageKey = `csh_book_pg_${state.course}_${state.semester}_${state.subjectKey}`;
+      localStorage.setItem(savedPageKey, p);
+
+      const subObj = getActiveSubjectData();
+      if (subObj && subObj.book) {
+        document.getElementById('inAppPdfIframe').src = convertToGoogleDriveEmbed(subObj.book, p);
+      }
     }
 
     // DIRECT DOWNLOAD (Bypasses Google Drive App on Android)
@@ -1577,7 +1670,6 @@
       const fileIdMatch = bookUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || bookUrl.match(/id=([a-zA-Z0-9_-]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
         const fileId = fileIdMatch[1];
-        // drive.usercontent.google.com triggers direct browser download without opening Google Drive app
         const directDownloadUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&authuser=0`;
         const a = document.createElement('a');
         a.href = directDownloadUrl;
@@ -1806,7 +1898,7 @@
         populateBookStepData();
       } else if (state.step === 6) {
         document.getElementById('step-book-reader').classList.remove('hidden');
-        backBtn.classList.add('hidden'); // Use in-app reader header back
+        backBtn.classList.add('hidden');
         breadcrumb.classList.add('hidden');
       }
     }
@@ -1893,7 +1985,7 @@
       updateView();
     }
 
-    // STRICT STEP-BY-STEP BACK NAVIGATION
+    // DETERMINISTIC BACK NAVIGATION
     function goBack() {
       if (state.inAccountTab) {
         closeAccountTab();
