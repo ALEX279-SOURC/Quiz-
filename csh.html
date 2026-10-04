@@ -192,7 +192,7 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* 2. TOP BAR & CONTROLS */
+    /* 2. TOP BAR & MAIN HEADER */
     .top-bar {
       background: var(--topbar-bg);
       color: #fff;
@@ -267,6 +267,11 @@
       transition: all 0.2s;
     }
 
+    /* FULL EDGE-TO-EDGE READER SCREEN VIEW */
+    body.reader-fullscreen-active {
+      overflow: hidden !important;
+    }
+
     body.reader-fullscreen-active main {
       max-width: 100% !important;
       width: 100% !important;
@@ -290,7 +295,7 @@
       box-shadow: none !important;
       padding: 0 !important;
       margin: 0 !important;
-      background: #0b1329;
+      background: #000 !important;
     }
 
     .step-title {
@@ -398,7 +403,7 @@
       text-decoration: underline;
     }
 
-    /* 3D BOOK COVER & CARDS (IMAGE 3 MATCH) */
+    /* 3D BOOK COVER & CARDS */
     .book-viewer-box {
       text-align: center;
       padding: 1rem 0.5rem;
@@ -480,23 +485,47 @@
       background: #1e293b;
     }
 
-    /* 3. CLEAN READER BAR (WITHOUT PAGE COUNTER / SAVE PAGE STRIP) */
-    .reader-top-controls {
+    /* ===================================================
+       3. EXACT PHOTO-MATCHED FIXED READER HEADER & FOOTER
+       =================================================== */
+    .reader-fixed-top-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 58px;
       background: #0f172a;
       color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: max(0.9rem, env(safe-area-inset-top, 0.9rem)) 0.85rem 0.65rem 0.85rem;
+      padding: max(0.4rem, env(safe-area-inset-top, 0.4rem)) 0.85rem 0.4rem 0.85rem;
       border-bottom: 1px solid #1e293b;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      gap: 0.5rem;
+      z-index: 10000;
+    }
+
+    .btn-reader-nav {
+      background: rgba(37, 99, 235, 0.16);
+      border: 1px solid #2563eb;
+      color: #60a5fa;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.4rem 0.85rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      white-space: nowrap;
+    }
+
+    .btn-reader-nav:hover {
+      background: #2563eb;
+      color: #fff;
     }
 
     .reader-title-badge {
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #38bdf8;
       overflow: hidden;
@@ -504,31 +533,22 @@
       text-overflow: ellipsis;
       flex: 1;
       text-align: center;
+      padding: 0 0.5rem;
     }
 
-    /* LEFT TO RIGHT HORIZONTAL SCROLL CAROUSEL CONTAINER */
-    .horizontal-reader-container {
+    /* FULL-VIEWPORT CENTER FRAME (BETWEEN FIXED HEADER & FIXED FOOTER) */
+    .reader-fixed-body-viewport {
+      position: fixed;
+      top: 58px;
+      left: 0;
       width: 100vw;
-      height: calc(100vh - 65px);
-      background: #0b1329;
-      position: relative;
-      overflow-x: auto;
-      overflow-y: hidden;
-      display: flex;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .horizontal-reader-frame-wrap {
-      flex: 0 0 100vw;
-      width: 100vw;
-      height: 100%;
-      scroll-snap-align: start;
-      position: relative;
+      bottom: 48px;
+      background: #000;
       overflow: hidden;
+      z-index: 9999;
     }
 
-    /* HIDES GOOGLE DRIVE POP-OUT TOOLBAR (MARGIN-TOP -56PX) */
+    /* CLIPS OUT TOP GOOGLE DRIVE POPOUT BAR */
     .in-app-pdf-frame {
       width: 100%;
       height: calc(100% + 56px);
@@ -548,7 +568,26 @@
       pointer-events: auto;
     }
 
-    /* 4. MODAL POPUP FOR STUDENT ACCOUNT DETAILS (IMAGE 3 CARD STYLE) */
+    /* FIXED NON-MOVEABLE READER FOOTER */
+    .reader-fixed-bottom-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      height: 48px;
+      background: #0f172a;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      border-top: 1px solid #1e293b;
+      z-index: 10000;
+      padding: 0 0.5rem;
+      text-align: center;
+    }
+
+    /* 4. MODAL POPUP FOR STUDENT ACCOUNT DETAILS */
     .account-modal-overlay {
       position: fixed;
       top: 0;
@@ -935,8 +974,8 @@
     </div>
   </div>
 
-  <!-- TOP BAR -->
-  <div class="top-bar">
+  <!-- NORMAL TOP BAR -->
+  <div class="top-bar" id="normalTopBar">
     <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
       🌙
     </button>
@@ -947,6 +986,7 @@
     </div>
   </div>
 
+  <!-- NORMAL MAIN HEADER -->
   <header id="mainAppHeader">
     <div class="header-logo-wrap">
       <svg class="header-mini-logo" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1084,7 +1124,7 @@
           </div>
         </section>
 
-        <!-- STEP 5: BOOK COVER & OPTIONS VIEW (MATCHING IMAGE 3) -->
+        <!-- STEP 5: BOOK COVER & OPTIONS VIEW -->
         <section id="step-book" class="hidden">
           <div class="book-viewer-box">
             <h2 class="step-title" style="justify-content:center; margin-bottom:0.35rem;" id="bookViewerTitle">Subject Book</h2>
@@ -1098,32 +1138,14 @@
               </div>
             </div>
 
-            <!-- ACTION BUTTONS: READ BOOK & DOWNLOAD BOOK (MATCHING IMAGE 3) -->
+            <!-- ACTION BUTTONS: READ BOOK & DOWNLOAD BOOK -->
             <div class="book-action-buttons-grid">
               <button type="button" class="btn-book-action btn-read-in-app" onclick="openInAppBookReader()">
                 <span>📖 Read Book</span>
               </button>
               <button type="button" class="btn-book-action btn-download-book" onclick="downloadBookDirectly()">
-                <span>⬇️ Download Book</span>
+                <span>⬇️️ Download Book</span>
               </button>
-            </div>
-          </div>
-        </section>
-
-        <!-- STEP 6: IN-APP HORIZONTAL SCROLL READER (NO PAGE/SAVE STRIP, LEFT TO RIGHT) -->
-        <section id="step-book-reader" class="hidden">
-          <!-- TOP ROW: ONLY BACK, TITLE, DOWNLOAD (CLEAN) -->
-          <div class="reader-top-controls">
-            <button type="button" class="btn-badge-action" onclick="goBack()">← Back</button>
-            <span class="reader-title-badge" id="inAppReaderHeader">📖 Book Reader</span>
-            <button type="button" class="btn-badge-action" onclick="downloadBookDirectly()">⬇️ Download</button>
-          </div>
-
-          <!-- HORIZONTAL SCROLL CAROUSEL (SWIPE / SCROLL LEFT TO RIGHT) -->
-          <div class="horizontal-reader-container" id="horizontalReaderScrollBox">
-            <div class="horizontal-reader-frame-wrap">
-              <div class="popout-blocker-shield"></div>
-              <iframe id="inAppPdfIframe" class="in-app-pdf-frame" src="about:blank" title="Book Viewer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
             </div>
           </div>
         </section>
@@ -1158,7 +1180,28 @@
 
   </main>
 
-  <!-- GATEWAY 3: CARD-STYLE MODAL FOR STUDENT ACCOUNT DETAILS (MATCHING IMAGE 3 DESIGN) -->
+  <!-- STEP 6: PHOTO-MATCHED FIXED READER INTERFACE (SHOWN ONLY WHEN BOOK OPENS) -->
+  <div id="fixedReaderInterface" class="hidden">
+    <!-- 1. FIXED TOP HEADER -->
+    <div class="reader-fixed-top-header">
+      <button type="button" class="btn-reader-nav" onclick="goBack()">← Back</button>
+      <span class="reader-title-badge" id="inAppReaderHeader">📘 MDC Gujrati (1) Book</span>
+      <button type="button" class="btn-reader-nav" onclick="downloadBookDirectly()">⬇ Download</button>
+    </div>
+
+    <!-- 2. FIXED CENTER PDF CONTAINER (CLIPS DRIVE POP-OUT BAR) -->
+    <div class="reader-fixed-body-viewport">
+      <div class="popout-blocker-shield"></div>
+      <iframe id="inAppPdfIframe" class="in-app-pdf-frame" src="about:blank" title="Book Viewer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+    </div>
+
+    <!-- 3. FIXED NON-MOVEABLE FOOTER -->
+    <div class="reader-fixed-bottom-footer">
+      <span>&copy; Campus Study Hub. Built for college students.</span>
+    </div>
+  </div>
+
+  <!-- GATEWAY 3: CARD-STYLE MODAL FOR STUDENT ACCOUNT DETAILS -->
   <div id="accountModal" class="account-modal-overlay hidden" onclick="closeAccountTab()">
     <div class="account-card-box" onclick="event.stopPropagation()">
       <button class="card-close-btn" onclick="closeAccountTab()" title="Close">✕</button>
@@ -1219,7 +1262,7 @@
           </label>
           <div class="pin-input-wrap">
             <input type="password" id="accNewPinInput" class="input-box" placeholder="Enter new 4-digit PIN" pattern="[0-9]{4}" maxlength="4" />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accNewPinInput', this)">👁️️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('accNewPinInput', this)">👁</button>
           </div>
 
           <button type="button" id="btnUpdatePin" class="btn-primary-action" style="background:#0f172a;" onclick="updateSecurityPin()">Verify & Save New PIN</button>
@@ -1236,13 +1279,14 @@
       <button class="modal-close-btn" onclick="closeEmptyModal()" title="Close">❌</button>
       <div style="font-size:2.5rem; margin-bottom:0.5rem;">📂</div>
       <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:0.3rem;" id="emptyModalTitle">Data Not Found</h3>
-      <p style="font-size:0.88rem; margin-bottom:1.25rem;" id="emptyModalDesc">
+      <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.25rem;" id="emptyModalDesc">
         Is resource ke liye link abhi add nahi ki gayi hai.
       </p>
       <button class="btn-primary-action" onclick="closeEmptyModal()">Theek Hai (OK)</button>
     </div>
   </div>
 
+  <!-- NORMAL APP FOOTER -->
   <footer id="mainAppFooter">
     &copy; Campus Study Hub. Built for college students.
   </footer>
@@ -1392,7 +1436,7 @@
         btn.innerText = '🙈';
       } else {
         input.type = 'password';
-        btn.innerText = '👁️️';
+        btn.innerText = '👁';
       }
     }
 
@@ -1640,7 +1684,7 @@
     }
 
     // ========================================================
-    // BOOK COVER STEP & DYNAMIC COVER RENDERING (IMAGE 3)
+    // BOOK COVER STEP & DYNAMIC COVER RENDERING
     // ========================================================
     function populateBookStepData() {
       const subObj = getActiveSubjectData();
@@ -1668,7 +1712,7 @@
       updateView();
     }
 
-    // OPENS HORIZONTAL SCROLL READER
+    // OPENS THE FULLSCREEN FIXED READER (MATCHING PHOTO)
     function openInAppBookReader() {
       if (!isFirebaseReady) return;
 
@@ -1718,7 +1762,7 @@
     }
 
     // ========================================================
-    // CARD-MODAL ACCOUNT OPEN / CLOSE (MATCHING IMAGE 3 CARD)
+    // CARD-MODAL ACCOUNT OPEN / CLOSE
     // ========================================================
     function openAccountTab() {
       const current = JSON.parse(localStorage.getItem('csh_student') || '{}');
@@ -1818,7 +1862,7 @@
       }
     });
 
-    // PURE HIERARCHICAL ROUTER
+    // ROUTER
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
@@ -1872,28 +1916,40 @@
     }
 
     function updateView() {
+      const body = document.body;
+      const normalTopBar = document.getElementById('normalTopBar');
+      const mainAppHeader = document.getElementById('mainAppHeader');
+      const mainAppFooter = document.getElementById('mainAppFooter');
+      const mainContainer = document.getElementById('mainContainer');
+      const fixedReaderInterface = document.getElementById('fixedReaderInterface');
+
+      // WHEN STEP 6 (READER OPEN): HIDE NORMAL PORTAL ELEMENTS, SHOW ONLY FIXED READER & FIXED FOOTER
+      if (state.step === 6) {
+        body.classList.add('reader-fullscreen-active');
+        normalTopBar.classList.add('hidden');
+        mainAppHeader.classList.add('hidden');
+        mainAppFooter.classList.add('hidden');
+        mainContainer.classList.add('hidden');
+        fixedReaderInterface.classList.remove('hidden');
+        return;
+      }
+
+      // ELSE NORMAL PORTAL VISIBILITY
+      body.classList.remove('reader-fullscreen-active');
+      normalTopBar.classList.remove('hidden');
+      mainAppHeader.classList.remove('hidden');
+      mainAppFooter.classList.remove('hidden');
+      mainContainer.classList.remove('hidden');
+      fixedReaderInterface.classList.add('hidden');
+
       document.getElementById('step-course').classList.add('hidden');
       document.getElementById('step-semester').classList.add('hidden');
       document.getElementById('step-subject').classList.add('hidden');
       document.getElementById('step-resources').classList.add('hidden');
       document.getElementById('step-book').classList.add('hidden');
-      document.getElementById('step-book-reader').classList.add('hidden');
 
-      const body = document.body;
       const backBtn = document.getElementById('backBtn');
       const breadcrumb = document.getElementById('breadcrumb');
-      const activeUsersCard = document.getElementById('activeUsersCard');
-      const commentsCard = document.getElementById('commentsSectionCard');
-
-      if (state.step === 6) {
-        body.classList.add('reader-fullscreen-active');
-        if (activeUsersCard) activeUsersCard.classList.add('hidden');
-        if (commentsCard) commentsCard.classList.add('hidden');
-      } else {
-        body.classList.remove('reader-fullscreen-active');
-        if (activeUsersCard) activeUsersCard.classList.remove('hidden');
-        if (commentsCard) commentsCard.classList.remove('hidden');
-      }
 
       if (state.step === 1) {
         document.getElementById('step-course').classList.remove('hidden');
@@ -1927,10 +1983,6 @@
         const fullSubjectName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey);
         breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName} > Book`;
         populateBookStepData();
-      } else if (state.step === 6) {
-        document.getElementById('step-book-reader').classList.remove('hidden');
-        backBtn.classList.add('hidden');
-        breadcrumb.classList.add('hidden');
       }
     }
 
