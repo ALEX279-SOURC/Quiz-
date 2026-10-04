@@ -620,6 +620,27 @@
       background: #059669;
     }
 
+    /* Cover Photo Card styles */
+    .cover-upload-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.4rem;
+      background: #0b1329;
+      border: 1px solid var(--card-border);
+      padding: 0.75rem;
+      border-radius: 8px;
+    }
+
+    .cover-img-preview {
+      width: 65px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1.5px solid #334155;
+      background: #1e293b;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -756,13 +777,13 @@
         <div class="quick-card" onclick="navigateToTab('addSubjectTab')">
           <div class="quick-icon">📚</div>
           <div class="quick-title">Add Subject Material</div>
-          <div class="quick-desc">Upload Google Drive links for notes and previous year papers.</div>
+          <div class="quick-desc">Upload Google Drive links for book, notes, and previous year papers.</div>
         </div>
 
         <div class="quick-card" onclick="navigateToTab('existingSubjectsTab')">
           <div class="quick-icon">🗂</div>
           <div class="quick-title">Existing Subjects</div>
-          <div class="quick-desc">Inspect, edit links, or delete live semester courses.</div>
+          <div class="quick-desc">Inspect, edit links, book cover photos, or delete live semester courses.</div>
         </div>
 
         <div class="quick-card" onclick="navigateToTab('studentsDirectoryTab')">
@@ -809,6 +830,25 @@
           <input type="text" id="subjectNameInput" class="input-box" placeholder="e.g. Sanskrit M1, VAC ( IKS / BKS )" required />
         </div>
 
+        <!-- NEW: BOOK DRIVE LINK (ABOVE NOTES) -->
+        <div class="form-group">
+          <label class="form-label">BOOK 📚 GOOGLE DRIVE LINK</label>
+          <input type="url" id="bookLinkInput" class="input-box" placeholder="https://drive.google.com/file/d/..." />
+        </div>
+
+        <!-- NEW: BOOK COVER PHOTO (IMAGE UPLOAD / URL) -->
+        <div class="form-group">
+          <label class="form-label">BOOK COVER PHOTO</label>
+          <div class="cover-upload-container">
+            <img id="newBookCoverPreview" class="cover-img-preview" src="https://via.placeholder.com/130x180?text=No+Cover" alt="Cover Preview" />
+            <div style="flex:1;">
+              <input type="file" id="newBookCoverFile" accept="image/*" style="display:none;" onchange="handleImageFilePicker(event, 'newBookCoverPreview', 'newBookCoverUrlInput')" />
+              <button type="button" class="btn-inline-pencil" style="padding:0.4rem 0.75rem; margin-bottom:0.4rem;" onclick="document.getElementById('newBookCoverFile').click()">📷 Choose Photo from Gallery</button>
+              <input type="text" id="newBookCoverUrlInput" class="input-box" placeholder="Or paste image URL" oninput="updatePreviewImg(this.value, 'newBookCoverPreview')" />
+            </div>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label">NOTES DRIVE LINK</label>
           <input type="url" id="notesLinkInput" class="input-box" placeholder="https://drive.google.com/..." />
@@ -838,12 +878,10 @@
         <button class="tab-close-btn" onclick="closeToHome()" title="Close Tab">✕</button>
       </div>
 
-      <!-- VIEW 1: SEMESTER 1 SE 6 CARDS -->
       <div id="semesterSelectView">
         <div class="item-list" id="semesterGridContainer"></div>
       </div>
 
-      <!-- VIEW 2: SELECTED SEMESTER'S SUBJECT LIST -->
       <div id="subjectListView" class="hidden">
         <button class="btn-detail-back" onclick="backToSemesterGrid()">← Back to Semesters</button>
         <h3 id="currentSemesterTitle" style="font-size:1.05rem; font-weight:800; margin-bottom:0.75rem; color:#38bdf8;"></h3>
@@ -852,7 +890,6 @@
         </div>
       </div>
 
-      <!-- VIEW 3: STRUCTURED DETAIL & LIVE EDIT VIEW -->
       <div id="subjectDetailView" class="hidden">
         <button class="btn-detail-back" onclick="backToSubjectList()">← Back to Subjects List</button>
         <div class="detail-view-box" id="subjectDetailContent"></div>
@@ -972,6 +1009,49 @@
     let isSubjectsLoaded = false;
     let isStudentsLoaded = false;
     let isCommentsLoaded = false;
+
+    // Image compression utility to convert file to lightweight base64
+    function handleImageFilePicker(event, previewImgId, targetInputId) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 500; // Optimal size for book cover thumbnail
+
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          document.getElementById(previewImgId).src = compressedDataUrl;
+          document.getElementById(targetInputId).value = compressedDataUrl;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updatePreviewImg(url, previewImgId) {
+      const img = document.getElementById(previewImgId);
+      if (img) {
+        img.src = url.trim() || 'https://via.placeholder.com/130x180?text=No+Cover';
+      }
+    }
 
     function togglePinVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
@@ -1169,12 +1249,15 @@
 
     window.addEventListener('hashchange', parseHash);
 
+    // ADD SUBJECT WITH BOOK & COVER PHOTO
     function handleSubjectSubmit(e) {
       e.preventDefault();
       const course = document.getElementById('courseSelect').value;
       const semester = document.getElementById('semesterSelect').value;
       const subject = document.getElementById('subjectNameInput').value.trim();
 
+      const book = document.getElementById('bookLinkInput').value.trim() || '#';
+      const bookCover = document.getElementById('newBookCoverUrlInput').value.trim() || '';
       const notes = document.getElementById('notesLinkInput').value.trim() || '#';
       const questions = document.getElementById('questionsLinkInput').value.trim() || '#';
       const papers = document.getElementById('papersLinkInput').value.trim() || '#';
@@ -1202,6 +1285,8 @@
 
         database.ref(path).set({
           subjectName: subject,
+          book: book,
+          bookCover: bookCover,
           notes: notes,
           questions: questions,
           papers: papers,
@@ -1211,6 +1296,9 @@
         }).then(() => {
           alert(`Subject '${subject}' successfully published to ${course} (${semester})!`);
           document.getElementById('subjectNameInput').value = '';
+          document.getElementById('bookLinkInput').value = '';
+          document.getElementById('newBookCoverUrlInput').value = '';
+          document.getElementById('newBookCoverPreview').src = 'https://via.placeholder.com/130x180?text=No+Cover';
           document.getElementById('notesLinkInput').value = '';
           document.getElementById('questionsLinkInput').value = '';
           document.getElementById('papersLinkInput').value = '';
@@ -1251,6 +1339,8 @@
                 createdAt: item.createdAt || 0,
                 updatedAt: item.updatedAt || '',
                 compositeKey: compositeKey,
+                book: item.book || '#',
+                bookCover: item.bookCover || '',
                 ...item
               };
             });
@@ -1359,6 +1449,7 @@
       renderSemesterGrid();
     }
 
+    // SUBJECT DETAIL WITH "BOOK 📚" ABOVE NOTES
     function showSubjectDetail(subKey, updateHash = true) {
       activeEditSubjectKey = subKey;
       const s = cachedSubjects[subKey];
@@ -1371,6 +1462,8 @@
         window.location.hash = `subject-detail/${encodeURIComponent(subKey)}`;
       }
 
+      const coverSrc = s.bookCover && s.bookCover.trim() !== '' ? s.bookCover : 'https://via.placeholder.com/130x180?text=No+Cover';
+
       const detailContainer = document.getElementById('subjectDetailContent');
       detailContainer.innerHTML = `
         <div class="detail-row-item">
@@ -1380,6 +1473,30 @@
         <div class="detail-row-item">
           <div class="detail-label">🎓 Course & Semester</div>
           <div class="detail-value">${s.course} • ${s.semester}</div>
+        </div>
+
+        <!-- NEW: BOOK 📚 DRIVE LINK (ABOVE NOTES) -->
+        <div class="detail-row-item">
+          <div class="detail-label-bar">
+            <span class="detail-label">📚 Book Google Drive Link</span>
+            <button type="button" class="btn-inline-pencil" onclick="focusField('editBookInput')">✏️ Edit</button>
+          </div>
+          <input type="text" id="editBookInput" class="detail-input-edit" value="${s.book && s.book !== '#' ? s.book : ''}" placeholder="Enter Google Drive link for book PDF" />
+        </div>
+
+        <!-- NEW: BOOK COVER PHOTO (ABOVE NOTES) -->
+        <div class="detail-row-item">
+          <div class="detail-label-bar">
+            <span class="detail-label">🖼️ Book Cover Photo (Embed with Book Link)</span>
+          </div>
+          <div class="cover-upload-container">
+            <img id="editCoverImgPreview" class="cover-img-preview" src="${coverSrc}" alt="Book Cover" />
+            <div style="flex:1;">
+              <input type="file" id="editCoverFilePicker" accept="image/*" style="display:none;" onchange="handleImageFilePicker(event, 'editCoverImgPreview', 'editBookCoverInput')" />
+              <button type="button" class="btn-inline-pencil" style="padding:0.4rem 0.75rem; margin-bottom:0.4rem;" onclick="document.getElementById('editCoverFilePicker').click()">📷 Choose Photo from Gallery</button>
+              <input type="text" id="editBookCoverInput" class="detail-input-edit" value="${s.bookCover || ''}" placeholder="Or paste Image URL" oninput="updatePreviewImg(this.value, 'editCoverImgPreview')" />
+            </div>
+          </div>
         </div>
 
         <div class="detail-row-item">
@@ -1411,7 +1528,7 @@
           <div class="detail-value" style="font-size:0.85rem; color:var(--text-muted);">${s.updatedAt ? new Date(s.updatedAt).toLocaleString('en-IN') : 'N/A'}</div>
         </div>
 
-        <button type="button" class="btn-save-changes" id="btnSaveSubjectLinks" onclick="saveSubjectLinksChanges()">💾 Save Resource Links</button>
+        <button type="button" class="btn-save-changes" id="btnSaveSubjectLinks" onclick="saveSubjectLinksChanges()">💾 Save Resource Links & Book</button>
       `;
 
       document.getElementById('semesterSelectView').classList.add('hidden');
@@ -1427,11 +1544,14 @@
       }
     }
 
+    // SAVES BOOK LINK & COVER PHOTO TO FIREBASE
     function saveSubjectLinksChanges() {
       if (!activeEditSubjectKey) return;
       const s = cachedSubjects[activeEditSubjectKey];
       if (!s) return;
 
+      const book = document.getElementById('editBookInput').value.trim() || '#';
+      const bookCover = document.getElementById('editBookCoverInput').value.trim() || '';
       const notes = document.getElementById('editNotesInput').value.trim() || '#';
       const questions = document.getElementById('editQuestionsInput').value.trim() || '#';
       const papers = document.getElementById('editPapersInput').value.trim() || '#';
@@ -1443,23 +1563,27 @@
       const path = `study_data/${s.course}/${s.semester}/${s.subKeyRaw}`;
       
       database.ref(path).update({
+        book: book,
+        bookCover: bookCover,
         notes: notes,
         questions: questions,
         papers: papers,
         updatedAt: new Date().toISOString()
       }).then(() => {
+        s.book = book;
+        s.bookCover = bookCover;
         s.notes = notes;
         s.questions = questions;
         s.papers = papers;
 
-        alert(`Resource Links for '${s.subject}' updated successfully!`);
+        alert(`Book & Links for '${s.subject}' updated successfully on the main website!`);
         saveBtn.innerText = "Saved Successfully ✓";
         setTimeout(() => {
           backToSubjectList(true);
         }, 400);
       }).catch(err => {
-        alert("Error saving links: " + err.message);
-        saveBtn.innerText = "💾 Save Resource Links";
+        alert("Error saving: " + err.message);
+        saveBtn.innerText = "💾 Save Resource Links & Book";
         saveBtn.disabled = false;
       });
     }
@@ -1483,7 +1607,7 @@
       }
     }
 
-    // 8. RENDER STUDENTS
+    // STUDENTS DIRECTORY
     function listenToStudents() {
       const container = document.getElementById('studentsListContainer');
       database.ref('registered_students').on('value', (snapshot) => {
@@ -1534,10 +1658,6 @@
           <div class="detail-value">${s.name}</div>
         </div>
         <div class="detail-row-item">
-          <div class="detail-label">📞 Registered Mobile Number</div>
-          <div class="detail-value">+91 ${s.phone || 'N/A'}</div>
-        </div>
-        <div class="detail-row-item">
           <div class="detail-label">🎓 Year of College</div>
           <div class="detail-value">${s.collegeYear || 'FYBA'}</div>
         </div>
@@ -1577,7 +1697,7 @@
       }
     }
 
-    // 9. RENDER COMMENTS
+    // COMMENTS
     function listenToComments() {
       const container = document.getElementById('commentsContainer');
       database.ref('student_comments').on('value', (snapshot) => {
@@ -1630,10 +1750,6 @@
         <div class="detail-row-item">
           <div class="detail-label">👤 Student Name</div>
           <div class="detail-value">${c.userName || 'Anonymous Scholar'}</div>
-        </div>
-        <div class="detail-row-item">
-          <div class="detail-label">📞 Mobile Number</div>
-          <div class="detail-value">+91 ${c.userPhone ? c.userPhone : 'Not Provided'}</div>
         </div>
         <div class="detail-row-item">
           <div class="detail-label">🎓 Year of College</div>
