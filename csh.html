@@ -10,6 +10,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Cinzel:wght@700;800&display=swap" rel="stylesheet">
 
+  <!-- PDF.js Library for Real Single-Page Canvas Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+  </script>
+
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -241,7 +247,7 @@
       transition: all 0.2s;
     }
 
-    /* FULL EDGE-TO-EDGE READER MODE */
+    /* FULL EDGE-TO-EDGE READER SCREEN */
     body.reader-fullscreen-active main {
       max-width: 100% !important;
       width: 100% !important;
@@ -263,9 +269,9 @@
       border: none !important;
       border-radius: 0 !important;
       box-shadow: none !important;
-      padding: 0.4rem 0.25rem !important;
+      padding: 0.5rem 0.25rem !important;
       margin: 0 !important;
-      background: #0b1329;
+      background: #0f172a;
     }
 
     .step-title {
@@ -433,7 +439,9 @@
       background: #1e293b;
     }
 
-    /* 3D FULL-BLEED IN-APP BOOK VIEWER */
+    /* ===================================================
+       3. 3D FLIP SINGLE-PAGE CANVAS READER (EDGE-TO-EDGE)
+       =================================================== */
     .reader-top-controls {
       display: flex;
       justify-content: space-between;
@@ -465,9 +473,9 @@
     }
 
     .page-indicator-pill {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: var(--primary);
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #38bdf8;
       font-weight: 800;
       font-size: 0.82rem;
       padding: 0.35rem 0.65rem;
@@ -480,54 +488,73 @@
     .page-num-input {
       width: 44px;
       text-align: center;
-      border: 1px solid #93c5fd;
+      border: 1px solid #3b82f6;
       border-radius: 4px;
       font-weight: 800;
       font-size: 0.82rem;
       outline: none;
-      background: #fff;
-      color: #1e3a8a;
+      background: #0b1329;
+      color: #fff;
     }
 
-    /* FULL WIDTH CONTAINER - 0 MARGINS */
-    .full-page-edge-wrap {
+    /* FULL WIDTH CONTAINER - 0 MARGINS (NO SIDE SPACE) */
+    .book-canvas-stage {
       width: 100vw;
       margin-left: calc(-50vw + 50%);
-      height: 84vh;
+      margin-right: calc(-50vw + 50%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
       background: #0b1329;
+      perspective: 1400px;
       position: relative;
-      perspective: 1600px;
       touch-action: pan-y;
+      min-height: 72vh;
       overflow: hidden;
     }
 
-    .in-app-pdf-frame {
+    .book-page-canvas-wrap {
       width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
+      display: flex;
+      justify-content: center;
       transform-origin: left center;
-      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease;
     }
 
-    .turn-page-forward {
-      animation: flip3DForward 0.4s ease-in-out forwards;
+    /* 3D Flip Keyframes */
+    .flip-turn-forward {
+      animation: flip3DNext 0.35s ease-in-out forwards;
     }
 
-    .turn-page-backward {
-      animation: flip3DBackward 0.4s ease-in-out forwards;
+    .flip-turn-backward {
+      animation: flip3DPrev 0.35s ease-in-out forwards;
     }
 
-    @keyframes flip3DForward {
-      0% { transform: perspective(1600px) rotateY(0deg); opacity: 1; }
-      50% { transform: perspective(1600px) rotateY(-25deg) scale(0.96); opacity: 0.85; }
-      100% { transform: perspective(1600px) rotateY(0deg); opacity: 1; }
+    @keyframes flip3DNext {
+      0% { transform: perspective(1400px) rotateY(0deg); opacity: 1; }
+      50% { transform: perspective(1400px) rotateY(-35deg) scale(0.96); opacity: 0.8; }
+      100% { transform: perspective(1400px) rotateY(0deg); opacity: 1; }
     }
 
-    @keyframes flip3DBackward {
-      0% { transform: perspective(1600px) rotateY(0deg); opacity: 1; }
-      50% { transform: perspective(1600px) rotateY(25deg) scale(0.96); opacity: 0.85; }
-      100% { transform: perspective(1600px) rotateY(0deg); opacity: 1; }
+    @keyframes flip3DPrev {
+      0% { transform: perspective(1400px) rotateY(0deg); opacity: 1; }
+      50% { transform: perspective(1400px) rotateY(35deg) scale(0.96); opacity: 0.8; }
+      100% { transform: perspective(1400px) rotateY(0deg); opacity: 1; }
+    }
+
+    #bookCanvas {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      display: block;
+      margin: 0 auto;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .reader-loading-box {
+      text-align: center;
+      color: #94a3b8;
+      padding: 3rem 1rem;
     }
 
     .swipe-hint-pill {
@@ -954,7 +981,7 @@
           </label>
           <div class="pin-input-wrap">
             <input type="password" id="regPinInput" class="input-box" placeholder="e.g. 1234" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('regPinInput', this)">👁️️</button>
           </div>
 
           <button type="submit" id="regSubmitBtn" class="btn-primary-action">Create Account & Enter →</button>
@@ -971,7 +998,7 @@
           </label>
           <div class="pin-input-wrap">
             <input type="password" id="loginPinInput" class="input-box" placeholder="Enter your 4-digit PIN" pattern="[0-9]{4}" maxlength="4" required />
-            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('loginPinInput', this)">👁️️</button>
+            <button type="button" class="pin-toggle-btn" onclick="togglePinVisibility('loginPinInput', this)">👁️</button>
           </div>
 
           <button type="submit" id="loginSubmitBtn" class="btn-primary-action">Login to Study Hub →</button>
@@ -1043,6 +1070,7 @@
               <img id="displayBookCoverImg" class="book-cover-image" src="https://via.placeholder.com/165x230?text=Loading+Cover..." alt="Book Cover" />
             </div>
 
+            <!-- ACTION BUTTONS: READ BOOK & DOWNLOAD BOOK (SIDE-BY-SIDE) -->
             <div class="book-action-buttons-grid">
               <button type="button" class="btn-book-action btn-read-in-app" onclick="openInAppBookReader()">
                 <span>📖 Read Book</span>
@@ -1054,27 +1082,44 @@
           </div>
         </section>
 
-        <!-- STEP 6: IN-APP 3D FULL-BLEED BOOK READER (NO WASTED SIDE SPACE) -->
+        <!-- STEP 6: IN-APP 3D SINGLE-PAGE CANVAS READER (NO VERTICAL SCROLL, 100% FULL WIDTH) -->
         <section id="step-book-reader" class="hidden">
           <div class="reader-top-controls">
             <div class="page-turn-bar">
               <button type="button" class="btn-page-nav" onclick="turnBookPage(-1)">◀ Prev</button>
               <div class="page-indicator-pill">
                 <span>Page</span>
-                <input type="number" id="currentBookPageInput" class="page-num-input" value="1" min="1" max="1000" onchange="jumpToBookPage(this.value)" />
+                <input type="number" id="currentBookPageInput" class="page-num-input" value="1" min="1" onchange="jumpToBookPage(this.value)" />
+                <span>/ <span id="bookTotalPages">1</span></span>
               </div>
               <button type="button" class="btn-page-nav" onclick="turnBookPage(1)">Next ▶</button>
             </div>
             <button type="button" class="btn-badge-action" onclick="downloadBookDirectly()">⬇️ Download</button>
           </div>
 
-          <!-- FULL SCREEN EDGE-TO-EDGE TOUCH-CONTAINER -->
-          <div class="full-page-edge-wrap" id="touchBookContainer">
-            <iframe id="inAppPdfIframe" class="in-app-pdf-frame" src="about:blank" title="Book Viewer"></iframe>
+          <!-- FULL SCREEN EDGE-TO-EDGE TOUCH CANVAS (ONE PAGE AT A TIME) -->
+          <div class="book-canvas-stage" id="touchBookContainer">
+            <!-- Loading Indicator -->
+            <div id="bookLoadingSpinner" class="reader-loading-box">
+              <div style="font-size:2rem; margin-bottom:0.5rem;">📖</div>
+              <div style="font-weight:700; color:#fff;">Loading Page... Please wait</div>
+            </div>
+
+            <!-- Single Page Canvas Wrapper with 3D Flip -->
+            <div id="bookCanvasWrap" class="book-page-canvas-wrap hidden">
+              <canvas id="bookCanvas"></canvas>
+            </div>
+
+            <!-- Fallback box if proxy network is blocked -->
+            <div id="bookLoadError" class="reader-loading-box hidden">
+              <div style="font-size:2rem; margin-bottom:0.4rem;">⚠️</div>
+              <div style="font-weight:700; color:#f87171; margin-bottom:0.5rem;">Unable to load pages in canvas.</div>
+              <button type="button" class="btn-primary-action" style="padding:0.6rem 1rem;" onclick="downloadBookDirectly()">⬇️️ Download & Read in PDF Viewer</button>
+            </div>
           </div>
 
           <div class="swipe-hint-pill">
-            <span>👆 Swipe Left/Right with your finger to flip page in 3D</span>
+            <span>👆 Swipe Left or Right with your finger to flip page in 3D</span>
           </div>
         </section>
 
@@ -1196,7 +1241,7 @@
   </footer>
 
   <script>
-    // 0. GUARANTEED FAST DISMISSAL FOR SPLASH SCREEN
+    // 0. FAST SPLASH DISMISSAL
     function dismissSplashNow() {
       const splash = document.getElementById('splashScreen');
       if (splash) {
@@ -1207,11 +1252,11 @@
       }
     }
 
-    if (sessionStorage.getItem('csh_splash_done') === 'true') {
+    if (sessionStorage.getItem('csh_splash_shown') === 'true') {
       const sp = document.getElementById('splashScreen');
       if (sp && sp.parentNode) sp.parentNode.removeChild(sp);
     } else {
-      sessionStorage.setItem('csh_splash_done', 'true');
+      sessionStorage.setItem('csh_splash_shown', 'true');
       setTimeout(dismissSplashNow, 1400);
     }
 
@@ -1241,24 +1286,6 @@
       } catch(e) {
         return str;
       }
-    }
-
-    function convertToGoogleDriveEmbed(url, pageNum = 1) {
-      if (!url || !url.startsWith('http')) return url;
-      const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-      if (fileIdMatch && fileIdMatch[1]) {
-        return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview#page=${pageNum}&view=FitH`;
-      }
-      return url;
-    }
-
-    function convertToGoogleDriveDownload(url) {
-      if (!url || !url.startsWith('http')) return url;
-      const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-      if (fileIdMatch && fileIdMatch[1]) {
-        return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
-      }
-      return url;
     }
 
     function getSubjectFixedPriority(subName) {
@@ -1330,7 +1357,7 @@
         btn.innerText = '🙈';
       } else {
         input.type = 'password';
-        btn.innerText = '👁️️';
+        btn.innerText = '👁️';
       }
     }
 
@@ -1339,7 +1366,7 @@
       el.classList.toggle('hidden');
     }
 
-    // FIREBASE LIVE DATA LISTENER
+    // FIREBASE LIVE DATA LISTENER (RESETS REFRESH SAFETY)
     database.ref('study_data').on('value', (snapshot) => {
       const liveData = snapshot.val();
       studyData = {
@@ -1359,8 +1386,6 @@
       }
 
       isFirebaseReady = true;
-
-      // Automatically re-evaluate route after data arrives (resolves refresh error completely)
       parseHash();
     });
 
@@ -1581,8 +1606,12 @@
     }
 
     // ========================================================
-    // BOOK VIEWER & IN-APP FULL-SCREEN READER
+    // BOOK VIEWER & REAL HTML5 CANVAS 3D FLIP READER
     // ========================================================
+    let currentPdfDoc = null;
+    let isPageRendering = false;
+    let pageNumPending = null;
+
     function openBookView() {
       const subObj = getActiveSubjectData();
       const displayName = subObj.subjectName || state.subjectName || "Subject";
@@ -1601,9 +1630,9 @@
       updateView();
     }
 
-    // Opens Book directly in same tab without Google Drive redirect
+    // Opens Book directly into 3D Single-Page Canvas Reader
     function openInAppBookReader() {
-      if (!isFirebaseReady) return; // Wait for Firebase to prevent false "Book Not Found"
+      if (!isFirebaseReady) return; // Wait for Firebase data to prevent false "Book Not Found"
 
       const subObj = getActiveSubjectData();
       const bookUrl = subObj.book;
@@ -1614,51 +1643,166 @@
         return;
       }
 
-      // Restore saved page from localStorage so refresh stays on current page
       const savedPageKey = `csh_book_page_${state.course}_${state.semester}_${state.subjectKey}`;
       const savedPage = parseInt(localStorage.getItem(savedPageKey)) || 1;
       state.bookPage = savedPage;
 
-      document.getElementById('currentBookPageInput').value = savedPage;
-
-      const embedUrl = convertToGoogleDriveEmbed(bookUrl.trim(), savedPage);
-      document.getElementById('inAppPdfIframe').src = embedUrl;
-
       state.step = 6;
       setHash();
       updateView();
+
+      loadCanvasPdfDocument(bookUrl, savedPage);
       initSwipeGestures();
     }
 
-    // 3D Page Turn Simulation
-    function turnBookPage(delta) {
-      let newPage = state.bookPage + delta;
-      if (newPage < 1) newPage = 1;
-      jumpToBookPage(newPage, delta > 0 ? 'forward' : 'backward');
-    }
+    // Loads PDF with CORS proxies and prepares single-page rendering
+    async function loadCanvasPdfDocument(url, initialPage) {
+      document.getElementById('bookLoadingSpinner').classList.remove('hidden');
+      document.getElementById('bookCanvasWrap').classList.add('hidden');
+      document.getElementById('bookLoadError').classList.add('hidden');
 
-    function jumpToBookPage(pageNum, direction = 'forward') {
-      const p = parseInt(pageNum) || 1;
-      state.bookPage = p;
-      document.getElementById('currentBookPageInput').value = p;
+      const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+      let fetchUrl = url;
+      if (fileIdMatch && fileIdMatch[1]) {
+        const fileId = fileIdMatch[1];
+        const rawDirect = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
+        fetchUrl = `https://corsproxy.io/?url=${encodeURIComponent(rawDirect)}`;
+      }
 
-      // Save page state in localStorage
-      const savedPageKey = `csh_book_page_${state.course}_${state.semester}_${state.subjectKey}`;
-      localStorage.setItem(savedPageKey, p);
+      try {
+        const loadingTask = pdfjsLib.getDocument({
+          url: fetchUrl,
+          cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/cmaps/',
+          cMapPacked: true
+        });
 
-      const subObj = getActiveSubjectData();
-      const iframe = document.getElementById('inAppPdfIframe');
-      
-      iframe.classList.remove('turn-page-forward', 'turn-page-backward');
-      void iframe.offsetWidth; // Trigger reflow
-      iframe.classList.add(direction === 'forward' ? 'turn-page-forward' : 'turn-page-backward');
+        currentPdfDoc = await loadingTask.promise;
+        document.getElementById('bookTotalPages').innerText = currentPdfDoc.numPages;
+        document.getElementById('currentBookPageInput').max = currentPdfDoc.numPages;
 
-      if (subObj.book) {
-        iframe.src = convertToGoogleDriveEmbed(subObj.book, p);
+        let targetP = parseInt(initialPage) || 1;
+        if (targetP > currentPdfDoc.numPages) targetP = currentPdfDoc.numPages;
+        if (targetP < 1) targetP = 1;
+        state.bookPage = targetP;
+
+        document.getElementById('bookLoadingSpinner').classList.add('hidden');
+        document.getElementById('bookCanvasWrap').classList.remove('hidden');
+
+        renderSingleCanvasPage(state.bookPage);
+      } catch (err) {
+        console.warn("Primary proxy slow/failed, trying secondary proxy...", err);
+        try {
+          if (fileIdMatch && fileIdMatch[1]) {
+            const fileId = fileIdMatch[1];
+            const rawDirect = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
+            const altUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawDirect)}`;
+            
+            const altTask = pdfjsLib.getDocument({
+              url: altUrl,
+              cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/cmaps/',
+              cMapPacked: true
+            });
+
+            currentPdfDoc = await altTask.promise;
+            document.getElementById('bookTotalPages').innerText = currentPdfDoc.numPages;
+            document.getElementById('currentBookPageInput').max = currentPdfDoc.numPages;
+
+            let targetP = parseInt(initialPage) || 1;
+            if (targetP > currentPdfDoc.numPages) targetP = currentPdfDoc.numPages;
+            state.bookPage = targetP;
+
+            document.getElementById('bookLoadingSpinner').classList.add('hidden');
+            document.getElementById('bookCanvasWrap').classList.remove('hidden');
+
+            renderSingleCanvasPage(state.bookPage);
+            return;
+          }
+        } catch(e2) {
+          console.error("Secondary proxy also failed", e2);
+        }
+
+        document.getElementById('bookLoadingSpinner').classList.add('hidden');
+        document.getElementById('bookLoadError').classList.remove('hidden');
       }
     }
 
-    // 3D Touch Swipe Listener
+    // Renders ONLY ONE SINGLE PAGE AT A TIME (NO VERTICAL SCROLLING!)
+    function renderSingleCanvasPage(num) {
+      if (!currentPdfDoc) return;
+      isPageRendering = true;
+
+      currentPdfDoc.getPage(num).then((page) => {
+        const canvas = document.getElementById('bookCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Fit screen width with 0 side borders
+        const screenWidth = window.innerWidth || document.documentElement.clientWidth;
+        const unscaledViewport = page.getViewport({ scale: 1 });
+        const scale = screenWidth / unscaledViewport.width;
+        const viewport = page.getViewport({ scale: Math.max(scale, 1.25) });
+
+        const outputScale = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(viewport.width * outputScale);
+        canvas.height = Math.floor(viewport.height * outputScale);
+        canvas.style.width = "100%";
+        canvas.style.height = "auto";
+
+        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+
+        const renderContext = {
+          canvasContext: ctx,
+          transform: transform,
+          viewport: viewport
+        };
+
+        page.render(renderContext).promise.then(() => {
+          isPageRendering = false;
+          if (pageNumPending !== null) {
+            renderSingleCanvasPage(pageNumPending);
+            pageNumPending = null;
+          }
+        });
+
+        document.getElementById('currentBookPageInput').value = num;
+
+        // Save page to localStorage so refresh keeps the exact page
+        const savedPageKey = `csh_book_page_${state.course}_${state.semester}_${state.subjectKey}`;
+        localStorage.setItem(savedPageKey, num);
+      });
+    }
+
+    // 3D Flip Page Action
+    function turnBookPage(delta) {
+      if (!currentPdfDoc) return;
+      let newPage = state.bookPage + delta;
+      if (newPage < 1) newPage = 1;
+      if (newPage > currentPdfDoc.numPages) newPage = currentPdfDoc.numPages;
+      if (newPage === state.bookPage) return;
+
+      const wrap = document.getElementById('bookCanvasWrap');
+      const isForward = delta > 0;
+
+      // Real 3D Flip Animation trigger
+      wrap.classList.remove('flip-turn-forward', 'flip-turn-backward');
+      void wrap.offsetWidth;
+      wrap.classList.add(isForward ? 'flip-turn-forward' : 'flip-turn-backward');
+
+      setTimeout(() => {
+        state.bookPage = newPage;
+        renderSingleCanvasPage(newPage);
+      }, 160);
+    }
+
+    function jumpToBookPage(val) {
+      if (!currentPdfDoc) return;
+      let p = parseInt(val) || 1;
+      if (p < 1) p = 1;
+      if (p > currentPdfDoc.numPages) p = currentPdfDoc.numPages;
+      state.bookPage = p;
+      renderSingleCanvasPage(p);
+    }
+
+    // Finger Swipe Gesture Listener
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -1673,16 +1817,17 @@
       container.ontouchend = (e) => {
         touchEndX = e.changedTouches[0].screenX;
         const diff = touchEndX - touchStartX;
-        if (Math.abs(diff) > 45) {
+        if (Math.abs(diff) > 40) {
           if (diff < 0) {
-            turnBookPage(1); // Swipe Left -> Next Page
+            turnBookPage(1); // Swipe Left -> 3D Flip to Next Page
           } else {
-            turnBookPage(-1); // Swipe Right -> Prev Page
+            turnBookPage(-1); // Swipe Right -> 3D Flip to Prev Page
           }
         }
       };
     }
 
+    // DIRECT BROWSER DOWNLOAD (DOES NOT OPEN GOOGLE DRIVE APP)
     function downloadBookDirectly() {
       const subObj = getActiveSubjectData();
       const bookUrl = subObj.book;
@@ -1693,8 +1838,21 @@
         return;
       }
 
-      const downloadUrl = convertToGoogleDriveDownload(bookUrl.trim());
-      window.open(downloadUrl, '_blank');
+      const fileIdMatch = bookUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || bookUrl.match(/id=([a-zA-Z0-9_-]+)/);
+      if (fileIdMatch && fileIdMatch[1]) {
+        const fileId = fileIdMatch[1];
+        // drive.usercontent.google.com sends file bytes directly, bypassing Google Drive app
+        const directDownloadUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
+
+        const a = document.createElement('a');
+        a.href = directDownloadUrl;
+        a.download = `${subObj.subjectName || 'Book'}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        window.location.href = bookUrl;
+      }
     }
 
     function openAccountTab() {
@@ -1799,7 +1957,7 @@
       }
     });
 
-    // PURE HIERARCHICAL STEP ROUTER WITH REFRESH SAFETY
+    // PURE STEP ROUTER WITH REFRESH SAFETY
     function parseHash() {
       const saved = localStorage.getItem('csh_student');
       if (!saved) return;
@@ -1915,7 +2073,7 @@
         breadcrumb.classList.remove('hidden');
         const subObj = getActiveSubjectData();
         const fullSubjectName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey);
-        breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName} > Reader`;
+        breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName} > Book Reader`;
       }
     }
 
@@ -2009,7 +2167,7 @@
       }
 
       if (state.step === 6) {
-        document.getElementById('inAppPdfIframe').src = 'about:blank';
+        currentPdfDoc = null;
         state.step = 5;
         setHash();
         updateView();
