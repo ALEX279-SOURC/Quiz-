@@ -374,6 +374,34 @@
       font-size: 0.9rem;
     }
 
+    /* IN-PLACE BOOK VIEWER CARD */
+    .book-viewer-box {
+      text-align: center;
+      padding: 1rem 0.5rem;
+      animation: expandBox 0.25s ease-out;
+    }
+
+    .book-3d-cover-wrap {
+      display: inline-block;
+      cursor: pointer;
+      perspective: 800px;
+      margin-bottom: 1.25rem;
+      transition: transform 0.2s ease;
+    }
+
+    .book-3d-cover-wrap:hover {
+      transform: scale(1.03) rotateY(-5deg);
+    }
+
+    .book-cover-image {
+      width: 160px;
+      height: 225px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: -6px 10px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.06);
+      background: #f1f5f9;
+    }
+
     .auth-tab-switch {
       display: flex;
       border: 1px solid var(--border);
@@ -835,9 +863,15 @@
           <div class="grid" id="subject-list"></div>
         </section>
 
+        <!-- SUBJECT RESOURCES LIST -->
         <section id="step-resources" class="hidden">
           <h2 class="step-title" id="subject-title">Resources</h2>
           <div class="grid">
+            <!-- NEW: BOOK 📚 OPTION (ABOVE NOTES) -->
+            <button class="resource-card" style="border-color: #3b82f6; background: #eff6ff;" onclick="openBookView()">
+              <span style="color: #1d4ed8; font-weight: 700;">📚 Book</span> <span style="color: #1d4ed8;">View & Read ↗</span>
+            </button>
+
             <button class="resource-card" onclick="openResource('notes')">
               <span>📖 Notes</span> <span>Download ↗</span>
             </button>
@@ -847,15 +881,36 @@
             <button class="resource-card" onclick="openResource('papers')">
               <span>📄 Previous Papers</span> <span>Download ↗</span>
             </button>
-            <!-- DIRECT EXAM PREPARATION / PRACTICE QUIZ (SAME TAB REDIRECT) -->
-            <button class="resource-card" style="border-color: #3b82f6; background: #eff6ff;" onclick="openResource('exam')">
-              <span style="color: #1d4ed8; font-weight: 700;">🎯 Exam Preparation (MCQ Practice & Mock Test)</span> <span style="color: #1d4ed8;">Start Test ↗</span>
+            <button class="resource-card" onclick="openResource('exam')">
+              <span>🎯 Exam Preparation (MCQ Practice & Mock Test)</span> <span>Start Test ↗</span>
             </button>
             <button class="resource-card btn-order" onclick="openResource('assignments')">
               <span>📝 Order Assignments</span> <span>Order ↗</span>
             </button>
           </div>
         </section>
+
+        <!-- NEW: IN-PLACE SAME TAB BOOK VIEWER SECTION -->
+        <section id="step-book" class="hidden">
+          <button class="back-btn" onclick="backToResourcesFromBook()">← Back to Resources</button>
+          <div class="book-viewer-box">
+            <h2 class="step-title" style="justify-content:center; margin-bottom:0.35rem;" id="bookViewerTitle">Subject Book</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.25rem;">
+              Click the book cover image below to read or download the book.
+            </p>
+
+            <div class="book-3d-cover-wrap" onclick="openBookDriveFileDirectly()" title="Click to Read Book PDF">
+              <img id="displayBookCoverImg" class="book-cover-image" src="https://via.placeholder.com/160x225?text=Loading+Cover..." alt="Book Cover" />
+            </div>
+
+            <div>
+              <button type="button" class="btn-primary-action" style="max-width:280px; margin:0 auto;" onclick="openBookDriveFileDirectly()">
+                📖 Open & Read Book (PDF)
+              </button>
+            </div>
+          </div>
+        </section>
+
       </div>
 
       <!-- GATEWAY 3: ACCOUNT DETAILS TAB -->
@@ -931,7 +986,7 @@
 
     </div>
 
-    <!-- ACTIVE USERS LIVE BOX (STARTS AT 324 AND INCREMENTS UPON REGISTRATION) -->
+    <!-- ACTIVE USERS LIVE BOX -->
     <div class="active-users-box">
       <div class="active-users-title">
         <span>⚡ Active Scholars Joined:</span>
@@ -1036,7 +1091,7 @@
       semester: null,
       subjectKey: null,
       subjectName: null,
-      step: 1,
+      step: 1, // 1: course, 2: sem, 3: subject, 4: resources, 5: book-view
       inAccountTab: false,
       previousHash: ''
     };
@@ -1110,10 +1165,9 @@
       }
 
       if (state.step === 3) renderSubjects();
-      if (state.step === 4) updateView();
+      if (state.step === 4 || state.step === 5) updateView();
     });
 
-    // ACTIVE USERS COUNT: BASE 324 + LIVE INCREMENT
     database.ref('registered_students').on('value', (snapshot) => {
       const count = snapshot.numChildren() || 0;
       document.getElementById('totalUsersCount').innerText = 324 + count;
@@ -1303,7 +1357,7 @@
       document.getElementById('emptyDataModal').classList.add('hidden');
     }
 
-    // OPEN RESOURCE FUNCTION (SAME TAB REDIRECTION)
+    // OPEN RESOURCE FUNCTION (SAME TAB REDIRECTIONS)
     function openResource(type) {
       if (type === 'assignments') {
         const waText = encodeURIComponent(`Hi, I want to order assignments for ${state.course}, ${state.semester} (${state.subjectName})`);
@@ -1311,7 +1365,6 @@
         return;
       }
 
-      // PRACTICE QUIZ / EXAM PREPARATION -> OPENS IN SAME TAB
       if (type === 'exam') {
         window.location.href = "https://alex279-sourc.github.io/Quiz-/mdc.html";
         return;
@@ -1329,6 +1382,46 @@
         showEmptyModal("Data is Empty", `Abhi ${displayName} ke liye '${labelName}' upload nahi hua hai.`);
       } else {
         window.location.href = targetUrl.trim();
+      }
+    }
+
+    // ==========================================
+    // IN-PLACE BOOK VIEWER FUNCTIONS
+    // ==========================================
+    function openBookView() {
+      const subObj = getActiveSubjectData();
+      const displayName = subObj.subjectName || state.subjectName || "Subject";
+
+      document.getElementById('bookViewerTitle').innerText = `📚 ${displayName} Book`;
+      
+      const coverImg = document.getElementById('displayBookCoverImg');
+      if (subObj.bookCover && subObj.bookCover.trim() !== '') {
+        coverImg.src = subObj.bookCover;
+      } else {
+        coverImg.src = 'https://via.placeholder.com/160x225?text=' + encodeURIComponent(displayName);
+      }
+
+      state.step = 5;
+      setHash();
+      updateView();
+    }
+
+    function backToResourcesFromBook() {
+      state.step = 4;
+      setHash();
+      updateView();
+    }
+
+    function openBookDriveFileDirectly() {
+      const subObj = getActiveSubjectData();
+      const bookUrl = subObj.book;
+
+      if (!bookUrl || bookUrl.trim() === '' || bookUrl.trim() === '#' || !bookUrl.startsWith('http')) {
+        const displayName = subObj.subjectName || state.subjectName || "Subject";
+        showEmptyModal("Book Not Found", `Abhi ${displayName} ke liye Book PDF upload nahi ki gayi hai.`);
+      } else {
+        // Open Book in the EXACT SAME TAB as requested!
+        window.location.href = bookUrl.trim();
       }
     }
 
@@ -1479,6 +1572,9 @@
           state.subjectName = subObj.subjectName;
         }
       }
+      if (parts[3] === 'book') {
+        state.step = 5;
+      }
       updateView();
     }
 
@@ -1487,6 +1583,7 @@
       if (state.step === 2) path = `${state.course}`;
       else if (state.step === 3) path = `${state.course}___${state.semester}`;
       else if (state.step === 4) path = `${state.course}___${state.semester}___${state.subjectName || state.subjectKey}`;
+      else if (state.step === 5) path = `${state.course}___${state.semester}___${state.subjectName || state.subjectKey}___book`;
       
       window.location.hash = path ? `#/${path}` : '';
     }
@@ -1498,6 +1595,7 @@
       document.getElementById('step-semester').classList.add('hidden');
       document.getElementById('step-subject').classList.add('hidden');
       document.getElementById('step-resources').classList.add('hidden');
+      document.getElementById('step-book').classList.add('hidden');
 
       const backBtn = document.getElementById('backBtn');
       const breadcrumb = document.getElementById('breadcrumb');
@@ -1528,6 +1626,13 @@
         backBtn.classList.remove('hidden');
         breadcrumb.classList.remove('hidden');
         breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName}`;
+      } else if (state.step === 5) {
+        document.getElementById('step-book').classList.remove('hidden');
+        backBtn.classList.add('hidden');
+        breadcrumb.classList.remove('hidden');
+        const subObj = getActiveSubjectData();
+        const fullSubjectName = subObj.subjectName || state.subjectName || safeDecode(state.subjectKey);
+        breadcrumb.innerText = `${state.course} > ${state.semester} > ${fullSubjectName} > Book`;
       }
     }
 
@@ -1616,6 +1721,10 @@
     function goBack() {
       if (state.inAccountTab) {
         closeAccountTab();
+        return;
+      }
+      if (state.step === 5) {
+        backToResourcesFromBook();
         return;
       }
       window.history.back();
