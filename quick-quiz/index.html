@@ -63,7 +63,7 @@
     .sticky-link-bar { background: #eff6ff; border: 1.5px dashed var(--primary); border-radius: 10px; padding: 1rem; margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; }
     .link-copy-box { display: flex; gap: 0.5rem; }
 
-    /* Compact Header Bar */
+    /* Compact Header Bar in 1 Line */
     .quiz-compact-bar {
       display: flex;
       align-items: center;
@@ -125,7 +125,14 @@
       margin-right: 0.8rem; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
     }
 
-    .footer-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .footer-actions { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-top: 1.5rem; 
+      padding-top: 1rem; 
+      border-top: 1px solid var(--border); 
+    }
     .btn { padding: 0.6rem 1.3rem; border-radius: 8px; font-size: 0.92rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; }
     .btn-primary { background: var(--primary); color: white; }
     .btn-success { background: var(--correct); color: white; }
@@ -235,7 +242,7 @@
       <div class="progress-bar-container"><div id="progress" class="progress-bar"></div></div>
       <div class="card">
         
-        <!-- Compact Header Bar in 1 Line -->
+        <!-- Header Bar: Category, Counter & Timer in 1 Row -->
         <div class="quiz-compact-bar">
           <span class="badge-compact" id="categoryBadge">પ્રકરણ</span>
           <span class="counter-compact" id="questionCounter">૧ / ૨૦</span>
@@ -246,10 +253,11 @@
 
         <div class="question-title" id="questionText">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
         <div class="options-grid" id="optionsContainer"></div>
+
+        <!-- Footer: Sirf Pachhad aur Submit Button (Aagal removed) -->
         <div class="footer-actions">
           <button class="btn btn-secondary" id="prevBtn" onclick="prevQuestion()">પાછળ</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">આગળ</button>
-          <button class="btn btn-success" id="submitBtn" onclick="confirmSubmit()">સબમિટ કરો</button>
+          <button class="btn btn-success" id="submitBtn" onclick="confirmSubmit()" style="display: none; margin-left: auto;">સબમિટ કરો</button>
         </div>
       </div>
     </div>
@@ -364,7 +372,7 @@
       return copy.slice(0, count);
     }
 
-    // Refresh Persistence State Management
+    // Refresh Persistence State
     function saveSessionState() {
       const state = {
         inQuiz: true,
@@ -516,37 +524,29 @@
       });
 
       document.getElementById('prevBtn').style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
+      
+      // Last question par submit button dikhega
       if (currentIndex === activeQuestions.length - 1) {
-        document.getElementById('nextBtn').style.display = 'none';
         document.getElementById('submitBtn').style.display = 'inline-flex';
       } else {
-        document.getElementById('nextBtn').style.display = 'inline-flex';
         document.getElementById('submitBtn').style.display = 'none';
       }
     }
 
-    // Option select karte hi direct agle question par transition
+    // Option tap hote hi direct next question par transition
     function selectOption(index) {
       userAnswers[currentIndex] = index;
       renderQuestion();
       saveSessionState();
 
-      // Short delay (300ms) taaki selection visually dikhe aur automatically next par jaye
+      // 250ms visual feedback delay ke baad turant auto-advance
       setTimeout(() => {
         if (currentIndex < activeQuestions.length - 1) {
           currentIndex++;
           renderQuestion();
           saveSessionState();
         }
-      }, 300);
-    }
-
-    function nextQuestion() {
-      if (currentIndex < activeQuestions.length - 1) {
-        currentIndex++;
-        renderQuestion();
-        saveSessionState();
-      }
+      }, 250);
     }
 
     function prevQuestion() {
@@ -655,7 +655,7 @@
       window.location.href = window.location.origin + window.location.pathname;
     }
 
-    // Window Load with Refresh Restoration
+    // Refresh Persistence
     window.onload = async function() {
       const savedSession = sessionStorage.getItem('current_quiz_running_session');
       if (savedSession) {
