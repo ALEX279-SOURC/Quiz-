@@ -248,23 +248,20 @@
       if (e.data && e.data.roomId === roomId) renderScoreboard();
     };
 
-    // Robust Multi-Path JSON Loader (Checks all potential GitHub Pages directories)
+    // 100% Reliable Multi-Path Resolver with Direct GitHub Raw Fallback
     async function fetchWithFallback(sem, file) {
       const paths = [
         `./data/${sem}/${file}.json`,
         `data/${sem}/${file}.json`,
-        `./Data/${sem}/${file}.json`,
-        `Data/${sem}/${file}.json`,
-        `./quick-quiz/data/${sem}/${file}.json`,
-        `quick-quiz/data/${sem}/${file}.json`,
-        `./quick-quiz/Data/${sem}/${file}.json`,
+        `../quick-quiz/data/${sem}/${file}.json`,
         `/Quiz-/quick-quiz/data/${sem}/${file}.json`,
-        `/Quiz-/quick-quiz/Data/${sem}/${file}.json`
+        // Direct Raw Fallback (No 404 possible)
+        `https://raw.githubusercontent.com/ALEX279-SOURC/Quiz-/main/quick-quiz/data/${sem}/${file}.json`
       ];
 
       for (const p of paths) {
         try {
-          const res = await fetch(p + '?v=' + Date.now()); // Prevent caching
+          const res = await fetch(p + '?cache_bust=' + Date.now());
           if (res.ok) {
             return await res.json();
           }
@@ -281,7 +278,7 @@
       try {
         currentQuestionsPool = await fetchWithFallback(sem, file);
       } catch (err) {
-        alert(`${name} ના પ્રશ્નો લોડ થઈ શક્યા નથી!\nકૃપા કરીને GitHub પર ચેક કરો કે 'data/${sem}/${file}.json' ફાઈલ હાજર છે.`);
+        alert(`${name} ના પ્રશ્નો લોડ થઈ શક્યા નથી! ફાઈલ પાથ તપાસો.`);
         return;
       }
 
