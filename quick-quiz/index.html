@@ -229,6 +229,9 @@
   </div>
 
   <script>
+    // Aapka confirmed Firebase base URL
+    const FIREBASE_BASE_URL = "https://quick-quiz-portal-default-rtdb.firebaseio.com";
+
     let currentQuestionsPool = [];
     let currentSem = "sem1";
     let currentFile = "mdc_gujarati";
@@ -250,50 +253,29 @@
       if (e.data && e.data.roomId === roomId) renderScoreboard();
     };
 
-    // Robust fetcher: dynamically checks live domain and repository path[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span)
-    async function fetchWithFallback(sem, file) {
-      const origin = window.location.origin;
-      let pathSegments = window.location.pathname.split('/').filter(Boolean);
-      
-      // index.html agar url me hai to hatao
-      if (pathSegments.length > 0 && pathSegments[pathSegments.length - 1].includes('.html')) {
-        pathSegments.pop();
-      }
-      
-      const currentFolder = origin + '/' + pathSegments.join('/');
-
-      // Multiple precise fallback locations
-      const possibleUrls = [
-        `${origin}/Quiz-/quick-quiz/data/${sem}/${file}.json`, // Direct repo link[span_4](start_span)[span_4](end_span)[span_5](start_span)[span_5](end_span)
-        `${currentFolder}/data/${sem}/${file}.json`,            // Current directory data folder
-        `./data/${sem}/${file}.json`,                           // Relative path
-        `data/${sem}/${file}.json`                              // Local data path
-      ];
-
-      let lastError = null;
-      for (const url of possibleUrls) {
-        try {
-          const res = await fetch(url + '?t=' + Date.now());
-          if (res.ok) {
-            return await res.json();
-          }
-        } catch (e) {
-          lastError = e;
-        }
-      }
-
-      throw new Error(lastError ? lastError.message : "File not found at configured paths.");
-    }
-
+    // Firebase direct REST API call (Clean, Fast & 100% Reliable)
     async function fetchSubjectData(sem, file, name) {
       currentSem = sem;
       currentFile = file;
       currentDisplayName = name;
 
+      const targetUrl = `${FIREBASE_BASE_URL}/${sem}/${file}.json`;
+
       try {
-        currentQuestionsPool = await fetchWithFallback(sem, file);
+        const response = await fetch(targetUrl);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP Error: ${response.status}`);
+        }
+        
+        currentQuestionsPool = await response.json();
+
+        if (!currentQuestionsPool || currentQuestionsPool.length === 0) {
+          throw new Error("કોઈ પ્રશ્નો મળ્યા નથી!");
+        }
+
       } catch (err) {
-        alert(`${name} ના પ્રશ્નો લોડ થઈ શક્યા નથી!\nError: ${err.message}\nકૃપા કરીને ફાઈલ પાથ તપાસો.`);
+        alert(`${name} ના પ્રશ્નો લોડ થઈ શક્યા નથી!\n\nError: ${err.message}`);
         return;
       }
 
@@ -378,7 +360,9 @@
 
       if (!currentQuestionsPool || currentQuestionsPool.length === 0) {
         try {
-          currentQuestionsPool = await fetchWithFallback(currentSem, currentFile);
+          const targetUrl = `${FIREBASE_BASE_URL}/${currentSem}/${currentFile}.json`;
+          const response = await fetch(targetUrl);
+          currentQuestionsPool = await response.json();
         } catch (e) {
           alert("પ્રશ્નો લોડ થઈ શક્યા નથી!");
           return;
@@ -586,7 +570,9 @@
         showPersistentLink(window.location.href);
 
         try {
-          currentQuestionsPool = await fetchWithFallback(currentSem, currentFile);
+          const targetUrl = `${FIREBASE_BASE_URL}/${currentSem}/${currentFile}.json`;
+          const res = await fetch(targetUrl);
+          currentQuestionsPool = await res.json();
         } catch (e) {
           console.warn("Auto-fetch error on load:", e);
         }
