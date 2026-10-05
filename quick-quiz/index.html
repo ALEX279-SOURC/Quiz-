@@ -248,31 +248,29 @@
       if (e.data && e.data.roomId === roomId) renderScoreboard();
     };
 
-    // Auto-Resolving Multi-Path Fetcher
+    // Robust Multi-Path JSON Loader (Checks all potential GitHub Pages directories)
     async function fetchWithFallback(sem, file) {
-      const loc = window.location.pathname;
-      const currentDir = loc.substring(0, loc.lastIndexOf('/') + 1);
-
-      // Candidate paths based on various GitHub Pages deployments
-      const candidatePaths = [
+      const paths = [
         `./data/${sem}/${file}.json`,
         `data/${sem}/${file}.json`,
-        `${currentDir}data/${sem}/${file}.json`,
+        `./Data/${sem}/${file}.json`,
+        `Data/${sem}/${file}.json`,
         `./quick-quiz/data/${sem}/${file}.json`,
         `quick-quiz/data/${sem}/${file}.json`,
+        `./quick-quiz/Data/${sem}/${file}.json`,
         `/Quiz-/quick-quiz/data/${sem}/${file}.json`,
-        `/quick-quiz/data/${sem}/${file}.json`
+        `/Quiz-/quick-quiz/Data/${sem}/${file}.json`
       ];
 
-      for (const p of candidatePaths) {
+      for (const p of paths) {
         try {
-          const res = await fetch(p);
+          const res = await fetch(p + '?v=' + Date.now()); // Prevent caching
           if (res.ok) {
             return await res.json();
           }
         } catch (err) {}
       }
-      throw new Error("Unable to fetch JSON from known paths");
+      throw new Error("Unable to fetch JSON");
     }
 
     async function fetchSubjectData(sem, file, name) {
@@ -283,7 +281,7 @@
       try {
         currentQuestionsPool = await fetchWithFallback(sem, file);
       } catch (err) {
-        alert(`${name} ના પ્રશ્નો હજુ ઉપલબ્ધ નથી! ('data/${sem}/${file}.json' ફાઈલ પાથ તપાસો)`);
+        alert(`${name} ના પ્રશ્નો લોડ થઈ શક્યા નથી!\nકૃપા કરીને GitHub પર ચેક કરો કે 'data/${sem}/${file}.json' ફાઈલ હાજર છે.`);
         return;
       }
 
