@@ -28,15 +28,15 @@
     header {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
-      padding: 1.4rem 1rem;
+      padding: 1.2rem 1rem;
       text-align: center;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    header h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 0.2rem; }
-    header p { font-size: 0.95rem; font-weight: 500; opacity: 0.9; }
+    header h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 0.2rem; }
+    header p { font-size: 0.9rem; font-weight: 500; opacity: 0.9; }
 
-    .container { max-width: 800px; margin: 1.5rem auto; padding: 0 1rem; flex: 1; width: 100%; }
-    .card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 1.8rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); margin-bottom: 1.5rem; }
+    .container { max-width: 800px; margin: 1rem auto; padding: 0 1rem; flex: 1; width: 100%; }
+    .card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); margin-bottom: 1.5rem; }
 
     .breadcrumb-text { font-size: 0.85rem; color: var(--muted); font-weight: 600; margin-bottom: 0.3rem; }
     .subject-title { font-size: 1.35rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; }
@@ -63,42 +63,90 @@
     .sticky-link-bar { background: #eff6ff; border: 1.5px dashed var(--primary); border-radius: 10px; padding: 1rem; margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; }
     .link-copy-box { display: flex; gap: 0.5rem; }
 
-    .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
-    .timer-badge { background: #fef3c7; color: #b45309; font-weight: 700; padding: 0.35rem 0.8rem; border-radius: 8px; border: 1px solid #fde68a; display: inline-flex; align-items: center; gap: 0.4rem; }
-    .badge { background: #eff6ff; color: var(--primary); padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; border: 1px solid #bfdbfe; }
+    /* Compact Header Bar */
+    .quiz-compact-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.2rem;
+    }
+    .badge-compact {
+      background: #eff6ff;
+      color: var(--primary);
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid #bfdbfe;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 140px;
+    }
+    .counter-compact {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .timer-badge-compact {
+      background: #fef3c7;
+      color: #b45309;
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid #fde68a;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      white-space: nowrap;
+    }
     
-    .progress-bar-container { width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
-    .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.2s ease; }
+    .progress-bar-container { width: 100%; height: 5px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 1.2rem; }
+    .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.25s ease; }
 
-    .question-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; }
+    .question-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 1.3rem; }
     .options-grid { display: grid; gap: 0.75rem; }
-    .option-btn { display: flex; align-items: center; padding: 0.9rem 1.2rem; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; font-size: 0.95rem; text-align: left; }
+    .option-btn {
+      display: flex; align-items: center; padding: 0.85rem 1.1rem;
+      border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface);
+      color: var(--text); cursor: pointer; font-size: 0.95rem; text-align: left;
+      transition: all 0.15s ease;
+    }
     .option-btn:hover { background: #f1f5f9; border-color: var(--primary); }
-    .option-btn.selected { border-color: var(--primary); background: #eff6ff; font-weight: 600; }
-    .option-index { width: 26px; height: 26px; border-radius: 50%; background: #f1f5f9; display: inline-flex; align-items: center; justify-content: center; margin-right: 0.8rem; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
+    .option-btn.selected { border-color: var(--primary); background: #eff6ff; font-weight: 700; box-shadow: 0 0 0 1px var(--primary); }
+    .option-index {
+      width: 26px; height: 26px; border-radius: 50%; background: #f1f5f9;
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-right: 0.8rem; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
+    }
 
-    .footer-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.8rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-    .btn { padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; }
+    .footer-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .btn { padding: 0.6rem 1.3rem; border-radius: 8px; font-size: 0.92rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; }
     .btn-primary { background: var(--primary); color: white; }
     .btn-success { background: var(--correct); color: white; }
     .btn-secondary { background: #e2e8f0; color: var(--text); }
 
     .result-view { text-align: center; }
-    .score-circle { width: 120px; height: 120px; border-radius: 50%; background: #eff6ff; border: 4px solid var(--primary); display: flex; align-items: center; justify-content: center; margin: 1rem auto; font-size: 1.8rem; font-weight: 700; color: var(--primary); }
-    .result-stats { display: flex; justify-content: space-around; margin: 1.5rem 0; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border); }
-    .stat-item h3 { font-size: 1.3rem; color: var(--primary); }
-    .stat-item p { font-size: 0.85rem; color: var(--muted); }
+    .score-circle { width: 110px; height: 110px; border-radius: 50%; background: #eff6ff; border: 4px solid var(--primary); display: flex; align-items: center; justify-content: center; margin: 1rem auto; font-size: 1.7rem; font-weight: 700; color: var(--primary); }
+    .result-stats { display: flex; justify-content: space-around; margin: 1.3rem 0; padding: 0.8rem; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border); }
+    .stat-item h3 { font-size: 1.2rem; color: var(--primary); }
+    .stat-item p { font-size: 0.8rem; color: var(--muted); }
 
-    .review-item { padding: 1.2rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border); background: #ffffff; border-left: 5px solid var(--wrong); }
-    .review-q { font-weight: 700; margin-bottom: 0.5rem; color: var(--text); }
-    .badge-ans { font-size: 0.9rem; display: block; margin-top: 0.35rem; line-height: 1.5; }
+    .review-item { padding: 1rem; margin-bottom: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: #ffffff; border-left: 4px solid var(--wrong); }
+    .review-q { font-weight: 700; margin-bottom: 0.4rem; color: var(--text); font-size: 0.95rem; }
+    .badge-ans { font-size: 0.88rem; display: block; margin-top: 0.25rem; line-height: 1.4; }
     .ans-correct { color: var(--correct); font-weight: 600; }
     .ans-user-wrong { color: var(--wrong); font-weight: 600; }
 
-    .scoreboard-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.95rem; }
-    .scoreboard-table th, .scoreboard-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); text-align: left; }
+    .scoreboard-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+    .scoreboard-table th, .scoreboard-table td { padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--border); text-align: left; }
     .scoreboard-table th { background: #f1f5f9; color: var(--muted); font-weight: 600; }
-    .rank-pill { display: inline-block; width: 24px; height: 24px; text-align: center; line-height: 24px; border-radius: 50%; background: #e2e8f0; font-size: 0.8rem; }
+    .rank-pill { display: inline-block; width: 22px; height: 22px; text-align: center; line-height: 22px; border-radius: 50%; background: #e2e8f0; font-size: 0.75rem; }
   </style>
 </head>
 <body>
@@ -110,7 +158,7 @@
 
   <div class="container">
     <div id="persistentLinkBar" class="sticky-link-bar" style="display: none;">
-      <span style="font-weight: 700; color: var(--primary);">🔗 ટીમ ક્વિઝ લિંક:</span>
+      <span style="font-weight: 700; color: var(--primary); font-size: 0.9rem;">🔗 ટીમ ક્વિઝ લિંક:</span>
       <div class="link-copy-box">
         <input type="text" id="persistentLinkText" class="form-control" readonly style="background: white;">
         <button class="btn btn-primary" onclick="copyPersistentLink()">Copy</button>
@@ -182,14 +230,20 @@
       <button class="btn btn-success" style="width: 100%; padding: 0.8rem;" onclick="startCandidateQuiz()">Start Quiz</button>
     </div>
 
-    <!-- 4. Active Quiz -->
+    <!-- 4. Active Quiz Screen -->
     <div id="quizScreen" style="display: none;">
       <div class="progress-bar-container"><div id="progress" class="progress-bar"></div></div>
       <div class="card">
-        <div class="quiz-header">
-          <div><span class="badge" id="categoryBadge">પ્રકરણ</span> <span style="margin-left: 0.5rem; font-weight: 600;" id="questionCounter">૧ / ૨૦</span></div>
-          <div class="timer-badge" id="timerBadge" style="display: none;"><span>⏱️</span> <span id="timeDisplay">00:00</span></div>
+        
+        <!-- Compact Header Bar in 1 Line -->
+        <div class="quiz-compact-bar">
+          <span class="badge-compact" id="categoryBadge">પ્રકરણ</span>
+          <span class="counter-compact" id="questionCounter">૧ / ૨૦</span>
+          <div class="timer-badge-compact" id="timerBadge" style="display: none;">
+            <span>⏱️</span> <span id="timeDisplay">00:00</span>
+          </div>
         </div>
+
         <div class="question-title" id="questionText">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
         <div class="options-grid" id="optionsContainer"></div>
         <div class="footer-actions">
@@ -229,7 +283,6 @@
   </div>
 
   <script>
-    // Aapka confirmed Firebase base URL
     const FIREBASE_BASE_URL = "https://quick-quiz-portal-default-rtdb.firebaseio.com";
 
     let currentQuestionsPool = [];
@@ -247,13 +300,14 @@
     let timeRemaining = 0;
     let totalTimeTaken = 0;
     let teamTimeLimit = 0;
+    let isTimerEnabled = false;
 
     const syncChannel = new BroadcastChannel('quiz_team_sync');
     syncChannel.onmessage = (e) => {
       if (e.data && e.data.roomId === roomId) renderScoreboard();
     };
 
-    // Firebase direct REST API call (Clean, Fast & 100% Reliable)
+    // Firebase Data Fetcher
     async function fetchSubjectData(sem, file, name) {
       currentSem = sem;
       currentFile = file;
@@ -263,17 +317,9 @@
 
       try {
         const response = await fetch(targetUrl);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP Error: ${response.status}`);
-        }
-        
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         currentQuestionsPool = await response.json();
-
-        if (!currentQuestionsPool || currentQuestionsPool.length === 0) {
-          throw new Error("કોઈ પ્રશ્નો મળ્યા નથી!");
-        }
-
+        if (!currentQuestionsPool || currentQuestionsPool.length === 0) throw new Error("કોઈ પ્રશ્નો મળ્યા નથી!");
       } catch (err) {
         alert(`${name} ના પ્રશ્નો લોડ થઈ શક્યા નથી!\n\nError: ${err.message}`);
         return;
@@ -318,6 +364,30 @@
       return copy.slice(0, count);
     }
 
+    // Refresh Persistence State Management
+    function saveSessionState() {
+      const state = {
+        inQuiz: true,
+        isTeamMode,
+        roomId,
+        participantName,
+        currentSem,
+        currentFile,
+        currentDisplayName,
+        activeQuestions,
+        userAnswers,
+        currentIndex,
+        timeRemaining,
+        totalTimeTaken,
+        isTimerEnabled
+      };
+      sessionStorage.setItem('current_quiz_running_session', JSON.stringify(state));
+    }
+
+    function clearSessionState() {
+      sessionStorage.removeItem('current_quiz_running_session');
+    }
+
     function startSoloQuiz() {
       isTeamMode = false;
       participantName = "Solo Learner";
@@ -328,8 +398,11 @@
       userAnswers = new Array(activeQuestions.length).fill(null);
       currentIndex = 0;
       totalTimeTaken = 0;
+      isTimerEnabled = minutes > 0;
+      timeRemaining = minutes * 60;
 
-      setupQuizScreen(minutes);
+      saveSessionState();
+      setupQuizScreen(timeRemaining, isTimerEnabled);
     }
 
     function createTeamQuiz() {
@@ -373,25 +446,31 @@
       userAnswers = new Array(activeQuestions.length).fill(null);
       currentIndex = 0;
       totalTimeTaken = 0;
+      isTimerEnabled = teamTimeLimit > 0;
+      timeRemaining = teamTimeLimit * 60;
 
       document.getElementById('joinCard').style.display = 'none';
-      setupQuizScreen(teamTimeLimit);
+      saveSessionState();
+      setupQuizScreen(timeRemaining, isTimerEnabled);
     }
 
-    function setupQuizScreen(minutes) {
+    function setupQuizScreen(remainingSeconds, timerActive) {
       document.getElementById('setupCard').style.display = 'none';
       document.getElementById('subjectSelectionCard').style.display = 'none';
+      document.getElementById('joinCard').style.display = 'none';
       document.getElementById('quizScreen').style.display = 'block';
 
-      if (minutes > 0) {
-        timeRemaining = minutes * 60;
+      clearInterval(timerInterval);
+
+      if (timerActive) {
+        timeRemaining = remainingSeconds;
         document.getElementById('timerBadge').style.display = 'inline-flex';
         updateTimerDisplay();
-        clearInterval(timerInterval);
         timerInterval = setInterval(() => {
           timeRemaining--;
           totalTimeTaken++;
           updateTimerDisplay();
+          saveSessionState();
           if (timeRemaining <= 0) {
             clearInterval(timerInterval);
             alert("સમય પૂર્ણ થઈ ગયો છે! ટેસ્ટ સબમિટ થઈ રહી છે.");
@@ -400,8 +479,10 @@
         }, 1000);
       } else {
         document.getElementById('timerBadge').style.display = 'none';
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => { totalTimeTaken++; }, 1000);
+        timerInterval = setInterval(() => { 
+          totalTimeTaken++; 
+          saveSessionState();
+        }, 1000);
       }
 
       renderQuestion();
@@ -444,15 +525,27 @@
       }
     }
 
+    // Option select karte hi direct agle question par transition
     function selectOption(index) {
       userAnswers[currentIndex] = index;
       renderQuestion();
+      saveSessionState();
+
+      // Short delay (300ms) taaki selection visually dikhe aur automatically next par jaye
+      setTimeout(() => {
+        if (currentIndex < activeQuestions.length - 1) {
+          currentIndex++;
+          renderQuestion();
+          saveSessionState();
+        }
+      }, 300);
     }
 
     function nextQuestion() {
       if (currentIndex < activeQuestions.length - 1) {
         currentIndex++;
         renderQuestion();
+        saveSessionState();
       }
     }
 
@@ -460,6 +553,7 @@
       if (currentIndex > 0) {
         currentIndex--;
         renderQuestion();
+        saveSessionState();
       }
     }
 
@@ -476,6 +570,8 @@
 
     function submitQuiz() {
       clearInterval(timerInterval);
+      clearSessionState();
+
       document.getElementById('quizScreen').style.display = 'none';
       document.getElementById('dashboardScreen').style.display = 'block';
 
@@ -555,10 +651,42 @@
     }
 
     function resetToHome() {
+      clearSessionState();
       window.location.href = window.location.origin + window.location.pathname;
     }
 
+    // Window Load with Refresh Restoration
     window.onload = async function() {
+      const savedSession = sessionStorage.getItem('current_quiz_running_session');
+      if (savedSession) {
+        try {
+          const state = JSON.parse(savedSession);
+          if (state && state.inQuiz && state.activeQuestions && state.activeQuestions.length > 0) {
+            isTeamMode = state.isTeamMode;
+            roomId = state.roomId;
+            participantName = state.participantName;
+            currentSem = state.currentSem;
+            currentFile = state.currentFile;
+            currentDisplayName = state.currentDisplayName;
+            activeQuestions = state.activeQuestions;
+            userAnswers = state.userAnswers;
+            currentIndex = state.currentIndex || 0;
+            timeRemaining = state.timeRemaining;
+            totalTimeTaken = state.totalTimeTaken || 0;
+            isTimerEnabled = state.isTimerEnabled;
+
+            if (isTeamMode && roomId) {
+              showPersistentLink(window.location.href);
+            }
+
+            setupQuizScreen(timeRemaining, isTimerEnabled);
+            return;
+          }
+        } catch (e) {
+          console.warn("Session restore failed:", e);
+        }
+      }
+
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('room')) {
         isTeamMode = true;
