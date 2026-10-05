@@ -248,22 +248,29 @@
       if (e.data && e.data.roomId === roomId) renderScoreboard();
     };
 
-    // Smart Multi-Path Loader (Automatic fallback taaki relative aur root dono jagah se chale)
+    // Auto-Resolving Multi-Path Fetcher
     async function fetchWithFallback(sem, file) {
-      const paths = [
-        `data/${sem}/${file}.json`,
+      const loc = window.location.pathname;
+      const currentDir = loc.substring(0, loc.lastIndexOf('/') + 1);
+
+      // Candidate paths based on various GitHub Pages deployments
+      const candidatePaths = [
         `./data/${sem}/${file}.json`,
+        `data/${sem}/${file}.json`,
+        `${currentDir}data/${sem}/${file}.json`,
+        `./quick-quiz/data/${sem}/${file}.json`,
         `quick-quiz/data/${sem}/${file}.json`,
-        `./quick-quiz/data/${sem}/${file}.json`
+        `/Quiz-/quick-quiz/data/${sem}/${file}.json`,
+        `/quick-quiz/data/${sem}/${file}.json`
       ];
 
-      for (const p of paths) {
+      for (const p of candidatePaths) {
         try {
           const res = await fetch(p);
           if (res.ok) {
             return await res.json();
           }
-        } catch (e) {}
+        } catch (err) {}
       }
       throw new Error("Unable to fetch JSON from known paths");
     }
@@ -276,7 +283,7 @@
       try {
         currentQuestionsPool = await fetchWithFallback(sem, file);
       } catch (err) {
-        alert(`${name} ના પ્રશ્નો હજુ ઉપલબ્ધ નથી! ('quick-quiz/data/${sem}/${file}.json' પાથ ચેક કરો)`);
+        alert(`${name} ના પ્રશ્નો હજુ ઉપલબ્ધ નથી! ('data/${sem}/${file}.json' ફાઈલ પાથ તપાસો)`);
         return;
       }
 
