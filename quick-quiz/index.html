@@ -194,6 +194,7 @@
         <div class="options-grid" id="optionsContainer"></div>
         <div class="footer-actions">
           <button class="btn btn-secondary" id="prevBtn" onclick="prevQuestion()">પાછળ</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">આગળ</button>
           <button class="btn btn-success" id="submitBtn" onclick="confirmSubmit()">સબમિટ કરો</button>
         </div>
       </div>
@@ -242,21 +243,21 @@
     let timerInterval = null;
     let timeRemaining = 0;
     let totalTimeTaken = 0;
+    let teamTimeLimit = 0;
 
     const syncChannel = new BroadcastChannel('quiz_team_sync');
     syncChannel.onmessage = (e) => {
       if (e.data && e.data.roomId === roomId) renderScoreboard();
     };
 
-    // 100% Reliable Multi-Path Resolver with Direct GitHub Raw Fallback
+    // 100% Guaranteed Multi-Path Resolver with GitHub Raw Priority
     async function fetchWithFallback(sem, file) {
       const paths = [
+        `https://raw.githubusercontent.com/ALEX279-SOURC/Quiz-/main/quick-quiz/data/${sem}/${file}.json`,
         `./data/${sem}/${file}.json`,
         `data/${sem}/${file}.json`,
-        `../quick-quiz/data/${sem}/${file}.json`,
-        `/Quiz-/quick-quiz/data/${sem}/${file}.json`,
-        // Direct Raw Fallback (No 404 possible)
-        `https://raw.githubusercontent.com/ALEX279-SOURC/Quiz-/main/quick-quiz/data/${sem}/${file}.json`
+        `../data/${sem}/${file}.json`,
+        `/Quiz-/quick-quiz/data/${sem}/${file}.json`
       ];
 
       for (const p of paths) {
@@ -303,7 +304,7 @@
       document.getElementById('teamForm').style.display = mode === 'team' ? 'block' : 'none';
     }
 
-    function getShuffledQuestions(array, seed = null) {
+    function getShuffledQuestions(array, count, seed = null) {
       let copy = [...array];
       if (seed) {
         let m = copy.length, t, i, s = seed;
@@ -312,14 +313,242 @@
           i = Math.floor((s / 233280) * m--);
           t = copy[m]; copy[m] = copy[i]; copy[i] = t;
         }
-        return copy;
       } else {
         for (let i = copy.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [copy[i], copy[j]] = [copy[j], copy[i]];
         }
-        return copy;
       }
+      return copy.slice(0, count);
+    }
+
+    function startSoloQuiz() {
+      isTeamMode = false;
+      participantName = "Solo Learner";
+      const count = Math.min(parseInt(document.getElementById('soloQCount').value) || 20, currentQuestionsPool.length);
+      const minutes = parseInt(document.getElementById('soloTimer').value) || 0;
+
+      activeQuestions = getShuffledQuestions(currentQuestionsPool, count);
+      userAnswers = new Array(activeQuestions.length).fill(null);
+      currentIndex = 0;
+      totalTimeTaken = 0;
+
+      setupQuizScreen(minutes);
+    }
+
+    function createTeamQuiz() {
+      const count = Math.min(parseInt(document.getElementById('teamQCount').value) || 25, currentQuestionsPool.length);
+      const minutes = parseInt(document.getElementById('teamTimer').value) || 15;
+      const roomSeed = Date.now();
+      roomId = "room_" + roomSeed;
+
+      const baseUrl = window.location.origin + window.location.pathname;
+      const shareUrl = `${baseUrl}?room=${roomId}&seed=${roomSeed}&sem=${currentSem}&file=${currentFile}&name=${encodeURIComponent(currentDisplayName)}&count=${count}&time=${minutes}`;
+
+      showPersistentLink(shareUrl);
+      window.location.href = shareUrl;
+    }
+
+    function startCandidateQuiz() {
+      const nameInput = document.getElementById('candidateName').value.trim();
+      if (!nameInput) {
+        alert("કૃપા કરીને તમારું નામ લખો!");
+        return;
+      }
+      participantName = nameInput;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const count = parseInt(urlParams.get('count')) || 25;
+      const seed = parseInt(urlParams.get('seed')) || 12345;
+      teamTimeLimit = parseInt(urlParams.get('time')) || 0;
+
+      activeQuestions = getShuffledQuestions(currentQuestionsPool, count, seed);
+      userAnswers = new Array(activeQuestions.length).fill(null);
+      currentIndex = 0;
+      totalTimeTaken = 0;
+
+      document.getElementById('joinCard').style.display = 'none';
+      setupQuizScreen(teamTimeLimit);
+    }
+
+    function setupQuizScreen(minutes) {
+      document.getElementById('setupCard').style.display = 'none';
+      document.getElementById('subjectSelectionCard').style.display = 'none';
+      document.getElementById('quizScreen').style.display = 'block';
+
+      if (minutes > 0) {
+        timeRemaining = minutes * 60;
+        document.getElementById('timerBadge').style.display = 'inline-flex';
+        updateTimerDisplay();
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          timeRemaining--;
+          totalTimeTaken++;
+          updateTimerDisplay();
+          if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            alert("સમય પૂર્ણ થઈ ગયો છે! ટેસ્ટ સબમિટ થઈ રહી છે.");
+            submitQuiz();
+          }
+        }, 1000);
+      } else {
+        document.getElementById('timerBadge').style.display = 'none';
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => { totalTimeTaken++; }, 1000);
+      }
+
+      renderQuestion();
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timeRemaining / 60);
+      const secs = timeRemaining % 60;
+      document.getElementById('timeDisplay').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function renderQuestion() {
+      const q = activeQuestions[currentIndex];
+      document.getElementById('categoryBadge').innerText = q.cat || "પ્રશ્ન";
+      document.getElementById('questionCounter').innerText = `${currentIndex + 1} / ${activeQuestions.length}`;
+      document.getElementById('questionText').innerText = `${currentIndex + 1}. ${q.q}`;
+      
+      const progressPercent = ((currentIndex + 1) / activeQuestions.length) * 100;
+      document.getElementById('progress').style.width = `${progressPercent}%`;
+
+      const optionsGrid = document.getElementById('optionsContainer');
+      optionsGrid.innerHTML = '';
+
+      const letters = ['A', 'B', 'C', 'D'];
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `option-btn ${userAnswers[currentIndex] === idx ? 'selected' : ''}`;
+        btn.onclick = () => selectOption(idx);
+        btn.innerHTML = `<span class="option-index">${letters[idx] || idx + 1}</span><span>${opt}</span>`;
+        optionsGrid.appendChild(btn);
+      });
+
+      document.getElementById('prevBtn').style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
+      if (currentIndex === activeQuestions.length - 1) {
+        document.getElementById('nextBtn').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'inline-flex';
+      } else {
+        document.getElementById('nextBtn').style.display = 'inline-flex';
+        document.getElementById('submitBtn').style.display = 'none';
+      }
+    }
+
+    function selectOption(index) {
+      userAnswers[currentIndex] = index;
+      renderQuestion();
+    }
+
+    function nextQuestion() {
+      if (currentIndex < activeQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function confirmSubmit() {
+      const unattempted = userAnswers.filter(a => a === null).length;
+      let msg = "શું તમે ખરેખર ટેસ્ટ સબમિટ કરવા માંગો છો?";
+      if (unattempted > 0) {
+        msg = `હજુ ${unattempted} પ્રશ્નોના ઉત્તર આપવાના બાકી છે. ${msg}`;
+      }
+      if (confirm(msg)) {
+        submitQuiz();
+      }
+    }
+
+    function submitQuiz() {
+      clearInterval(timerInterval);
+      document.getElementById('quizScreen').style.display = 'none';
+      document.getElementById('dashboardScreen').style.display = 'block';
+
+      let correctCount = 0;
+      let wrongCount = 0;
+      const reviewContainer = document.getElementById('reviewContainer');
+      reviewContainer.innerHTML = '';
+
+      activeQuestions.forEach((q, i) => {
+        const userAns = userAnswers[i];
+        if (userAns === q.ans) {
+          correctCount++;
+        } else {
+          wrongCount++;
+          const reviewItem = document.createElement('div');
+          reviewItem.className = 'review-item';
+          
+          const userAnsText = userAns !== null ? q.options[userAns] : "જવાબ આપ્યો નથી";
+          const correctAnsText = q.options[q.ans];
+
+          reviewItem.innerHTML = `
+            <div class="review-q">${i + 1}. ${q.q}</div>
+            <span class="badge-ans ans-user-wrong">તમારો ઉત્તર: ${userAnsText}</span>
+            <span class="badge-ans ans-correct">સાચો ઉત્તર: ${correctAnsText}</span>
+          `;
+          reviewContainer.appendChild(reviewItem);
+        }
+      });
+
+      if (wrongCount === 0) {
+        reviewContainer.innerHTML = '<p style="color: var(--correct); font-weight: 600;">અભિનંદન! તમારા બધા જ જવાબો સાચા છે. 🎉</p>';
+      }
+
+      const total = activeQuestions.length;
+      const percentage = Math.round((correctCount / total) * 100);
+      const minsTaken = String(Math.floor(totalTimeTaken / 60)).padStart(2, '0');
+      const secsTaken = String(totalTimeTaken % 60).padStart(2, '0');
+      const timeString = `${minsTaken}:${secsTaken}`;
+
+      document.getElementById('userProfileTag').innerText = `વિદ્યાર્થી: ${participantName} | વિષય: ${currentDisplayName}`;
+      document.getElementById('finalScore').innerText = `${correctCount}/${total}`;
+      document.getElementById('statPercentage').innerText = `${percentage}%`;
+      document.getElementById('statCorrect').innerText = correctCount;
+      document.getElementById('statWrong').innerText = wrongCount;
+      document.getElementById('statTime').innerText = timeString;
+
+      if (isTeamMode && roomId) {
+        document.getElementById('scoreboardCard').style.display = 'block';
+        saveAndBroadcastScore(correctCount, total, timeString);
+      }
+    }
+
+    function saveAndBroadcastScore(score, total, time) {
+      const leaderboards = JSON.parse(localStorage.getItem(`scoreboard_${roomId}`) || '[]');
+      leaderboards.push({ name: participantName, score: `${score}/${total}`, rawScore: score, time: time });
+      leaderboards.sort((a, b) => b.rawScore - a.rawScore);
+      localStorage.setItem(`scoreboard_${roomId}`, JSON.stringify(leaderboards));
+
+      syncChannel.postMessage({ roomId: roomId });
+      renderScoreboard();
+    }
+
+    function renderScoreboard() {
+      const leaderboards = JSON.parse(localStorage.getItem(`scoreboard_${roomId}`) || '[]');
+      const tbody = document.getElementById('scoreboardBody');
+      tbody.innerHTML = '';
+      leaderboards.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><span class="rank-pill">${index + 1}</span></td>
+          <td><strong>${item.name}</strong></td>
+          <td style="color: var(--primary); font-weight:700;">${item.score}</td>
+          <td>${item.time}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function resetToHome() {
+      window.location.href = window.location.origin + window.location.pathname;
     }
 
     window.onload = async function() {
@@ -329,20 +558,14 @@
         roomId = urlParams.get('room');
         currentSem = urlParams.get('sem') || "sem1";
         currentFile = urlParams.get('file') || "mdc_gujarati";
-        currentDisplayName = urlParams.get('name') || "MDC Gujrati (1)";
+        currentDisplayName = decodeURIComponent(urlParams.get('name') || "MDC Gujrati (1)");
 
         showPersistentLink(window.location.href);
-
-        const savedSession = sessionStorage.getItem('active_quiz_session');
-        if (savedSession) {
-          restoreSession(JSON.parse(savedSession));
-          return;
-        }
 
         try {
           currentQuestionsPool = await fetchWithFallback(currentSem, currentFile);
         } catch (e) {
-          alert("ડેટા લોડ થઈ શક્યો નથી!");
+          alert("ડેટા લોડ થઈ શક્યો નથી! ફાઈલ પાથ તપાસો.");
         }
 
         document.getElementById('subjectSelectionCard').style.display = 'none';
@@ -351,9 +574,6 @@
         document.getElementById('joinSubjectLabel').innerText = `Subject: ${currentDisplayName}`;
         document.getElementById('joinQCount').innerText = urlParams.get('count') || 25;
         document.getElementById('joinTimeLimit').innerText = urlParams.get('time') || 0;
-      } else {
-        const savedSession = sessionStorage.getItem('active_quiz_session');
-        if (savedSession) restoreSession(JSON.parse(savedSession));
       }
     };
 
@@ -367,225 +587,6 @@
       text.select();
       navigator.clipboard.writeText(text.value);
       alert("ટીમ ક્વિઝ લિંક કૉપિ થઈ ગઈ છે!");
-    }
-
-    function startSoloQuiz() {
-      isTeamMode = false;
-      participantName = "Solo Learner";
-      const count = Math.min(currentQuestionsPool.length, Math.max(1, parseInt(document.getElementById('soloQCount').value) || 20));
-      const customMin = Math.max(0, parseInt(document.getElementById('soloTimer').value) || 0);
-
-      activeQuestions = getShuffledQuestions(currentQuestionsPool).slice(0, count);
-      userAnswers = new Array(activeQuestions.length).fill(null);
-      currentIndex = 0;
-      timeRemaining = customMin > 0 ? customMin * 60 : 0;
-      totalTimeTaken = 0;
-
-      saveCurrentSession();
-      launchQuizUI(customMin > 0);
-    }
-
-    function createTeamQuiz() {
-      const count = Math.min(currentQuestionsPool.length, Math.max(1, parseInt(document.getElementById('teamQCount').value) || 25));
-      const time = Math.max(0, parseInt(document.getElementById('teamTimer').value) || 0);
-      const generatedRoom = 'room_' + Math.random().toString(36).substring(2, 8);
-      const seed = Math.floor(Math.random() * 100000);
-
-      const base = window.location.origin + window.location.pathname;
-      const fullLink = `${base}?room=${generatedRoom}&sem=${currentSem}&file=${currentFile}&name=${encodeURIComponent(currentDisplayName)}&count=${count}&time=${time}&seed=${seed}`;
-
-      showPersistentLink(fullLink);
-      window.location.href = fullLink;
-    }
-
-    function startCandidateQuiz() {
-      const name = document.getElementById('candidateName').value.trim();
-      if (!name) return alert("કૃપા કરીને તમારું નામ લખો!");
-      participantName = name;
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const count = parseInt(urlParams.get('count')) || 25;
-      const customMin = parseInt(urlParams.get('time')) || 0;
-      const seed = parseInt(urlParams.get('seed')) || 12345;
-
-      activeQuestions = getShuffledQuestions(currentQuestionsPool, seed).slice(0, count);
-      userAnswers = new Array(activeQuestions.length).fill(null);
-      currentIndex = 0;
-      timeRemaining = customMin > 0 ? customMin * 60 : 0;
-      totalTimeTaken = 0;
-
-      saveCurrentSession();
-      launchQuizUI(customMin > 0);
-    }
-
-    function launchQuizUI(hasTimer) {
-      document.getElementById('subjectSelectionCard').style.display = 'none';
-      document.getElementById('setupCard').style.display = 'none';
-      document.getElementById('joinCard').style.display = 'none';
-      document.getElementById('quizScreen').style.display = 'block';
-
-      if (hasTimer) {
-        document.getElementById('timerBadge').style.display = 'inline-flex';
-        updateTimerDisplay();
-        timerInterval = setInterval(() => {
-          timeRemaining--; totalTimeTaken++;
-          updateTimerDisplay(); saveCurrentSession();
-          if (timeRemaining <= 0) { clearInterval(timerInterval); alert("સમય પૂર્ણ!"); submitTest(); }
-        }, 1000);
-      } else {
-        document.getElementById('timerBadge').style.display = 'none';
-        timerInterval = setInterval(() => { totalTimeTaken++; saveCurrentSession(); }, 1000);
-      }
-      loadQuestion();
-    }
-
-    function saveCurrentSession() {
-      sessionStorage.setItem('active_quiz_session', JSON.stringify({
-        currentDisplayName, isTeamMode, roomId, participantName, activeQuestions,
-        userAnswers, currentIndex, timeRemaining, totalTimeTaken, hasTimer: timeRemaining > 0
-      }));
-    }
-
-    function restoreSession(data) {
-      currentDisplayName = data.currentDisplayName;
-      isTeamMode = data.isTeamMode;
-      roomId = data.roomId;
-      participantName = data.participantName;
-      activeQuestions = data.activeQuestions;
-      userAnswers = data.userAnswers;
-      currentIndex = data.currentIndex;
-      timeRemaining = data.timeRemaining;
-      totalTimeTaken = data.totalTimeTaken;
-      if (isTeamMode && roomId) showPersistentLink(window.location.href);
-      launchQuizUI(data.hasTimer);
-    }
-
-    function updateTimerDisplay() {
-      const mins = Math.floor(timeRemaining / 60);
-      const secs = timeRemaining % 60;
-      document.getElementById('timeDisplay').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    function loadQuestion() {
-      const cur = activeQuestions[currentIndex];
-      document.getElementById('questionCounter').innerText = `${currentIndex + 1} / ${activeQuestions.length}`;
-      document.getElementById('categoryBadge').innerText = `${currentDisplayName} • ${cur.cat || 'MCQ'}`;
-      document.getElementById('questionText').innerText = cur.q;
-
-      const progress = ((currentIndex + 1) / activeQuestions.length) * 100;
-      document.getElementById('progress').style.width = `${progress}%`;
-
-      const optionsContainer = document.getElementById('optionsContainer');
-      optionsContainer.innerHTML = '';
-      const letters = ['A', 'B', 'C', 'D'];
-
-      cur.options.forEach((opt, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        if (userAnswers[currentIndex] === idx) btn.classList.add('selected');
-        btn.innerHTML = `<span class="option-index">${letters[idx]}</span><span>${opt}</span>`;
-        btn.onclick = () => selectOption(idx);
-        optionsContainer.appendChild(btn);
-      });
-
-      document.getElementById('prevBtn').disabled = currentIndex === 0;
-    }
-
-    function selectOption(index) {
-      userAnswers[currentIndex] = index;
-      saveCurrentSession();
-      if (currentIndex < activeQuestions.length - 1) { currentIndex++; loadQuestion(); } else { loadQuestion(); }
-    }
-
-    function prevQuestion() {
-      if (currentIndex > 0) { currentIndex--; saveCurrentSession(); loadQuestion(); }
-    }
-
-    function confirmSubmit() {
-      const unans = userAnswers.filter(a => a === null).length;
-      if (confirm(unans > 0 ? `હજુ ${unans} પ્રશ્નો બાકી છે. શું સબમિટ કરવું છે?` : "શું તમે સબમિટ કરવા માંગો છો?")) {
-        submitTest();
-      }
-    }
-
-    function submitTest() {
-      clearInterval(timerInterval);
-      sessionStorage.removeItem('active_quiz_session');
-
-      let correctCount = 0, wrongCount = 0;
-      activeQuestions.forEach((q, i) => { if (userAnswers[i] === q.ans) correctCount++; else wrongCount++; });
-
-      document.getElementById('quizScreen').style.display = 'none';
-      document.getElementById('dashboardScreen').style.display = 'block';
-
-      document.getElementById('userProfileTag').innerText = `${participantName} | વિષય: ${currentDisplayName}`;
-      document.getElementById('finalScore').innerText = `${correctCount}/${activeQuestions.length}`;
-      document.getElementById('statPercentage').innerText = `${((correctCount / activeQuestions.length) * 100).toFixed(1)}%`;
-      document.getElementById('statCorrect').innerText = correctCount;
-      document.getElementById('statWrong').innerText = wrongCount;
-
-      const spentMins = Math.floor(totalTimeTaken / 60);
-      const spentSecs = totalTimeTaken % 60;
-      const formattedTime = `${spentMins.toString().padStart(2, '0')}:${spentSecs.toString().padStart(2, '0')}`;
-      document.getElementById('statTime').innerText = formattedTime;
-
-      const reviewContainer = document.getElementById('reviewContainer');
-      reviewContainer.innerHTML = '';
-      const letters = ['A', 'B', 'C', 'D'];
-      let mistakes = false;
-
-      activeQuestions.forEach((q, idx) => {
-        const uAns = userAnswers[idx];
-        if (uAns !== q.ans) {
-          mistakes = true;
-          const item = document.createElement('div');
-          item.className = 'review-item';
-          const uText = uAns === null ? `<span class="badge-ans ans-user-wrong">❌ સ્કીપ કરેલ</span>` : `<span class="badge-ans ans-user-wrong">❌ તમારો ઉત્તર: (${letters[uAns]}) ${q.options[uAns]}</span>`;
-          item.innerHTML = `<div class="review-q">${idx + 1}. ${q.q}</div>${uText}<span class="badge-ans ans-correct">✅ સાચો ઉત્તર: (${letters[q.ans]}) ${q.options[q.ans]}</span>`;
-          reviewContainer.appendChild(item);
-        }
-      });
-
-      if (!mistakes) {
-        reviewContainer.innerHTML = `<div style="background: #dcfce7; color: #166534; padding: 1.2rem; border-radius: 8px; text-align: center; font-weight: 600;">🎉 તમામ જવાબો સાચા છે!</div>`;
-      }
-
-      if (isTeamMode && roomId) {
-        document.getElementById('scoreboardCard').style.display = 'block';
-        saveScore(participantName, correctCount, totalTimeTaken, formattedTime);
-      }
-    }
-
-    function saveScore(name, score, seconds, timeStr) {
-      const storageKey = `scoreboard_${roomId}`;
-      let board = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      board.push({ name, score, seconds, timeStr });
-      localStorage.setItem(storageKey, JSON.stringify(board));
-      syncChannel.postMessage({ roomId });
-      renderScoreboard();
-    }
-
-    function renderScoreboard() {
-      const storageKey = `scoreboard_${roomId}`;
-      let board = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      board.sort((a, b) => b.score !== a.score ? b.score - a.score : a.seconds - b.seconds);
-
-      const tbody = document.getElementById('scoreboardBody');
-      tbody.innerHTML = '';
-      if (!board.length) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--muted);">કોઈ સબમિશન નથી.</td></tr>`;
-        return;
-      }
-      board.forEach((item, i) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td><span class="rank-pill">${i + 1}</span></td><td>${item.name}</td><td><strong>${item.score}</strong> / ${activeQuestions.length}</td><td>${item.timeStr}</td>`;
-        tbody.appendChild(row);
-      });
-    }
-
-    function resetToHome() {
-      sessionStorage.removeItem('active_quiz_session');
-      window.location.href = window.location.origin + window.location.pathname;
     }
   </script>
 </body>
