@@ -7,8 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
- <script src="./data/sem1/mdc_gujarati.js"></script>
-  
   <style>
     :root {
       --primary: #1e3a8a;
@@ -252,25 +250,39 @@
       if (e.data && e.data.roomId === roomId) renderScoreboard();
     };
 
-    // 100% Guaranteed Multi-Path Resolver with GitHub Raw Priority
+    // Robust fetcher: dynamically checks live domain and repository path[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span)
     async function fetchWithFallback(sem, file) {
-      const paths = [
-        `https://raw.githubusercontent.com/ALEX279-SOURC/Quiz-/main/quick-quiz/data/${sem}/${file}.json`,
-        `./data/${sem}/${file}.json`,
-        `data/${sem}/${file}.json`,
-        `../data/${sem}/${file}.json`,
-        `/Quiz-/quick-quiz/data/${sem}/${file}.json`
+      const origin = window.location.origin;
+      let pathSegments = window.location.pathname.split('/').filter(Boolean);
+      
+      // index.html agar url me hai to hatao
+      if (pathSegments.length > 0 && pathSegments[pathSegments.length - 1].includes('.html')) {
+        pathSegments.pop();
+      }
+      
+      const currentFolder = origin + '/' + pathSegments.join('/');
+
+      // Multiple precise fallback locations
+      const possibleUrls = [
+        `${origin}/Quiz-/quick-quiz/data/${sem}/${file}.json`, // Direct repo link[span_4](start_span)[span_4](end_span)[span_5](start_span)[span_5](end_span)
+        `${currentFolder}/data/${sem}/${file}.json`,            // Current directory data folder
+        `./data/${sem}/${file}.json`,                           // Relative path
+        `data/${sem}/${file}.json`                              // Local data path
       ];
 
-      for (const p of paths) {
+      let lastError = null;
+      for (const url of possibleUrls) {
         try {
-          const res = await fetch(p + '?cache_bust=' + Date.now());
+          const res = await fetch(url + '?t=' + Date.now());
           if (res.ok) {
             return await res.json();
           }
-        } catch (err) {}
+        } catch (e) {
+          lastError = e;
+        }
       }
-      throw new Error("Unable to fetch JSON");
+
+      throw new Error(lastError ? lastError.message : "File not found at configured paths.");
     }
 
     async function fetchSubjectData(sem, file, name) {
@@ -281,7 +293,7 @@
       try {
         currentQuestionsPool = await fetchWithFallback(sem, file);
       } catch (err) {
-        alert(`${name} ના પ્રશ્નો લોડ થઈ શક્યા નથી! ફાઈલ પાથ તપાસો.`);
+        alert(`${name} ના પ્રશ્નો લોડ થઈ શક્યા નથી!\nError: ${err.message}\nકૃપા કરીને ફાઈલ પાથ તપાસો.`);
         return;
       }
 
@@ -351,7 +363,7 @@
       window.location.href = shareUrl;
     }
 
-    function startCandidateQuiz() {
+    async function startCandidateQuiz() {
       const nameInput = document.getElementById('candidateName').value.trim();
       if (!nameInput) {
         alert("કૃપા કરીને તમારું નામ લખો!");
@@ -363,6 +375,15 @@
       const count = parseInt(urlParams.get('count')) || 25;
       const seed = parseInt(urlParams.get('seed')) || 12345;
       teamTimeLimit = parseInt(urlParams.get('time')) || 0;
+
+      if (!currentQuestionsPool || currentQuestionsPool.length === 0) {
+        try {
+          currentQuestionsPool = await fetchWithFallback(currentSem, currentFile);
+        } catch (e) {
+          alert("પ્રશ્નો લોડ થઈ શક્યા નથી!");
+          return;
+        }
+      }
 
       activeQuestions = getShuffledQuestions(currentQuestionsPool, count, seed);
       userAnswers = new Array(activeQuestions.length).fill(null);
@@ -567,7 +588,7 @@
         try {
           currentQuestionsPool = await fetchWithFallback(currentSem, currentFile);
         } catch (e) {
-          alert("ડેટા લોડ થઈ શક્યો નથી! ફાઈલ પાથ તપાસો.");
+          console.warn("Auto-fetch error on load:", e);
         }
 
         document.getElementById('subjectSelectionCard').style.display = 'none';
